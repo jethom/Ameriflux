@@ -1,0 +1,1103 @@
+;{CR10X}
+;Program:     (site)
+;Location:    (city,state)
+;RSP:         PYxxxxx; CC=xx.x; R=100; CF=xxx.xx
+;Lat:         xx.xxx N
+;Long:        xx.xxx W
+;
+;Program Revisions
+;****REMEMBER TO CHANGE PROGRAM REV # IN INSTRUCTION #1
+;****WHEN MAKING MODIFICATIONS TO THIS PROGRAM.
+;** Edit FSA1 output array ID to match site code
+;This is typically instruction # 143 in Table 1.
+;
+;Rev  Date         Description
+;0    01/23/96     Standard program revised by PJB
+;1    06/20/96     Error flag code added by RDL
+;2    06/20/96     Instructions added by DLG to disable
+;                    rotation when Vbat<10.5V.     These are now gone.  D.L.R.
+;3    03/07/97     Changed C2 to always be input port
+;                  Changed pulse routine to pulse for 500 counts
+;                  and then up to an additional 500 depending on state of C2.
+;                  Removed signature instruction (RDL)
+;4    03/19/97     Added REV, Changed "Error on" to flag from #pulses (RDL)
+;                  Also fixed input locations from CSI conversion
+;5    11/11/97     Put in a minimum pulse length of 500 loops (RDL)
+;6    11/07/98     Removed Dn and air temp.   D.L.R.
+;
+;
+;Hardware Input Channel Connections:
+;
+;Analog
+;6H     RSP   White
+;6L     RSP   Yellow
+;
+;Control
+;C1     Motor Rotation Control   Brown
+;C2     Motor Positon Feedback   Blue
+;
+;Flags
+;F1      Rotate when high
+;F2      High when rotation finished
+;F3      High if rotational error
+;F4      High if rotational error from previous interval
+;
+
+*Table 1 Program
+  01: 1.0       Execution Interval (seconds)
+;
+;Set site constants
+;
+; Increment Revision number after every program change
+
+1:  Z=F (P30)
+ 1: 0        F ; *** enter program revision here ***
+ 2: 00       Exponent of 10
+ 3: 18       Z Loc [ Revision  ]
+
+2:  Z=F (P30)
+ 1: 2110     F; *** enter pyranometer calibration factor here
+ 2: 00       Exponent of 10
+ 3: 45       Z Loc [ GH_____CF ]; W/m2 / mV
+
+;
+;Initialize ports
+;
+
+3:  Set Port(s) (P20)
+ 1: 9999     C8,C7,C6,C5 Options
+ 2: 9980     C4..C1 = nc/nc/input/0
+
+;
+;Measure 1 second data
+;
+
+4:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 1        2.5 mV Slow Range
+ 3: 6        DIFF Channel
+ 4: 56       Loc [ GH_____mV ]
+ 5: -1       Mult ;If negative, set to 1
+ 6: 0.0      Offset
+
+;
+;Multiply by calibration factor
+;
+
+5:  Z=X*Y (P36)
+ 1: 56       X Loc [ GH_____mV ]
+ 2: 45       Y Loc [ GH_____CF ]
+ 3: 1        Z Loc [ GH___W_m2 ]
+
+;
+;Set the rotation flag (F1) when it is 54 seconds
+;into the minute (first condition for rotation)
+;
+
+6:  Time (P18)
+ 1: 0        Seconds into current minute (maximum 60)
+ 2: 60       Mod/By
+ 3: 34       Loc [ t0        ]
+
+7:  IF (X<=>F) (P89)
+ 1: 34       X Loc [ t0        ]
+ 2: 4        <
+ 3: 54       F
+ 4: 22       Set Flag 2 Low
+
+8:  IF (X<=>F) (P89)
+ 1: 34       X Loc [ t0        ]
+ 2: 3        >=
+ 3: 54       F
+ 4: 30       Then Do
+
+9:  If Flag/Port (P91)
+ 1: 22       Do if Flag 2 is Low
+ 2: 11       Set Flag 1 High; (only at 54 sec)
+
+10:  End (P95)
+;
+
+
+11:  Do (P86)
+ 1: 1        Call Subroutine 1
+
+12:  If Flag/Port (P91)
+ 1: 11       Do if Flag 1 is High
+ 2: 30       Then Do; (if 54 seconds into minute)
+
+;
+;Set default diffuse horizontal
+;
+
+13:  Z=X (P31)
+ 1: 56       X Loc [ GH_____mV ]
+ 2: 58       Z Loc [ DH_____mV ]
+
+14:  If Flag/Port (P91)
+ 1: 11       Do if Flag 1 is High
+ 2: 12       Set Flag 2 High; (high from 54 - 60 sec)
+
+15:  If Flag/Port (P91)
+ 1: 11       Do if Flag 1 is High
+ 2: 21       Set Flag 1 Low; (high only at 54 seconds)
+
+;
+;Set previous rotation error flag = current rot err flag
+;(F4 = F3), then reset current rot err flag
+;
+
+16:  If Flag/Port (P91)
+ 1: 13       Do if Flag 3 is High
+ 2: 14       Set Flag 4 High
+
+17:  If Flag/Port (P91)
+ 1: 23       Do if Flag 3 is Low
+ 2: 24       Set Flag 4 Low
+
+18:  If Flag/Port (P91)
+ 1: 13       Do if Flag 3 is High
+ 2: 23       Set Flag 3 Low
+
+;
+;Rotate on the 1/2 hr at night (GH < 5 W/m2)
+;
+
+19:  IF (X<=>F) (P89)
+ 1: 1        X Loc [ GH___W_m2 ]
+ 2: 4        <
+ 3: 5        F
+ 4: 30       Then Do
+
+20:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 30       Interval (same units as above)
+ 3: 30       Then Do
+
+21:  Do (P86)
+ 1: 2        Call Subroutine 2; (rotate)
+
+22:  End (P95)
+
+23:  Else (P94); GH > 5 W/m2
+
+24:  Do (P86)
+ 1: 2        Call Subroutine 2; (rotate)
+
+;
+;Make the Burst measurement
+;
+
+25:  Burst Measurement (P23)
+ 1: 1        Input Channels per Scan
+ 2: 11       2.5 mV Fast Range
+ 3: 5        In Chan
+ 4: 0001     Trig/Trig/Dest/Meas Options
+ 5: 2.0      Time per Scan (msec)
+ 6: 0.7      Scans (in thousands)
+ 7: 0000     Samples before Trigger
+ 8: 0.0000   mV Limit
+ 9: 0000     mV Excitation
+10: 250      Loc [ Burst_Dat ]
+11: -1       Mult ;  change to 1 if neg.
+12: 0.0      Offset
+
+;
+;Estimate the noise and signal fluctuation from the
+;first 25 samples in the burst mode.   A calculation
+;of the peak to peak fluctuation is made in units of
+;W/m2.
+;
+
+26:  Spatial Mimimum (P50)
+ 1: 25       Swath
+ 2: 250      First Loc [ Burst_Dat ]
+ 3: 34       Min Option [ t0        ]
+
+27:  Spatial Maximum (P49)
+ 1: 25       Swath
+ 2: 250      First Loc [ Burst_Dat ]
+ 3: 35       Max Option [ t1        ]
+
+28:  Z=X-Y (P35)
+ 1: 35       X Loc [ t1        ]
+ 2: 34       Y Loc [ t0        ]
+ 3: 35       Z Loc [ t1        ]
+
+29:  Z=X*Y (P36)
+ 1: 35       X Loc [ t1        ]
+ 2: 45       Y Loc [ GH_____CF ]
+ 3: 65       Z Loc [ GHrn_W_m2 ]
+
+;
+;The burst data indicies are:
+;
+;250 to  274    GHr I
+;275 to  924    Curve data
+;925 to  949    GHr II
+;
+;Find the minimum value in the burst data
+;between the indicies of 275 and 924.  Identify the
+;index of the minimum.
+;
+
+30:  Spatial Mimimum (P50)
+ 1: 650      Swath
+ 2: 275      First Loc [ Curve_Dat ]
+ 3: 1028     Min Option [ min_val   ]
+
+;
+;Check for a Burst Data Error
+;
+
+31:  Spatial Mimimum (P50); of last 25 samples
+ 1: 25       Swath
+ 2: 925      First Loc [ GHII      ]
+ 3: 35       Min Option [ t1        ]
+
+32:  Z=X (P31)
+ 1: 28       X Loc [ min_val   ]
+ 2: 36       Z Loc [ t2        ]; Minimum of entire well
+
+33:  Spatial Mimimum (P50)
+ 1: 3        Swath
+ 2: 34       First Loc [ t0        ]; has min of 1st 25 samples
+ 3: 34       Min Option [ t0        ]
+
+34:  IF (X<=>F) (P89)
+ 1: 34       X Loc [ t0        ]
+ 2: 4        <
+ 3: -0.2     F; (in mV)
+ 4: 30       Then Do
+
+35:  Z=Z+1 (P32); If any BD data pts are < -0.2 then
+ 1: 15       Z Loc [ Err_bd    ]; increment BD err count
+
+36:  Z=Z+1 (P32)
+ 1: 16       Z Loc [ Err_flag  ]; Add one to err flag
+
+37:  If Flag/Port (P91)
+ 1: 23       Do if Flag 3 is Low
+ 2: 13       Set Flag 3 High; If BD error occurred
+
+38:  End (P95)
+
+;
+;Continue if there were no rotation errors.
+;
+
+39:  If Flag/Port (P91)
+ 1: 23       Do if Flag 3 is Low
+ 2: 30       Then Do
+
+;
+;Determine the GH from the rotation data by averaging
+;the first and last 25 samples
+;
+
+40:  Spatial Average (P51)
+ 1: 25       Swath
+ 2: 250      First Loc [ Burst_Dat ]
+ 3: 36       Avg Loc [ t2        ]
+
+41:  Spatial Average (P51)
+ 1: 25       Swath
+ 2: 925      First Loc [ GHII      ]
+ 3: 37       Avg Loc [ t3        ]
+
+42:  Spatial Average (P51)
+ 1: 2        Swath
+ 2: 36       First Loc [ t2        ]
+ 3: 66       Avg Loc [ GH_rot_mV ]
+
+;
+;Move the 50 points around the min to locations
+;100 to 149.  Loc 125 will have the min value.
+;
+
+43:  Z=F (P30)
+ 1: 100      F
+ 2: 00       Exponent of 10
+ 3: 34       Z Loc [ t0        ]
+
+44:  Z=X+F (P34)
+ 1: 29       X Loc [ min_ind   ]
+ 2: -25      F
+ 3: 35       Z Loc [ t1        ]
+
+45:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 50       Loop Count
+
+46:  Indirect Move (P61)
+ 1: 35    -- Source Loc [ t1        ]
+ 2: 34    -- Destination Loc [ t0        ]
+
+47:  End (P95)
+
+;
+;Calculate the delta array using locs 150-198
+;
+
+48:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 49       Loop Count
+
+49:  Z=X-Y (P35)
+ 1: 101   -- X Loc [ _________ ]
+ 2: 100   -- Y Loc [ Well_Arr  ]
+ 3: 150   -- Z Loc [ Delta_Arr ]
+
+50:  End (P95)
+
+51:  Spatial Mimimum (P50)
+ 1: 49       Swath
+ 2: 150      First Loc [ Delta_Arr ]
+ 3: 1024     Min Option [ x1__val   ]
+
+52:  Spatial Maximum (P49)
+ 1: 49       Swath
+ 2: 150      First Loc [ Delta_Arr ]
+ 3: 1026     Max Option [ x2__val   ]
+
+;
+;Determine x1 and x2 indicies in terms of the well array
+;stored in 100-149.
+;
+
+53:  Z=X+F (P34)
+ 1: 25       X Loc [ x1__ind   ]
+ 2: -50      F
+ 3: 25       Z Loc [ x1__ind   ]
+
+54:  Z=X+F (P34)
+ 1: 27       X Loc [ x2__ind   ]
+ 2: -49      F
+ 3: 27       Z Loc [ x2__ind   ]
+
+;
+;X1 and x2 indicies should be with indicies 100 to 149
+;Well center is halfway between x1 and x2
+;
+
+55:  Z=X+Y (P33)
+ 1: 25       X Loc [ x1__ind   ]
+ 2: 27       Y Loc [ x2__ind   ]
+ 3: 34       Z Loc [ t0        ]
+
+56:  Z=X*F (P37)
+ 1: 34       X Loc [ t0        ]
+ 2: 0.5      F
+ 3: 31       Z Loc [ cen_ind   ]
+
+;
+;Store the center value
+;
+
+57:  Z=F (P30)
+ 1: 30       F
+ 2: 00       Exponent of 10
+ 3: 34       Z Loc [ t0        ]
+
+58:  Indirect Move (P61)
+ 1: 31       Source Loc [ cen_ind   ]
+ 2: 34       Destination Loc [ t0        ]
+
+;
+;Calculate the width of the well
+;
+
+59:  Z=X-Y (P35)
+ 1: 27       X Loc [ x2__ind   ]
+ 2: 25       Y Loc [ x1__ind   ]
+ 3: 23       Z Loc [ Well_wdth ]
+
+;
+;Calculate the diffuse horizontal component if well
+;width is >= 5.  S1 and s2 are well shoulder values
+;
+;DH = (GH - avg[s1,s2]) + well center value
+;
+;where (GH - avg[s1,s2]) is diffuse occluded by band
+
+60:  IF (X<=>F) (P89)
+ 1: 23       X Loc [ Well_wdth ]
+ 2: 3        >=
+ 3: 5        F
+ 4: 30       Then Do
+
+61:  Z=X+Y (P33)
+ 1: 66       X Loc [ GH_rot_mV ]
+ 2: 30       Y Loc [ cen_val   ]
+ 3: 37       Z Loc [ t3        ]
+
+;
+;Place s1 value in loc 32; s1 index is at well center
+;minus well width
+
+62:  Z=F (P30)
+ 1: 32       F
+ 2: 00       Exponent of 10
+ 3: 35       Z Loc [ t1        ]
+
+63:  Z=X-Y (P35)
+ 1: 31       X Loc [ cen_ind   ]
+ 2: 23       Y Loc [ Well_wdth ]
+ 3: 36       Z Loc [ t2        ]
+
+64:  IF (X<=>F) (P89); If s1 falls before well begins,
+ 1: 36       X Loc [ t2        ]; place s1 at well beginning
+ 2: 4        <
+ 3: 100      F
+ 4: 30       Then Do
+
+65:  Z=F (P30)
+ 1: 100      F
+ 2: 00       Exponent of 10
+ 3: 36       Z Loc [ t2        ]
+
+66:  End (P95)
+
+;NOTE - check the following comment - should it really be 35
+67:  Indirect Move (P61); Move value of well shoulder to loc 32
+ 1: 36       Source Loc [ t2        ]
+ 2: 35       Destination Loc [ t1        ]
+
+;NOTE - check the following comment - should it really be 33 and is it done.
+;
+;Place the value of s2 in loc 33
+;
+
+68:  Z=Z+1 (P32)
+ 1: 35       Z Loc [ t1        ]
+
+69:  Z=X+Y (P33)
+ 1: 31       X Loc [ cen_ind   ]
+ 2: 23       Y Loc [ Well_wdth ]
+ 3: 36       Z Loc [ t2        ]
+
+70:  IF (X<=>F) (P89); If s2 falls after well ends, place s2 at
+ 1: 36       X Loc [ t2        ]; end of well
+ 2: 3        >=
+ 3: 149      F
+ 4: 30       Then Do
+
+71:  Z=F (P30)
+ 1: 149      F
+ 2: 00       Exponent of 10
+ 3: 36       Z Loc [ t2        ]
+
+72:  End (P95)
+
+73:  Indirect Move (P61)
+ 1: 36       Source Loc [ t2        ]
+ 2: 35       Destination Loc [ t1        ]
+
+;
+;Average s1 and s2
+;
+
+74:  Spatial Average (P51)
+ 1: 2        Swath
+ 2: 32       First Loc [ s1__val   ]
+ 3: 35       Avg Loc [ t1        ]
+
+75:  Z=X-Y (P35)
+ 1: 37       X Loc [ t3        ]
+ 2: 35       Y Loc [ t1        ]
+ 3: 58       Z Loc [ DH_____mV ]
+
+76:  End (P95); If well width > 5
+
+77:  End (P95); If no burst data pts < -0.2
+
+78:  End (P95); If GH > 5 W/m2
+
+79:  End (P95); If 54 seconds into minute
+
+80:  Z=X*Y (P36)
+ 1: 58       X Loc [ DH_____mV ]
+ 2: 45       Y Loc [ GH_____CF ]
+ 3: 3        Z Loc [ DH___W_m2 ]
+
+;
+;
+;********      End of the Rotation Loop   ********
+;
+;
+;************ Begin 1 minute data processing ***********
+;
+;Calculate 1-minute averages of 2 data fields.
+;GH and DH whose 1-min
+;averages will be set to zero if -5 < x < 1.  Since AT
+;is usually part of this group, it is important to
+;note that the 1-minute average "zeroed" location should
+;NOT be used for output to final storage area 1.
+;"Zeroing" is desired for irradiance measurements to
+;retrieve clean "0" values throughout the night.
+;Note:  zeroing range prior to 01/23/96: -20 < x < 0.
+;
+;Place the 1-minute averages into locations 67 and 69
+
+81:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 1        Interval (same units as above)
+ 3: 10       Set Output Flag High
+
+82:  Set Active Storage Area (P80)
+ 1: 3        Input Storage Area
+ 2: 67       Array ID or Loc [ _GH__W_m2 ]
+
+83:  Average (P71)
+ 1: 1        Reps
+ 2: 1        Loc [ GH___W_m2 ]
+
+84:  Average (P71)
+ 1: 1        Reps
+ 2: 3        Loc [ DH___W_m2 ]
+
+;
+;Range checking: if -5 <= x < 1 then x := 0
+;(only perform if on the minute)
+
+85:  If Flag/Port (P91)
+ 1: 10       Do if Output Flag is High (Flag 0)
+ 2: 30       Then Do
+
+86:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 5        Loop Count
+
+87:  IF (X<=>F) (P89)
+ 1: 67    -- X Loc [ _GH__W_m2 ]
+ 2: 4        <
+ 3: 1        F
+ 4: 30       Then Do
+
+88:  IF (X<=>F) (P89)
+ 1: 67    -- X Loc [ _GH__W_m2 ]
+ 2: 3        >=
+ 3: -5       F
+ 4: 30       Then Do
+
+89:  Z=F (P30)
+ 1: 0.0000   F
+ 2: 00       Exponent of 10
+ 3: 67    -- Z Loc [ _GH__W_m2 ]
+
+;
+;If DH > GH then DH = GH.
+;
+
+90:  If (X<=>Y) (P88)
+ 1: 69       X Loc [ _DH__W_m2 ]
+ 2: 3        >=
+ 3: 67       Y Loc [ _GH__W_m2 ]
+ 4: 30       Then Do
+
+91:  Z=X (P31)
+ 1: 67       X Loc [ _GH__W_m2 ]
+ 2: 69       Z Loc [ _DH__W_m2 ]
+
+92:  End (P95) ; reset DH to GH if DH > GH
+
+93:  End (P95)
+
+94:  End (P95)
+
+95:  End (P95); loop
+;
+;
+
+96:  Do (P86)
+ 1: 20       Set Output Flag Low
+;
+;********** End of 1 minute data processing ************
+;
+;Send data to final storage area 1 at specified interval
+;CC,YR,JD,HM,GH,DN,DH,AT
+;
+
+97:  Set Active Storage Area (P80)
+ 1: 1        Final Storage Area 1
+ 2: 1        Array ID or Loc [ _________ ]; Enter site code here
+
+98:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 15       Interval (same units as above)
+ 3: 10       Set Output Flag High
+
+99:  Sample (P70)
+ 1: 1        Reps
+ 2: 18       Loc [ Revision  ]
+
+100:  Real Time (P77)
+ 1: 1220     Year,Day,Hour/Minute (prev day at midnight, 2400 at midnight); 2400 at midnight
+
+101:  Average (P71)
+ 1: 1        Reps
+ 2: 67       Loc [ _GH__W_m2 ]
+
+102:  Average (P71)
+ 1: 1        Reps
+ 2: 69       Loc [ _DH__W_m2 ]
+
+103:  Resolution (P78)
+ 1: 1        high resolution
+
+104:  Sample (P70)
+ 1: 1        Reps
+ 2: 16       Loc [ Err_flag  ]
+
+105:  Resolution (P78)
+ 1: 0        low resolution
+
+;
+;Zero error flag
+
+106:  Z=F (P30)
+ 1: 0.0000   F
+ 2: 00       Exponent of 10
+ 3: 16       Z Loc [ Err_flag  ]
+
+107:  End (P95); End of error flag output
+
+108:  Do (P86)
+ 1: 20       Set Output Flag Low
+
+;
+;Output hourly system diagnostics information to FSA2:
+;CC,JD,HM,sig,min ind,well width,err tot
+
+109:  Set Active Storage Area (P80)
+ 1: 2        Final Storage Area 2
+ 2: 511      Array ID or Loc [ _________ ]
+
+110:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 60       Interval (same units as above)
+ 3: 10       Set Output Flag High
+
+111:  Real Time (P77)
+ 1: 1220     Year,Day,Hour/Minute (prev day at midnight, 2400 at midnight); 2400 at midnight
+
+112:  Average (P71)
+ 1: 1        Reps ;
+ 2: 29       Loc [ min_ind   ]
+
+113:  Average (P71)
+ 1: 1        Reps
+ 2: 23       Loc [ Well_wdth ]
+
+114:  Sample (P70)
+ 1: 1        Reps
+ 2: 16       Loc [ Err_flag  ]
+
+*Table 2 Program
+  02: 0         Execution Interval (seconds)
+
+*Table 3 Subroutines
+;
+
+1:  Beginning of Subroutine (P85)
+ 1: 1        Subroutine 1
+;
+; For now leave a dummy sub-routine 1
+;
+2:  End (P95)
+
+3:  Beginning of Subroutine (P85)
+ 1: 2        Subroutine 2
+;
+;This subroutine will pulse on the driver
+;relay for the RSB motor and read back
+;through C2 the status of the driver relay.
+;The duration of the pulse on is about
+;200 msec.  C2 is low during rotations.
+;
+;The entire rotation sequence is performed only if the
+;battery voltage is greater than 10.5 V.  This helps
+;protect the battery from being drained during periods
+;of little or no insolation.
+;
+;Loop = 600 = 200ms
+;Loop = 800 = 267ms (use for slow-starting RSPs)
+;
+
+4:  Set Port(s) (P20)
+ 1: 9999     C8,C7,C6,C5 Options
+ 2: 9980     C4,C3,C2,C1 Options
+
+5:  Read Ports (P25)
+ 1: 2        Mask (0..255); Read C2
+ 2: 34       Loc [ t0        ]
+
+6:  IF (X<=>F) (P89)
+ 1: 34       X Loc [ t0        ]
+ 2: 1        =
+ 3: 0.0000   F
+ 4: 30       Then Do
+
+7:  Z=Z+1 (P32)
+ 1: 14       Z Loc [ Err_off   ]
+
+8:  Z=X+F (P34)
+ 1: 16       X Loc [ Err_flag  ]
+ 2: 16       F
+ 3: 16       Z Loc [ Err_flag  ]
+
+9:  End (P95)
+
+; Pulse C1 for a maximum of 1000 counts.
+; Tests C2 every 10 counts and stop pulsing if motor is off tab
+; Increment Error on if #_pulses reach 100 (meaning 1000 counts)
+
+10:  Set Port(s) (P20)
+ 1: 9999     C8,C7,C6,C5 Options
+ 2: 9981     C4,C3,C2,C1 Options
+
+11:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 17       Z Loc [ _pulses   ]
+
+; Loop for a minimum of 500 counts
+12:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 500      Loop Count
+
+13:  End (P95)
+
+;Test loop sequence for max of 500 more loops
+14:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 50       Loop Count
+
+15:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 10       Loop Count
+
+16:  End (P95)
+
+17:  Z=Z+1 (P32)
+ 1: 17       Z Loc [ _pulses   ]
+
+18:  If Flag/Port (P91)
+ 1: 52       Do if Port 2 is Low
+ 2: 31       Exit Loop if True
+
+19:  End (P95) ;Pulse loops
+
+; Increment Error on if #_pulses reach maximum
+20:  IF (X<=>F) (P89)
+ 1: 17       X Loc [ _pulses   ]
+ 2: 3        >=
+ 3: 50       F
+ 4: 30       Then Do
+
+21:  Z=Z+1 (P32)
+ 1: 13       Z Loc [ Err_on    ]
+
+22:  Z=X+F (P34)
+ 1: 16       X Loc [ Err_flag  ]
+ 2: 256      F
+ 3: 16       Z Loc [ Err_flag  ]
+
+23:  End (P95) ; Max #_pulses
+
+24:  Set Port(s) (P20)
+ 1: 9999     C8,C7,C6,C5 Options
+ 2: 9980     C4..C1 = nc/nc/input/0
+
+25:  End (P95)
+
+End Program
+
+-Input Locations-
+1 GH___W_m2 7 2 1
+2 _________ 3 0 0
+3 DH___W_m2 3 1 1
+4 _________ 3 0 0
+5 _________ 3 0 0
+6 _________ 2 0 0
+7 _________ 2 0 0
+8 _________ 2 0 0
+9 _________ 2 0 0
+10 _________ 2 0 0
+11 _________ 2 0 0
+12 _________ 3 0 0
+13 Err_on    3 0 1
+14 Err_off   3 0 1
+15 Err_bd    3 0 1
+16 Err_flag  3 4 4
+17 _pulses   3 1 2
+18 Revision  3 1 1
+19 _________ 2 0 0
+20 _________ 2 0 0
+21 _________ 2 0 0
+22 _________ 2 0 0
+23 Well_wdth 3 4 1
+24 x1__val   3 0 1
+25 x1__ind   3 3 2
+26 x2__val   3 0 1
+27 x2__ind   3 3 2
+28 min_val   3 1 1
+29 min_ind   3 2 1
+30 cen_val   3 1 0
+31 cen_ind   3 3 1
+32 s1__val   3 1 0
+33 s2__val   3 1 0
+34 t0        3 7 9
+35 t1        3 5 9
+36 t2        3 6 6
+37 t3        3 2 2
+38 _________ 3 0 0
+39 _________ 3 0 0
+40 _________ 3 0 0
+41 _________ 3 0 0
+42 _________ 3 0 0
+43 _________ 3 0 0
+44 _________ 2 0 0
+45 GH_____CF 3 3 1
+46 _________ 2 0 0
+47 _________ 2 0 0
+48 _________ 2 0 0
+49 _________ 3 0 0
+50 _________ 3 0 0
+51 _________ 3 0 0
+52 _________ 3 0 0
+53 _________ 3 0 0
+54 _________ 2 0 0
+55 _________ 2 0 0
+56 GH_____mV 3 2 1
+57 _________ 3 0 0
+58 DH_____mV 3 1 2
+59 _________ 2 0 0
+60 _________ 2 0 0
+61 _________ 2 0 0
+62 _________ 2 0 0
+63 _________ 2 0 0
+65 GHrn_W_m2 3 0 1
+66 GH_rot_mV 3 1 1
+67 _GH__W_m2 7 5 2
+68 _________ 3 0 0
+69 _DH__W_m2 3 2 1
+70 _________ 3 0 0
+71 _________ 2 0 0
+72 _________ 2 0 0
+73 _________ 2 0 0
+74 _________ 2 0 0
+75 _________ 2 0 0
+76 _________ 2 0 0
+77 _________ 2 0 0
+78 _________ 2 0 0
+79 _________ 2 0 0
+80 _________ 2 0 0
+81 _________ 2 0 0
+82 _________ 2 0 0
+83 _________ 2 0 0
+84 _________ 2 0 0
+85 _________ 2 0 0
+86 _________ 2 0 0
+87 _________ 2 0 0
+88 _________ 2 0 0
+89 _________ 2 0 0
+90 _________ 2 0 0
+91 _________ 2 0 0
+92 _________ 2 0 0
+93 _________ 2 0 0
+94 _________ 2 0 0
+95 _________ 2 0 0
+96 _________ 2 0 0
+97 _________ 2 0 0
+98 _________ 2 0 0
+99 _________ 2 0 0
+100 Well_Arr  3 1 0
+101 _________ 3 1 0
+102 _________ 2 0 0
+103 _________ 2 0 0
+104 _________ 2 0 0
+105 _________ 2 0 0
+106 _________ 2 0 0
+107 _________ 2 0 0
+108 _________ 2 0 0
+109 _________ 2 0 0
+110 _________ 2 0 0
+111 _________ 2 0 0
+112 _________ 2 0 0
+113 _________ 2 0 0
+114 _________ 2 0 0
+115 _________ 2 0 0
+116 _________ 2 0 0
+117 _________ 2 0 0
+118 _________ 2 0 0
+119 _________ 2 0 0
+120 _________ 2 0 0
+121 _________ 2 0 0
+122 _________ 2 0 0
+123 _________ 2 0 0
+124 _________ 2 0 0
+125 Well_Min  2 0 0
+126 _________ 2 0 0
+127 _________ 2 0 0
+128 _________ 2 0 0
+129 _________ 2 0 0
+130 _________ 2 0 0
+131 _________ 2 0 0
+132 _________ 2 0 0
+133 _________ 2 0 0
+134 _________ 2 0 0
+135 _________ 2 0 0
+136 _________ 2 0 0
+137 _________ 2 0 0
+138 _________ 2 0 0
+139 _________ 2 0 0
+140 _________ 2 0 0
+141 _________ 2 0 0
+142 _________ 2 0 0
+143 _________ 2 0 0
+144 _________ 2 0 0
+145 _________ 2 0 0
+146 _________ 2 0 0
+147 _________ 2 0 0
+148 _________ 2 0 0
+149 _________ 2 0 0
+150 Delta_Arr 3 2 1
+151 _________ 3 2 0
+152 _________ 3 2 0
+153 _________ 3 2 0
+154 _________ 3 2 0
+155 _________ 3 2 0
+156 _________ 3 2 0
+157 _________ 3 2 0
+158 _________ 3 2 0
+159 _________ 3 2 0
+160 _________ 3 2 0
+161 _________ 3 2 0
+162 _________ 3 2 0
+163 _________ 3 2 0
+164 _________ 3 2 0
+165 _________ 3 2 0
+166 _________ 3 2 0
+167 _________ 3 2 0
+168 _________ 3 2 0
+169 _________ 3 2 0
+170 _________ 3 2 0
+171 _________ 3 2 0
+172 _________ 3 2 0
+173 _________ 3 2 0
+174 _________ 3 2 0
+175 _________ 3 2 0
+176 _________ 3 2 0
+177 _________ 3 2 0
+178 _________ 3 2 0
+179 _________ 3 2 0
+180 _________ 3 2 0
+181 _________ 3 2 0
+182 _________ 3 2 0
+183 _________ 3 2 0
+184 _________ 3 2 0
+185 _________ 3 2 0
+186 _________ 3 2 0
+187 _________ 3 2 0
+188 _________ 3 2 0
+189 _________ 3 2 0
+190 _________ 3 2 0
+191 _________ 3 2 0
+192 _________ 3 2 0
+193 _________ 3 2 0
+194 _________ 3 2 0
+195 _________ 3 2 0
+196 _________ 3 2 0
+197 _________ 3 2 0
+198 _________ 3 2 0
+199 _________ 2 0 0
+200 _________ 2 0 0
+201 _________ 2 0 0
+202 _________ 2 0 0
+203 _________ 2 0 0
+204 _________ 2 0 0
+205 _________ 2 0 0
+206 _________ 2 0 0
+207 _________ 2 0 0
+208 _________ 2 0 0
+209 _________ 2 0 0
+210 _________ 2 0 0
+211 _________ 2 0 0
+212 _________ 2 0 0
+213 _________ 2 0 0
+214 _________ 2 0 0
+215 _________ 2 0 0
+216 _________ 2 0 0
+217 _________ 2 0 0
+218 _________ 2 0 0
+219 _________ 2 0 0
+220 _________ 2 0 0
+221 _________ 2 0 0
+222 _________ 2 0 0
+223 _________ 2 0 0
+224 _________ 2 0 0
+225 _________ 2 0 0
+226 _________ 2 0 0
+227 _________ 2 0 0
+228 _________ 2 0 0
+229 _________ 2 0 0
+230 _________ 2 0 0
+231 _________ 2 0 0
+232 _________ 2 0 0
+233 _________ 2 0 0
+234 _________ 2 0 0
+235 _________ 2 0 0
+236 _________ 2 0 0
+237 _________ 2 0 0
+238 _________ 2 0 0
+239 _________ 2 0 0
+240 _________ 2 0 0
+241 _________ 2 0 0
+242 _________ 2 0 0
+243 _________ 2 0 0
+244 _________ 2 0 0
+245 _________ 2 0 0
+246 _________ 2 0 0
+247 _________ 2 0 0
+248 _________ 2 0 0
+249 _________ 2 0 0
+250 Burst_Dat 3 3 1
+275 Curve_Dat 3 1 0
+925 GHII      3 2 0
+926 _________ 1 0 0
+927 _________ 1 0 0
+928 _________ 0 0 0
+929 _________ 0 0 0
+930 _________ 0 0 0
+931 _________ 0 0 0
+932 _________ 0 0 0
+933 _________ 0 0 0
+934 _________ 0 0 0
+935 _________ 0 0 0
+936 _________ 0 0 0
+937 _________ 0 0 0
+938 _________ 0 0 0
+939 _________ 0 0 0
+940 _________ 0 0 0
+941 _________ 0 0 0
+942 _________ 0 0 0
+943 _________ 0 0 0
+944 _________ 0 0 0
+945 _________ 0 0 0
+946 _________ 0 0 0
+947 _________ 0 0 0
+948 _________ 0 0 0
+949 _________ 0 0 0
+950 _________ 0 0 0
+-Program Security-
+0000
+0000
+0000
+-Mode 4-
+-Final Storage Area 2-
+1920
+-CR10X ID-
+0
+-CR10X Power Up-
+3

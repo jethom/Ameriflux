@@ -1,0 +1,48 @@
+Final Storage Label File for:  LATEST8.CSI
+Date:  8/10/1998
+Time:  10:27:26
+
+114 Output_Table   0.10 Sec
+1 114 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 Seconds_RTM  L
+6 Ux  L
+7 Uy  L
+8 Uz  L
+9 Ts  L
+10 CSAT_Diag  L
+11 CO2  L
+12 H20  L
+13 LI_T  L
+14 LI_P  L
+
+2 Output_Table   1.00 Sec
+1 2 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 Ux_AVG  L
+6 Uy_AVG  L
+7 Uz_AVG  L
+8 Ts_AVG  L
+9 CSAT_Diag_AVG  L
+10 CO2_AVG  L
+11 H20_AVG  L
+12 LI_T_AVG  L
+13 LI_P_AVG  L
+14 RTD_T_AVG  L
+15 Atm_P_AVG  L
+16 Dew_Pt_AVG  L
+17 Solar_In_AVG  L
+18 Solar_Out_AVG  L
+19 IR_In_AVG  L
+20 IR_Out_AVG  L
+21 KZ_T_AVG  L
+22 Battery_AVG  L
+23 Leaf_Wet_AVG  L
+24 Solar_In_STD  L
+
+
+Estimated Total Final Storage Locations used per day 14169600.0

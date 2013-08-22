@@ -1,0 +1,16 @@
+Final Storage Label File for:  SOLARV.CSI
+Date:  12/16/1999
+Time:  14:37:09
+
+105 Output_Table  60.00 Min
+1 105 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 bvolt_AVG  L
+6 bankvolt_AVG  L
+7 ref_t_AVG  L
+8 batt_t_AVG  L
+
+
+Estimated Total Final Storage Locations used per day  192.0

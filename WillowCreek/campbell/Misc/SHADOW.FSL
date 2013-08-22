@@ -1,0 +1,23 @@
+Final Storage Label File for:  SHADOW.CSI
+Date:  7/21/1998
+Time:  12:48:26
+
+136 Input_Storage   1.00 Min
+1 GH___W_m2_AVG  L
+2 t0_AVG  L
+3 t1_AVG  L
+4 LST___deg_AVG  L
+5 DH_____mV_AVG  L
+
+234 Output_Table  15.00 Min
+1 234 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 _GH__W_m2_AVG  L
+6 C_AVG  L
+7 _DH__W_m2_AVG  L
+8 _DN__W_m2_AVG  L
+
+
+Estimated Total Final Storage Locations used per day  768.0

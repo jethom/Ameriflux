@@ -1,0 +1,37 @@
+Program Trace Information File for:  TRAILER2.CSI
+Date: 9/3/2004
+Time: 20:07:27
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|1 Volt (SE)                   119.2  119.2  119.2    119.2  119.2  119.2
+1|2|86 Do                           0.2  119.4  119.4      0.2  119.4  119.4
+ Output Flag Set @ 12 for Array 1
+1|3|80 Set Active Storage Area      0.2  119.6  119.6      0.2  119.6  119.6
+1|4|77 Real Time                    0.1  119.7  119.7      2.2  121.8  121.8
+ Output Data 4 Values
+1|5|78 Resolution                   0.4  120.1  120.1      0.4  122.2  122.2
+1|6|70 Sample                       0.1  120.2  120.2      2.9  125.1  125.1
+ Output Data 12 Values
+
+Program Table 1 Execution Interval    0.200 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec  120.2 w/Output  125.1
+
+Table 1 Estimated Total Final Storage Locations used per day 12528000.0
+
+
+
+Estimated Total Final Storage Locations used per day 12528000.0

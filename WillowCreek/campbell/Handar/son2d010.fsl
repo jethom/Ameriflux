@@ -1,0 +1,17 @@
+Final Storage Label File for:  SON2D010.CSI
+Date:  6/6/2001
+Time:  19:53:01
+
+10 Output_Table   1.00 Sec
+1 10 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 Seconds_RTM  L
+6 wspeed  L
+7 wdir  L
+8 xvelocity  L
+9 yvelocity  L
+
+
+Estimated Total Final Storage Locations used per day 777600.0

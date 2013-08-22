@@ -1,0 +1,43 @@
+Program Trace Information File for:  HANDAR1.CSI
+Date: 7/26/2001
+Time: 17:37:45
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|91 If Flag/Port                 0.4    0.4    0.4      0.4    0.4    0.4
+1|2|86 Do                           0.3    0.7    0.7      0.3    0.7    0.7
+1|3|105 SDI-12 Recorder               *    0.7    0.7        *    0.7    0.7
+1|4|68 Extended Parameters 4 Digit   0.7    1.4    1.4      0.7    1.4    1.4
+1|5|95 End                          0.2    1.6    1.6      0.2    1.6    1.6
+1|6|105 SDI-12 Recorder               *    1.6    1.6        *    1.6    1.6
+1|7|86 Do                           0.3    1.9    1.9      0.3    1.9    1.9
+ Output Flag Set @ 17 for Array 10
+1|8|80 Set Active Storage Area      0.3    2.2    2.2      0.3    2.2    2.2
+1|9|77 Real Time                    0.2    2.4    2.4      3.8    6.0    6.0
+ Output Data 4 Values
+1|10|70 Sample                      0.2    2.6    2.6      2.1    8.1    8.1
+ Output Data 4 Values
+
+Program Table 1 Execution Interval    1.000 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec    2.6 w/Output    8.1
+
+Table 1 Estimated Total Final Storage Locations used per day 777600.0
+
+
+
+Estimated Total Final Storage Locations used per day 777600.0
+
+*Execution time is unknown.

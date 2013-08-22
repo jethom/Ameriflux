@@ -1,0 +1,313 @@
+'WLEF Tower box #3
+'Last modified: July 2006
+'Program author: Bruce Cook
+
+'*** BOX HISTORY ***
+'26 July 2006 - Installed at bot level
+
+'*** HARDWARE SETTINGS ***
+'Sonic anemometer:
+'Connect sonic to pc through serial port and hyperterminal (9600 baud, even-7-1-none).
+'Press escape to enter settings menu.
+'Record S/N from 'current settings'
+'Reset to factory defaults, then make the following modifications:
+'  output options: baud rate=9600, terse output=on
+'  trigger options: external triggering=on
+'  factory menu: samples per output=20 (10 Hz) or 40 (5 Hz), ticks per sample=0 (5 msec)
+
+'Radio modem:
+'To connect to base modem:
+'  - connect to pc through interface cable/serial port
+'  - open hyperterminal (19200 baud, 8-none-1-none) and press reset button twice to enter settings menu
+'To connect to tower box modem
+'  - connect modem-logger interface cable to supply power
+'  - connect diagnosics cable between modem and pc serial port
+'  - open hyperterminal (19200 baud, 8-none-1-none) and type 'U'
+'(0) Operation mode: 
+'   (2) point to multipoint master FOR BASE MODEM
+'   (3) point to multipoint slave FOR TOWER BOX MODEM
+'(1) Baud rate: (1) 115,200
+'(2) Call book: all set to 000-0000
+'(3) Radio transmission characteristics:
+'   (0)   FreqKey          7
+'   (1)   Max Packet Size  8
+'   (2)   Min Packet Size  9
+'   (3)   Xmit Rate        1
+'   (4)   RF Data Rate     3
+'   (5)   RF Xmit Power   10
+'   (6)   Slave Security   0
+'   (7)   RTS to CTS       0
+'   (8)   Retry Time Out 255
+'   (9)   Lowpower Mode    0
+'   (A)   High Noise       0
+'   (B)   MCU Speed        0
+'   (C)   RemoteLED        0
+'(5) Multipoint parameters:
+'   (0)   Number Repeaters      1
+'   (1)   Master Packet Repeat  2
+'   (2)   Max Slave Retry       3
+'   (3)   Retry Odds            9
+'   (4)   DTR Connect           0
+'   (5)   Repeater Frequency    0
+'   (6)   NetWork ID         1234
+'   (7)   Reserved
+'   (8)   MultiMasterSync       0
+'   (9)   1 PPS Enable/Delay  255
+'   (A)   Slave/Repeater        0
+'   (B)   Diagnostics           1
+'   (C)   SubNet ID          Disabled
+'   (D)   Radio ID           Not Set
+'
+'Diagnostic LED lights (CD,TX,CTS)
+'CONDITION								LED				MASTER/BASE					SLAVE/TOWER BOX
+'making settings					all				solid green					solid green
+'PC-logger not connected	CD 				solid red						solid green
+'                         TX				blinking red				off
+'                         CTS				off									solid red
+'PC-logger connected			CD				red/green bink			solid green (red if base 'off')
+' 												TX				dim solid red blink	dim solid red blink
+'													CTS				solid red blink			solid red
+'
+'CR-1000 Dataloggers:
+'Connect with pc to rs-232 port on logger
+'Use device configuration utility (part of loggernet) to set pakbus address = box #
+'   (e.g., box 1 = pakbus 1)
+
+'*** WIRING ***
+'NOTE:  AG (labeled w/ground symbol) is only for signal reference connections
+'        G (labeled 'G') is for power, shield, and case grounds
+
+'Sonic anemometer:
+'ATI SATI/3K, S/N 980809 (bot level installed ??? 2006)
+'(NOTE: strangly has same S/N as top)
+'		ATI (13 pin output)									CR1000
+'   Tx (pin 9, brown)			      				C2
+'   trigger (pin 5, white)	 						C3
+'   AG (RS-232 common, pin 7, green)	  G
+
+'IRGA
+'LI-6262, S/N IRG3-xxx (NOTE: no IRGA in bot box)
+'   CO2, 0.1S		SE1
+'   H2O, 0.1S		SE2
+'   SIG GND			AG
+'   TEMP 5V			SE3
+'   SIG GND			AG
+
+'In-Line sample tempeature (NOTE: no IRGA in bot box)
+'Omega TX94-1 used to transmit RTD temperature signal (mA) to logger
+'   red wires from RTD (~105.5 ohm) connected to terminals labeled 'RTD' on TX94-1
+'   orange 12V power source connected to terminal labeled '+PS' on TX94-1
+'   black signal out to 5H on CURS100 on CR1000 (or similar current shunt resistor) 
+
+'Sample pressure transducer (NOTE: no IRGA in bot box)
+'Cole Parmer, P/N 68971-00, S/N xxxxxxxx, 15 psi a,9-30 VDC
+'   red 12V power source
+'   blue signal out to 6H on CURS100 on CR1000 (or similar current shunt resistor) 
+
+'Air Temperature/RH
+'Vaisala HMP45A, S/N B2240039, calib 6 June 2006 (bot level installed ??? 2006):
+'   7-35VDC power supply (blue)								12V
+'   Power ground (violet)											G
+'   0-1V temperature signal (yellow)					SE4
+'   0-1V relative humidity signal (brown)			SE5
+'   signal reference (red)										AG
+'   shield (gray)															G
+
+'Sample flow meter (NOTE: no IRGA in bot box)
+'Microswitch AWM5104VN, 0...20 SLPM N2 = 1...5V
+'   power supply (orange)					12V
+'   power ground (black)				G
+'   signal (blue) 							SE6
+
+'Reference gas flow meter (NOTE: no IRGA in bot box)
+'Microswitch, AWM3150V, 0cc...30cc = 1...3.75V
+'   power supply (red)				12V
+'   power ground (black)				G
+'   signal (white)								SE7
+'   signal reference (black)		AG
+
+'Albedometer
+'Kipp & Zonan CM7B Albedometer, S/N 050471 (top level installed June 2006)
+'    signal from upper sensor (red)								7H
+'    signal reference from upper sensor (blue)		7L
+'    signal from lower sensor (green)							8H
+'    signal reference from lower sensor (orange)	8L
+'    case ground (white)													G
+'    shield (black)																G
+
+'Modems
+'Freewave FGR09CSU
+'  Base: S/N 916-4904
+'  Top:  S/N 916-3095
+'  Mid:  S/N 920-2946
+'  Bot:  S/N 924-5839
+'  Spare:  S/N 922-5513
+'PC com 1--female-to-male 9-pin serial caple--freewave interface cable--base modem
+'box modem--null-modem interface cable--Datalogger RS-232
+
+'CSI SETUP
+'COM1
+' | | |
+' | | PakBusPort
+' | |   |
+' | |   --top (S/N 2353, PackBus address 1)
+' | |   |
+' | |   --mid (S/N 2354, PackBus address 2)
+' | |   |
+' | |   --bot (S/N 3479, PackBus address 3)
+' | |
+' | --trailer (23x)
+' |
+' ----met (10x)
+'For all CR1000s: 115200 baud
+'No retries
+'Clock check daily, reset if off by 59 sec
+'Download binary data all three every 30 minutes (takes about 7 to 8 min each)
+'  (note: ASCII download seemed to cause more errors)
+'Convert to ASCII, split, rename, zip and archieve every 30 min (fileren.bat)
+'Hourly photos downloaded from palm, zipped and archieved daily (btwn 11:30p and midnight).
+
+'AC Power connection
+'TOWER			BOX
+'Black			Black
+'Red				White
+'Blue				Green
+
+'*** CONSTANTS ***
+Const SCAN_INTERVAL = 100	'Frequency of fast flux measurements/output (mSec)
+Const SLOW_SAMPLE = 1 'Frequency of slow micrometeorological measurements (Sec)
+Const SLOW_OUTPUT = 1	'Frequency of slow micrometeorological output (Min)
+Const DIAG_OUTPUT = 30 'Frequency of diagnostics output (Min)
+Const RTD_MULT = 0.055625	'temperature range / (mA range * 100 ohm resistor)
+Const RTD_OFFSET = -62.25	'-(min current * rtd_mult) + (-40)
+Const P_MULT = 0.064638346875 'pressure range / (mA range * 100 ohm resistor)
+Const P_OFFSET = -25.85533875 '-(min current * p_mult)
+Const SFLOW_MULT = 0.005	'flow range / mV range
+Const SFLOW_OFFSET = -5.0	'min voltage =0
+Const RFLOW_MULT = 0.010909	'flow range / mV range
+Const RFLOW_OFFSET = -10.909 '-(min voltage * rflow_mult)
+Const UPPER_SENSE = 0.01251	'pyranometer sensitivity, mV/(W/m^2)
+Const LOWER_SENSE = 0.01257	'pyranometer sensitivity, mV/(W/m^2)
+
+'*** VARIABLES ***
+'ATI Sonic:
+Public ATIString as STRING * 50
+Public SerialData(4) as STRING * 50
+Alias SerialData(1)=u
+Alias SerialData(2)=v
+Alias SerialData(3)=w
+Alias SerialData(4)=t
+units u=m/s * 100
+units v=m/s * 100
+units w=m/s * 100
+units t=deg C * 100
+
+'LICOR, Sample T and P
+Public licor(5) as FLOAT
+Alias licor(1) = co2
+Alias licor(2) = h2o
+Alias licor(3) = li_t
+Alias licor(4) = sample_t
+Alias licor(5) = sample_p
+Units co2 = mV
+Units h2o = mV
+Units li_t = deg C
+Units sample_t = deg C
+Units sample_p = kPa
+
+'Vaisala T/RH:
+Public hmp(2) As FLOAT
+Alias hmp(1) = t_hmp
+Alias hmp(2) = rh_hmp
+Units t_hmp = deg C
+Units rh_hmp = %
+
+'K&Z Albedometer
+Public kz(2) As FLOAT
+Alias kz(1) = solar_in
+Alias kz(2) = reflected
+Units hmp = W/m^2
+
+'Flow meters
+Public flow(2) as FLOAT
+Alias flow(1) = sflow
+Alias flow(2) = rflow
+Units sflow = SLPM	' standard liters per minute
+Units rflow = cm^3/min  'standard cc per minute 
+
+'*** DATA TABLES ***
+'Fast output (10 Hz)
+DataTable (fast,1,-1)
+	Sample (1,u,LONG) ' long = LONG, float = FP2
+	Sample (1,v,LONG)
+	Sample (1,w,LONG)
+	Sample (1,t,LONG)
+  Sample (1,co2,IEEE4)
+  Sample (1,h2o,IEEE4)
+  Sample (1,li_t,IEEE4)
+	Sample (1,sample_t,IEEE4)
+	Sample (1,sample_p,IEEE4)
+EndTable
+
+'Slow output (every minute)
+DataTable (slow,1,-1)
+  DataInterval (0,SLOW_OUTPUT,Min,0)
+  Average (1,t_hmp,FP2,FALSE)
+  Average (1,rh_hmp,FP2,FALSE)
+  Average (1,solar_in,IEEE4,FALSE)
+  Average (1,reflected,IEEE4,FALSE)
+  Average (1,sflow,fp2,FALSE)
+  Average (1,rflow,fp2,FALSE)
+endtable
+
+'*** MAIN PROGRAM ***
+BeginProg
+	SerialOpen (Com1,9600,10,0,60)
+  Scan (SCAN_INTERVAL,mSec,0,0)
+
+    '*** READ SONIC ***
+		'send low-going pulse to prompt sonic for data
+		PortSet (3,0)
+		Delay (0,1,mSec)
+
+		'read string from ATI sensor (uncomment to read sensor):
+'    SerialIn (ATIString,Com1,20,10,30) '10 = LF, 13 = CR
+    SerialIn (ATIString,Com1,1,10,30) '10 = LF, 13 = CR
+
+		'parse string:
+		u = Mid (ATIString,1,5)  'get 1st number
+		v = Mid (ATIString,6,5)  'get 2nd number
+		w = Mid (ATIString,11,5) 'get 3rd number
+		t = Mid (ATIString,16,5) 'get 4th number
+  
+		'set port high
+		PortSet (3,1)
+		SerialFlush (Com1)
+		
+		'*** READ LICOR CO2, H2O, T ****
+    VoltSe (licor(1),3,mV5000,1,FALSE,0,250,1,0)
+    li_t = li_t * 50. / 4096
+
+    '*** READ SAMPLE T, P ***
+    VoltSe (sample_t,1,mV2500,9,FALSE,0,250,RTD_MULT,RTD_OFFSET)
+    VoltSe (sample_p,1,mV2500,11,FALSE,0,250,P_MULT,P_OFFSET)
+    		
+	 ' *** READ VAISALA T/RH ***
+	  VoltSe (hmp(1),2,AutoRange,4,FALSE,0,250,0.1,0)
+    t_hmp = t_hmp - 40	'convert T to engineering units
+    
+    '*** READ K&Z ALBEDOMETER ***
+    VoltDiff (kz(1),2,AutoRange,7,FALSE,0,250,1,0)
+    solar_in = solar_in / UPPER_SENSE
+    reflected = reflected / LOWER_SENSE
+    
+    '*** READ FLOW METERS ***
+    VoltSe (sflow,1,mV5000,6,FALSE,0,250,SFLOW_MULT,SFLOW_OFFSET)
+    VoltSe (rflow,1,mV5000,7,FALSE,0,250,RFLOW_MULT,RFLOW_OFFSET)
+       
+		CallTable fast
+		CallTable slow
+	NextScan
+EndProg
+
+

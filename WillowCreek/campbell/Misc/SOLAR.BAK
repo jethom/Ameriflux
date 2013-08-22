@@ -1,0 +1,169 @@
+;{CR23X}
+;SOLAR INTERCALIBRATION (WILLOW CREEK AND WETLAND TOWER SENSORS)
+;LAST MODIFIED 15 AUGUST 1999
+;
+*Table 1 Program
+  01: 1         Execution Interval (seconds)
+
+;UPWARD PYRANOMETER
+
+1:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 11       10 mV, Fast Range
+ 3: 1        DIFF Channel
+ 4: 1        Loc [ solar_in  ]
+ 5: 200      Mult
+ 6: 0.0      Offset
+
+;KIPP & ZONAN PAR LITE
+2:  If time is (P92)
+ 1: 26    -- Minutes (Seconds --) into a
+ 2: 60       Interval (same units as above)
+ 3: 30       Then Do
+
+     3:  Volt (Diff) (P2)
+      1: 1        Reps
+      2: 12       50 mV, Fast Range
+      3: 3        DIFF Channel
+      4: 4        Loc [ par       ]
+      5: 1        Mult
+      6: 0.0      Offset
+
+     par=par/0.00534
+
+4:  End (P95)
+
+5:  If time is (P92)
+ 1: 59    -- Minutes (Seconds --) into a
+ 2: 60       Interval (same units as above)
+ 3: 30       Then Do
+
+;DOWNWARD PYRANOMETER
+     6:  Volt (Diff) (P2)
+      1: 1        Reps
+      2: 11       10 mV, Fast Range
+      3: 2        DIFF Channel
+      4: 2        Loc [ solar_out ]
+      5: 200      Mult
+      6: 0.0      Offset
+
+;KIPP & ZONAN NR LITE
+
+     7:  Volt (Diff) (P2)
+      1: 1        Reps
+      2: 12       50 mV, Fast Range
+      3: 4        DIFF Channel
+      4: 3        Loc [ net_rad   ]
+      5: 1        Mult
+      6: 0.0      Offset
+
+     net_rad=net_rad/0.0128
+
+8:  End (P95)
+
+;OUTPUT DATA EVERY MINUTE
+9:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 1        Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+10:  Set Active Storage Area (P80)
+ 1: 1        Final Storage Area 1
+ 2: 1        Array ID
+
+11:  Real Time (P77)
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000)
+
+12:  Resolution (P78)
+ 1: 1        High Resolution
+
+13:  Sample (P70)
+ 1: 4        Reps
+ 2: 1        Loc [ solar_in  ]
+
+14:  Standard Deviation (P82)
+ 1: 1        Reps
+ 2: 1        Sample Loc [ solar_in  ]
+
+*Table 2 Program
+  02: 10        Execution Interval (seconds)
+
+1:  Volt (SE) (P1)
+ 1: 1        Reps
+ 2: 25       5000 mV, 60 Hz Reject, Fast Range
+ 3: 9        SE Channel
+ 4: 5        Loc [ t         ]
+ 5: .1       Mult
+ 6: -40      Offset
+
+2:  Volt (SE) (P1)
+ 1: 1        Reps
+ 2: 25       5000 mV, 60 Hz Reject, Fast Range
+ 3: 10       SE Channel
+ 4: 6        Loc [ rh        ]
+ 5: .1       Mult
+ 6: 0.0      Offset
+
+3:  Batt Voltage (P10)
+ 1: 7        Loc [ battery   ]
+
+4:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 10       Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+5:  Set Active Storage Area (P80)
+ 1: 2        Final Storage Area 2
+ 2: 2        Array ID
+
+6:  Real Time (P77)
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000)
+
+7:  Average (P71)
+ 1: 3        Reps
+ 2: 5        Loc [ t         ]
+
+*Table 3 Subroutines
+
+End Program
+
+-Input Locations-
+1 solar_in  5 2 1
+2 solar_out 1 1 1
+3 net_rad   1 1 1
+4 par       1 1 1
+5 t         1 1 1
+6 rh        1 1 1
+7 battery   1 0 1
+8 CSI_R     0 0 0
+9 CSI_1     0 0 0
+10 _________ 0 0 0
+11 _________ 0 0 0
+12 _________ 0 0 0
+13 _________ 0 0 0
+14 _________ 0 0 0
+15 _________ 0 0 0
+16 _________ 0 0 0
+17 _________ 0 0 0
+18 _________ 0 0 0
+19 _________ 0 0 0
+20 _________ 0 0 0
+21 _________ 0 0 0
+22 _________ 0 0 0
+23 _________ 0 0 0
+24 _________ 0 0 0
+25 _________ 0 0 0
+26 _________ 0 0 0
+27 _________ 0 0 0
+28 _________ 0 0 0
+-Program Security-
+0000
+0000
+0000
+-Mode 4-
+-Final Storage Area 2-
+0
+-CR10X ID-
+0
+-CR10X Power Up-
+3

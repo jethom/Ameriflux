@@ -1,0 +1,22 @@
+Final Storage Label File for:  TTRAILER.CSI
+Date:  7/13/2005
+Time:  21:39:55
+
+103 Output_Table   0.20 Sec
+1 103 L
+2 CO2_top  H
+3 H2O_top  H
+4 T_top  H
+5 P_top  H
+
+2 Output_Table   1.00 Min
+1 2 L
+2 Year_RTM  H
+3 Day_RTM  H
+4 Hour_Minute_RTM  H
+5 PAR_AVG  H
+6 net_rad_AVG  H
+7 rain  H
+
+
+Estimated Total Final Storage Locations used per day 4276317.6

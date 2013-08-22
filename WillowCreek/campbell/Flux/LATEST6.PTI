@@ -1,0 +1,80 @@
+Program Trace Information File for:  LATEST6.CSI
+Date: 8/7/1998
+Time: 19:35:02
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|107 SDM-CSAT3                   4.4    4.4    4.4      4.4    4.4    4.4
+1|2|89 If (X<=>F)                   0.3    4.7    4.7      0.3    4.7    4.7
+1|3|91 If Flag/Port                 0.2    4.9    4.9      0.2    4.9    4.9
+1|4|89 If (X<=>F)                   0.3    5.2    5.2      0.3    5.2    5.2
+1|5|89 If (X<=>F)                   0.3    5.5    5.5      0.3    5.5    5.5
+1|6|86 Do                           0.2    5.7    5.7      0.2    5.7    5.7
+1|7|107 SDM-CSAT3                   4.4   10.1   10.1      4.4   10.1   10.1
+1|8|95 End                          0.2   10.3   10.3      0.2   10.3   10.3
+1|9|95 End                          0.2   10.5   10.5      0.2   10.5   10.5
+1|10|95 End                         0.2   10.7   10.7      0.2   10.7   10.7
+1|11|1 Volt (SE)                   40.0   50.7   50.7     40.0   50.7   50.7
+1|12|37 Z=X*F                       0.7   51.4   51.4      0.7   51.4   51.4
+1|13|55 Polynomial                  1.2   52.6   52.6      1.2   52.6   52.6
+1|14|86 Do                          0.2   52.8   52.8      0.2   52.8   52.8
+ Output Flag Set @ 114 for Array 114
+
+Program Table 1 Execution Interval    0.100 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec   52.8 w/Output   52.8
+
+Table 1 Estimated Total Final Storage Locations used per day    0.0
+
+
+--------------- Table 2 ---------------
+2|1|92 If time is                   0.2    0.2    0.2      0.2    0.2    0.2
+2|2|2 Volt (Diff)                 143.6  143.8  143.8    143.6  143.8  143.8
+2|3|9 Full Bridge w/mv Excit      144.0  287.8  287.8    144.0  287.8  287.8
+2|4|16 Temperature RTD              2.1  289.9  289.9      2.1  289.9  289.9
+2|5|1 Volt (SE)                    10.3  300.2  300.2     10.3  300.2  300.2
+2|6|37 Z=X*F                        0.7  300.9  300.9      0.7  300.9  300.9
+2|7|2 Volt (Diff)                  19.7  320.6  320.6     19.7  320.6  320.6
+2|8|34 Z=X+F                        0.6  321.2  321.2      0.6  321.2  321.2
+2|9|37 Z=X*F                        0.7  321.9  321.9      0.7  321.9  321.9
+2|10|9 Full Bridge w/mv Excit     144.0  465.9  465.9    144.0  465.9  465.9
+2|11|55 Polynomial                  1.9  467.8  467.8      1.9  467.8  467.8
+2|12|34 Z=X+F                       0.6  468.4  468.4      0.6  468.4  468.4
+2|13|95 End                         0.2  468.6  468.6      0.2  468.6  468.6
+2|14|92 If time is                  0.2  468.8  468.8      0.2  468.8  468.8
+2|15|10 Batt Voltage                2.5  471.3  471.3      2.5  471.3  471.3
+2|16|5 AC Half Bridge               5.6  476.9  476.9      5.6  476.9  476.9
+2|17|42 Z=1/X                       1.5  478.4  478.4      1.5  478.4  478.4
+2|18|34 Z=X+F                       0.6  479.0  479.0      0.6  479.0  479.0
+2|19|95 End                         0.2  479.2  479.2      0.2  479.2  479.2
+2|20|92 If time is                  0.2  479.4  479.4      0.2  479.4  479.4
+ Output Flag Set @ 220 for Array 2
+2|21|80 Set Active Storage Area     0.2  479.6  479.6      0.2  479.6  479.6
+2|22|77 Real Time                   0.1  479.7  479.7      2.2  481.8  481.8
+ Output Data 4 Values
+2|23|71 Average                     0.9  480.6  480.6      3.1  484.9  484.9
+ Output Data 1 Values
+2|24|75 Histogram                   2.4  483.0  483.0      4.3  489.2  489.2
+ Output Data 1 Values
+
+Program Table 2 Execution Interval    0.100 Seconds
+
+Table 2 Estimated Total Program Execution Time in msec  483.0 w/Output  489.2
+
+Table 2 Estimated Total Final Storage Locations used per day 10080.0
+
+
+
+Estimated Total Final Storage Locations used per day 10080.0

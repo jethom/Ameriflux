@@ -1,0 +1,86 @@
+;{CR23X}
+;
+; WLEF TRAILER Flux Licors
+; Written by Bruce Cook, 22 July 2005
+;
+*Table 1 Program
+  01: .2        Execution Interval (seconds)
+
+; LICOR MEASUREMENTS
+1:  Volt (Diff) (P2)
+ 1: 12       Reps
+ 2: 15       5000 mV, Fast Range
+ 3: 1        DIFF Channel
+ 4: 1        Loc [ CO2_top   ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+; OUTPUT FAST DATA
+2:  Do (P86)
+ 1: 10       Set Output Flag High (Flag 0)
+
+3:  Set Active Storage Area (P80)
+ 1: 1        Final Storage Area 1
+ 2: 1        Array ID
+
+4:  Real Time (P77)
+ 1: 1111     Year,Day,Hour/Minute,Seconds (midnight = 0000)
+
+5:  Resolution (P78)
+ 1: 1        High Resolution
+
+6:  Sample (P70)
+ 1: 12       Reps
+ 2: 1        Loc [ CO2_top   ]
+
+*Table 2 Program 
+  02: 0         Execution Interval (seconds)
+
+*Table 3 Subroutines
+
+End Program
+
+-Input Locations-
+1 CO2_top   5 1 1
+2 H2O_top   1 1 0
+3 T_top     9 1 1
+4 P_top     9 1 1
+5 CO2_mid   9 1 1
+6 H2O_mid   9 1 1
+7 T_mid     13 1 1
+8 P_mid     9 1 1
+9 CO2_bot   9 1 1
+10 H2O_bot   9 1 1
+11 T_bot     9 1 1
+12 P_bot     17 1 1
+13 PAR       1 0 0
+14 net_rad   1 0 0
+15 air_T     1 0 0
+16 air_RH    1 0 0
+17 rain      1 0 0
+18 _________ 1 0 0
+19 _________ 1 0 0
+20 _________ 1 0 0
+21 _________ 1 0 0
+22 _________ 1 0 0
+23 _________ 1 0 0
+24 _________ 1 0 0
+25 _________ 1 0 0
+26 _________ 1 0 0
+27 _________ 1 0 0
+28 _________ 0 0 0
+-Program Security-
+0000
+0000
+0000
+-Mode 4-
+-Final Storage Area 2-
+10000
+-CR10X ID-
+0
+-CR10X Power Up-
+3
+-CR10X Compile Setting-
+3
+-CR10X RS-232 Setting-
+-1

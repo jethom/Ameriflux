@@ -1,0 +1,86 @@
+};CR23X
+;T_LICORS.DLD
+;$
+;:CO2_top  :H2O_top  :T_top    :P_top    :CO2_mid  
+;:H2O_mid  :T_mid    :P_mid    :CO2_bot  :H2O_bot  
+;:T_bot    :P_bot    :PAR      :net_rad  :air_T    
+;:air_RH   :rain     :_________:_________:_________
+;:_________:_________:_________:_________:_________
+;:_________:_________:_________
+;$
+
+;%
+;Final Storage Label File for:  T_LICORS.CSI
+;Date:  7/22/2005
+;Time:  15:30:28
+;
+;1 Output_Table   0.20 Sec
+;1 1 L
+;2 Year_RTM  L
+;3 Day_RTM  L
+;4 Hour_Minute_RTM  L
+;5 Seconds_RTM  L
+;6 CO2_top  H
+;7 H2O_top  H
+;8 T_top  H
+;9 P_top  H
+;10 CO2_mid  H
+;11 H2O_mid  H
+;12 T_mid  H
+;13 P_mid  H
+;14 CO2_bot  H
+;15 H2O_bot  H
+;16 T_bot  H
+;17 P_bot  H
+;
+;
+;Estimated Total Final Storage Locations used per day 12528000.0
+;%
+
+MODE 1
+SCAN RATE .2
+
+1:P2
+1:12
+2:15
+3:1
+4:1
+5:1.0
+6:0.0
+
+2:P86
+1:10
+
+3:P80
+1:1
+2:1
+
+4:P77
+1:1111
+
+5:P78
+1:1
+
+6:P70
+1:12
+2:1
+
+
+MODE 2
+SCAN RATE 0
+
+
+MODE 3
+
+MODE 10
+1:28
+2:64
+3:10000
+
+
+MODE 12
+1:0000
+2:0000
+3:0000
+
+

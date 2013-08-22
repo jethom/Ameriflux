@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project editor="RTMC Development" app_id="f3b6b0271f84bbf9b17741fd9e9fb294" version="v2.0.55.0">
+  <server>localhost</server>
+  <user></user>
+  <pass></pass>
+  <manage_comm>1</manage_comm>
+  <auto_login>1</auto_login>
+  <remember_login>1</remember_login>
+  <dev_use_fixed_size>1</dev_use_fixed_size>
+  <dev_fixed_width>640</dev_fixed_width>
+  <dev_fixed_height>480</dev_fixed_height>
+  <frame_maxed>1</frame_maxed>
+  <frame_left>-4</frame_left>
+  <frame_top>-4</frame_top>
+  <frame_right>1028</frame_right>
+  <frame_bottom>696</frame_bottom>
+  <Screens count="1">
+    <screen screen_name="Screen">
+      <background_image></background_image>
+      <background_color>16777215</background_color>
+      <position>0</position>
+      <Components count="1">
+        <component name="StatusBar" type="10001">
+          <top_pos>35</top_pos>
+          <left_pos>444</left_pos>
+          <bottom_pos>185</bottom_pos>
+          <right_pos>519</right_pos>
+          <calculation>&quot;top.Public.a&quot;</calculation>
+          <snapshot_enabled>0</snapshot_enabled>
+          <lock_aspect_ratio>1</lock_aspect_ratio>
+          <BackGroundColor>12632256</BackGroundColor>
+          <EndsMargin>12</EndsMargin>
+          <Orientation>0</Orientation>
+          <OrientationTickMarks>1</OrientationTickMarks>
+          <PointerColor>65280</PointerColor>
+          <PositionMax>100.000000</PositionMax>
+          <PositionMin>0.000000</PositionMin>
+          <ReverseScale>0</ReverseScale>
+          <TickMinorColor>0</TickMinorColor>
+          <TickMajorColor>0</TickMajorColor>
+          <TickLabelFontColor>0</TickLabelFontColor>
+          <TickLabelPrecision>0</TickLabelPrecision>
+          <tick_label_font_bold>0</tick_label_font_bold>
+          <tick_label_font_underline>0</tick_label_font_underline>
+          <tick_label_font_size>12</tick_label_font_size>
+          <tick_label_font_name>Arial</tick_label_font_name>
+          <tick_label_font_italic>0</tick_label_font_italic>
+          <tick_label_font_charset>0</tick_label_font_charset>
+          <tick_label_font_weight>400</tick_label_font_weight>
+          <tick_label_font_strikethrough>0</tick_label_font_strikethrough>
+          <Transparent>0</Transparent>
+        </component>
+      </Components>
+      <dev_width>640</dev_width>
+      <dev_height>480</dev_height>
+    </screen>
+  </Screens>
+</Project>

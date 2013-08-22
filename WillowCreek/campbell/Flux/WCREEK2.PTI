@@ -1,0 +1,85 @@
+Program Trace Information File for:  WCREEK2.CSI
+Date: 8/17/1998
+Time: 16:16:24
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|107 SDM-CSAT3                   4.4    4.4    4.4      4.4    4.4    4.4
+1|2|89 If (X<=>F)                   0.3    4.7    4.7      0.3    4.7    4.7
+1|3|91 If Flag/Port                 0.2    4.9    4.9      0.2    4.9    4.9
+1|4|89 If (X<=>F)                   0.3    5.2    5.2      0.3    5.2    5.2
+1|5|89 If (X<=>F)                   0.3    5.5    5.5      0.3    5.5    5.5
+1|6|86 Do                           0.2    5.7    5.7      0.2    5.7    5.7
+1|7|107 SDM-CSAT3                   4.4   10.1   10.1      4.4   10.1   10.1
+1|8|95 End                          0.2   10.3   10.3      0.2   10.3   10.3
+1|9|95 End                          0.2   10.5   10.5      0.2   10.5   10.5
+1|10|95 End                         0.2   10.7   10.7      0.2   10.7   10.7
+1|11|1 Volt (SE)                    6.9   17.6   17.6      6.9   17.6   17.6
+1|12|37 Z=X*F                       0.7   18.3   18.3      0.7   18.3   18.3
+1|13|55 Polynomial                  1.2   19.5   19.5      1.2   19.5   19.5
+1|14|86 Do                          0.2   19.7   19.7      0.2   19.7   19.7
+ Output Flag Set @ 114 for Array 114
+1|15|77 Real Time                   0.1   19.8   19.8      2.2   21.9   21.9
+ Output Data 4 Values
+1|16|70 Sample                      0.1   19.9   19.9      2.3   24.2   24.2
+ Output Data 9 Values
+1|17|92 If time is                  0.2   20.1   20.1      0.2   24.4   24.4
+ Output Flag Set @ 117 for Array 2
+1|18|80 Set Active Storage Area     0.2   20.3   20.3      0.2   24.6   24.6
+1|19|77 Real Time                   0.1   20.4   20.4      2.2   26.8   26.8
+ Output Data 3 Values
+1|20|71 Average                     6.3   26.7   26.7     33.7   60.5   60.5
+ Output Data 19 Values
+1|21|82 Standard Deviation          1.8   28.5   28.5     10.3   70.8   70.8
+ Output Data 1 Values
+
+Program Table 1 Execution Interval    0.100 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec   28.5 w/Output   70.8
+
+Table 1 Estimated Total Final Storage Locations used per day 12130560.0
+
+
+--------------- Table 2 ---------------
+2|1|2 Volt (Diff)                   3.1    3.1    3.1      3.1    3.1    3.1
+2|2|2 Volt (Diff)                   3.1    6.2    6.2      3.1    6.2    6.2
+2|3|2 Volt (Diff)                   3.1    9.3    9.3      3.1    9.3    9.3
+2|4|2 Volt (Diff)                   3.1   12.4   12.4      3.1   12.4   12.4
+2|5|9 Full Bridge w/mv Excit       12.7   25.1   25.1     12.7   25.1   25.1
+2|6|16 Temperature RTD              2.1   27.2   27.2      2.1   27.2   27.2
+2|7|1 Volt (SE)                     2.1   29.3   29.3      2.1   29.3   29.3
+2|8|37 Z=X*F                        0.7   30.0   30.0      0.7   30.0   30.0
+2|9|2 Volt (Diff)                   3.1   33.1   33.1      3.1   33.1   33.1
+2|10|34 Z=X+F                       0.6   33.7   33.7      0.6   33.7   33.7
+2|11|37 Z=X*F                       0.7   34.4   34.4      0.7   34.4   34.4
+2|12|9 Full Bridge w/mv Excit      12.4   46.8   46.8     12.4   46.8   46.8
+2|13|55 Polynomial                  1.9   48.7   48.7      1.9   48.7   48.7
+2|14|34 Z=X+F                       0.6   49.3   49.3      0.6   49.3   49.3
+2|15|92 If time is                  0.2   49.5   49.5      0.2   49.5   49.5
+2|16|10 Batt Voltage                2.5   52.0   52.0      2.5   52.0   52.0
+2|17|5 AC Half Bridge               5.6   57.6   57.6      5.6   57.6   57.6
+2|18|42 Z=1/X                       1.5   59.1   59.1      1.5   59.1   59.1
+2|19|34 Z=X+F                       0.6   59.7   59.7      0.6   59.7   59.7
+2|20|95 End                         0.2   59.9   59.9      0.2   59.9   59.9
+
+Program Table 2 Execution Interval    1.000 Seconds
+
+Table 2 Estimated Total Program Execution Time in msec   59.9 w/Output   59.9
+
+Table 2 Estimated Total Final Storage Locations used per day    0.0
+
+
+
+Estimated Total Final Storage Locations used per day 12130560.0

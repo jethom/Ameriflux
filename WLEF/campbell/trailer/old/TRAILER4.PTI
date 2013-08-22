@@ -1,0 +1,59 @@
+Program Trace Information File for:  TRAILER4.CSI
+Date: 7/22/2005
+Time: 15:17:15
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|2 Volt (Diff)                 236.4  236.4  236.4    236.4  236.4  236.4
+1|2|86 Do                           0.2  236.6  236.6      0.2  236.6  236.6
+ Output Flag Set @ 12 for Array 1
+1|3|80 Set Active Storage Area      0.2  236.8  236.8      0.2  236.8  236.8
+1|4|77 Real Time                    0.1  236.9  236.9      2.2  239.0  239.0
+ Output Data 4 Values
+1|5|78 Resolution                   0.4  237.3  237.3      0.4  239.4  239.4
+1|6|70 Sample                       0.1  237.4  237.4      2.9  242.3  242.3
+ Output Data 12 Values
+1|7|92 If time is                   0.4  237.8  237.8      0.4  242.7  242.7
+ Output Flag Set @ 17 for Array 2
+1|8|80 Set Active Storage Area      0.2  238.0  238.0      0.2  242.9  242.9
+1|9|77 Real Time                    0.1  238.1  238.1      2.2  245.1  245.1
+ Output Data 3 Values
+1|10|71 Average                     1.8  239.9  239.9      8.2  253.3  253.3
+ Output Data 4 Values
+1|11|70 Sample                      0.1  240.0  240.0      0.9  254.2  254.2
+ Output Data 2 Values
+
+Program Table 1 Execution Interval    0.200 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec  240.0 w/Output  254.2
+
+Table 1 Estimated Total Final Storage Locations used per day 12556800.0
+
+
+--------------- Table 2 ---------------
+2|1|2 Volt (Diff)                   3.1    3.1    3.1      3.1    3.1    3.1
+2|2|2 Volt (Diff)                   3.1    6.2    6.2      3.1    6.2    6.2
+2|3|1 Volt (SE)                    20.2   26.4   26.4     20.2   26.4   26.4
+2|4|3 Pulse                         1.6   28.0   28.0      1.6   28.0   28.0
+
+Program Table 2 Execution Interval    1.000 Seconds
+
+Table 2 Estimated Total Program Execution Time in msec   28.0 w/Output   28.0
+
+Table 2 Estimated Total Final Storage Locations used per day    0.0
+
+
+
+Estimated Total Final Storage Locations used per day 12556800.0

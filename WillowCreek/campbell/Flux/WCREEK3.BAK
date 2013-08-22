@@ -1,0 +1,297 @@
+;{CR23X}
+;WILLOW CREEK
+;Last Modified:  18 February 1999
+;
+;10 Hz SAMPLING
+*Table 1 Program
+  01: .1        Execution Interval (seconds) ;
+
+;CSAT 3D SONIC ANEMOMETER
+1:  SDM-CSAT3 (P107)
+ 1: 1        Reps
+ 2: 3        SDM Address
+ 3: 91       Trigger and Get wind & Ts data
+ 4: 1        Ux Input Location [ Ux        ]
+
+2:  If (X<=>F) (P89)
+ 1: 5        X Loc [ CSAT_Diag ]
+ 2: 1        =
+ 3: 61440    F
+ 4: 21       Set Flag 1 Low
+
+3:  If Flag/Port (P91)
+ 1: 21       Do if Flag 1 is Low
+ 2: 30       Then Do
+
+4:  If (X<=>F) (P89)
+ 1: 5        X Loc [ CSAT_Diag ]
+ 2: 3        >=
+ 3: 0        F
+ 4: 30       Then Do
+
+5:  If (X<=>F) (P89)
+ 1: 5        X Loc [ CSAT_Diag ]
+ 2: 2        <>
+ 3: 61503    F
+ 4: 30       Then Do
+
+6:  Do (P86)
+ 1: 11       Set Flag 1 High
+
+7:  SDM-CSAT3 (P107)
+ 1: 1        Reps
+ 2: 3        SDM Address
+ 3: 10       Set Execution Parameter
+ 4: 1        Ux Input Location [ Ux        ]
+
+8:  End (P95)
+
+9:  End (P95)
+
+10:  End (P95)
+
+;LI-COR 6262
+11:  Volt (SE) (P1)
+ 1: 4        Reps
+ 2: 15       5000 mV, Fast Range
+ 3: 9        SE Channel
+ 4: 6        Loc [ CO2       ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset ;
+
+12:  Z=X*F (P37)
+ 1: 8        X Loc [ LI_T      ]
+ 2: .012207  F
+ 3: 8        Z Loc [ LI_T      ] ; deg C
+
+13:  Polynomial (P55)
+ 1: 1        Reps
+ 2: 9        X Loc [ LI_P      ]
+ 3: 9        F(X) Loc [ LI_P      ] ; kPa
+ 4: 58.738   C0
+ 5: .01522   C1
+ 6: 0.0      C2
+ 7: 0.0      C3
+ 8: 0.0      C4
+ 9: 0.0      C5
+
+14:  Do (P86)
+ 1: 10       Set Output Flag High (Flag 0)
+
+15:  Real Time (P77)
+ 1: 1111     Year,Day,Hour/Minute,Seconds (midnight = 0000)
+
+16:  Sample (P70)
+ 1: 9        Reps
+ 2: 1        Loc [ Ux        ]
+
+17:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 1        Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+18:  Set Active Storage Area (P80)
+ 1: 02       Final Storage Area 2
+ 2: 2        Array ID
+
+19:  Real Time (P77)
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000)
+
+20:  Average (P71)
+ 1: 19       Reps
+ 2: 1        Loc [ Ux        ]
+
+21:  Standard Deviation (P82)
+ 1: 1        Reps
+ 2: 13       Sample Loc [ Solar_In  ]
+
+*Table 2 Program
+  01: 1         Execution Interval (seconds)
+
+;KIPP & ZONEN
+1:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 12       50 mV, Fast Range
+ 3: 7        DIFF Channel
+ 4: 13       Loc [ Solar_In  ]
+ 5: 91.659   Mult
+ 6: 0.0      Offset
+
+2:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 12       50 mV, Fast Range
+ 3: 8        DIFF Channel
+ 4: 14       Loc [ Solar_Out ]
+ 5: 91.659   Mult
+ 6: 0.0      Offset
+
+3:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 12       50 mV, Fast Range
+ 3: 9        DIFF Channel
+ 4: 15       Loc [ IR_In     ]
+ 5: 91.659   Mult
+ 6: 0.0      Offset
+
+4:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 12       50 mV, Fast Range
+ 3: 10       DIFF Channel
+ 4: 16       Loc [ IR_Out    ]
+ 5: 91.659   Mult
+ 6: 0.0      Offset
+
+5:  Full Bridge w/mv Excit (P9)
+ 1: 1        Reps
+ 2: 14       1000 mV, Fast, Ex Range
+ 3: 12       50 mV, Fast, Br Range
+ 4: 11       DIFF Channel
+ 5: 1        Excite all reps w/Exchan 1
+ 6: 250      mV Excitation
+ 7: 17       Loc [ KZ_T      ]
+ 8: 100      Mult
+ 9: 0.0      Offset
+
+6:  Temperature RTD (P16)
+ 1: 1        Reps
+ 2: 17       R/R0 Loc [ KZ_T      ]
+ 3: 17       Loc [ KZ_T      ]
+ 4: 1.0      Mult
+ 5: 0.0      Offset
+
+;CS105 BAROMETRIC PRESSURE SENSOR
+7:  Volt (SE) (P1)
+ 1: 1        Reps
+ 2: 15       5000 mV, Fast Range
+ 3: 1        SE Channel
+ 4: 11       Loc [ Atm_P     ]
+ 5: .184     Mult
+ 6: 661.065  Offset
+
+8:  Z=X*F (P37) ;mb to kPa conversion
+ 1: 11       X Loc [ Atm_P     ]
+ 2: 0.1      F
+ 3: 11       Z Loc [ Atm_P     ]
+
+;CHILLED MIRROR HYGROMETER
+9:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 15       5000 mV, Fast Range
+ 3: 4        DIFF Channel
+ 4: 12       Loc [ Dew_Pt    ]
+ 5: .01      Mult
+ 6: 0        Offset
+
+10:  Z=X+F (P34)
+ 1: 12       X Loc [ Dew_Pt    ]
+ 2: -10.4    F
+ 3: 12       Z Loc [ Dew_Pt    ]
+
+11:  Z=X*F (P37)
+ 1: 12       X Loc [ Dew_Pt    ]
+ 2: 6.25     F
+ 3: 12       Z Loc [ Dew_Pt    ]
+
+;RTD AIR TEMPERATURE PROBE
+12:  Full Bridge w/mv Excit (P9)
+ 1: 1        Reps
+ 2: 14       1000 mV, Fast, Ex Range
+ 3: 14       1000 mV, Fast, Br Range
+ 4: 2        DIFF Channel
+ 5: 3        Excite all reps w/Exchan 3
+ 6: 2500     mV Excitation
+ 7: 10       Loc [ RTD_T     ]
+ 8: 1.0      Mult
+ 9: 0.0      Offset
+
+13:  Polynomial (P55)
+ 1: 1        Reps
+ 2: 10       X Loc [ RTD_T     ]
+ 3: 10       F(X) Loc [ RTD_T     ]
+ 4: -250.18  C0
+ 5: 238.66   C1
+ 6: 11.628   C2
+ 7: 0.0      C3
+ 8: 0.0      C4
+ 9: 0.0      C5
+
+14:  Z=X+F (P34)
+ 1: 10       X Loc [ RTD_T     ]
+ 2: -.0283   F
+ 3: 10       Z Loc [ RTD_T     ]
+
+15:  If time is (P92)
+ 1: 0        Minutes (Seconds --) into a
+ 2: 1        Interval (same units as above)
+ 3: 30       Then Do
+
+;BATTERY VOLTAGE
+16:  Batt Voltage (P10)
+ 1: 18       Loc [ Battery   ] ;
+
+;237 LEAF WETNESS SENSOR
+17:  AC Half Bridge (P5)
+ 1: 1        Reps
+ 2: 13       200 mV, Fast Range
+ 3: 2        SE Channel
+ 4: 2        Excite all reps w/Exchan 2
+ 5: 2500     mV Excitation
+ 6: 19       Loc [ Leaf_Wet  ]
+ 7: 1.0      Mult
+ 8: 0.0      Offset
+
+18:  Z=1/X (P42)
+ 1: 19       X Loc [ Leaf_Wet  ]
+ 2: 19       Z Loc [ Leaf_Wet  ]
+
+19:  Z=X+F (P34)
+ 1: 19       X Loc [ Leaf_Wet  ]
+ 2: -101.0   F
+ 3: 19       Z Loc [ Leaf_Wet  ]
+
+20:  End (P95)
+
+*Table 3 Subroutines
+
+End Program
+
+-Input Locations-
+1 Ux        5 2 2
+2 Uy        9 2 1
+3 Uz        9 2 2
+4 Ts        9 2 2
+5 CSAT_Diag 17 5 2
+6 CO2       5 2 1
+7 H20       9 2 1
+8 LI_T      9 3 2
+9 LI_P      17 3 2
+10 RTD_T     1 3 3
+11 Atm_P     1 2 2
+12 Dew_Pt    1 3 3
+13 Solar_In  1 2 1
+14 Solar_Out 1 1 1
+15 IR_In     1 1 1
+16 IR_Out    1 1 1
+17 KZ_T      1 2 2
+18 Battery   1 1 1
+19 Leaf_Wet  1 3 3
+20 _________ 0 0 0
+21 _________ 0 0 0
+22 _________ 0 0 0
+23 _________ 0 0 0
+24 _________ 0 0 0
+25 _________ 0 0 0
+26 _________ 0 0 0
+27 _________ 0 0 0
+28 _________ 0 0 0
+-Program Security-
+0
+0
+0
+-Mode 4-
+-Final Storage Area 2-
+10001
+-CR10X ID-
+0
+-CR10X Power Up-
+3

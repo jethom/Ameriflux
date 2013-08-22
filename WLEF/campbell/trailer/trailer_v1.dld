@@ -1,0 +1,180 @@
+};CR23X
+;TRAILER_V1.dld
+;$
+;:top_co2  :top_h2o  :top_t    :mid_co2  :mid_h2o  
+;:mid_t    :bot_co2  :bot_h2o  :bot_t    :top_t2   
+;:mid_t2   :bot_t2   :top_p    :mid_p    :bot_p    
+;:top_flow :CSI_R    :CSI_1    
+;$
+
+;%
+;Final Storage Label File for:  TRAILER_V1.csi
+;Date:  7/24/2006
+;Time:  19:50:46
+;
+;120 Output_Table   0.10 Sec
+;1 120 L
+;2 Year_RTM  L
+;3 Day_RTM  L
+;4 Hour_Minute_RTM  L
+;5 Seconds_RTM  L
+;6 top_co2  H
+;7 top_h2o  H
+;8 top_t  H
+;9 mid_co2  H
+;10 mid_h2o  H
+;11 mid_t  H
+;12 bot_co2  H
+;13 bot_h2o  H
+;14 bot_t  H
+;15 top_t2  H
+;16 mid_t2  H
+;17 bot_t2  H
+;18 top_p  H
+;19 mid_p  H
+;20 bot_p  H
+;21 top_flow  H
+;
+;
+;Estimated Total Final Storage Locations used per day 31968000
+;%
+
+MODE 1
+SCAN RATE .1
+
+1:P1
+1:9
+2:15
+3:1
+4:1
+5:1.0
+6:0.0
+
+2:P31
+1:3
+2:18
+
+3:P30
+1:50.
+2:0
+3:17
+
+4:P36
+1:17
+2:18
+3:18
+
+5:P30
+1:4096.
+2:0
+3:17
+
+6:P38
+1:18
+2:17
+3:3
+
+7:P31
+1:6
+2:18
+
+8:P30
+1:50.
+2:0
+3:17
+
+9:P36
+1:17
+2:18
+3:18
+
+10:P30
+1:4096.
+2:0
+3:17
+
+11:P38
+1:18
+2:17
+3:6
+
+12:P31
+1:9
+2:18
+
+13:P30
+1:50.
+2:0
+3:17
+
+14:P36
+1:17
+2:18
+3:18
+
+15:P30
+1:4096.
+2:0
+3:17
+
+16:P38
+1:18
+2:17
+3:9
+
+17:P2
+1:3
+2:15
+3:7
+4:10
+5:.069444
+6:-45.5555
+
+18:P1
+1:3
+2:15
+3:19
+4:13
+5:0.02666
+6:0.0
+
+19:P2
+1:1
+2:15
+3:12
+4:16
+5:0.01
+6:0.0
+
+20:P86
+1:10
+
+21:P77
+1:1111
+
+22:P78
+1:1
+
+23:P70
+1:16
+2:1
+
+
+MODE 2
+SCAN RATE 0
+
+
+MODE 3
+
+MODE 10
+1:28
+2:64
+3:0
+
+
+MODE 12
+1:0000
+2:0000
+3:0000
+
+

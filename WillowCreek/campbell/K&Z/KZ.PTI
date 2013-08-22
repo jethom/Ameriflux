@@ -1,0 +1,45 @@
+Program Trace Information File for:  KZ.CSI
+Date: 6/5/1998
+Time: 23:19:24
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|10 Batt Voltage                 4.8    4.8    4.8      4.8    4.8    4.8
+1|2|2 Volt (Diff)                  37.3   42.1   42.1     37.3   42.1   42.1
+1|3|9 Full Bridge w/mv Excit       38.6   80.7   80.7     38.6   80.7   80.7
+1|4|16 Temperature RTD              3.4   84.1   84.1      3.4   84.1   84.1
+1|5|92 If time is                   0.3   84.4   84.4      0.3   84.4   84.4
+ Output Flag Set @ 15 for Array 105
+1|6|77 Real Time                    0.1   84.5   84.5      1.0   85.4   85.4
+ Output Data 3 Values
+1|7|71 Average                      1.4   85.9   85.9      5.1   90.5   90.5
+ Output Data 1 Values
+1|8|78 Resolution                   0.4   86.3   86.3      0.4   90.9   90.9
+1|9|71 Average                      3.4   89.7   89.7     17.1  108.0  108.0
+ Output Data 5 Values
+1|10|78 Resolution                  0.4   90.1   90.1      0.4  108.4  108.4
+1|11|82 Standard Deviation          2.4   92.5   92.5      2.4  110.8  110.8
+ Output Data 1 Values
+1|12|96 Serial Out                  0.5   93.0   93.0      0.5  111.3  111.3
+
+Program Table 1 Execution Interval    1.000 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec   93.0 w/Output  111.3
+
+Table 1 Estimated Total Final Storage Locations used per day 1632.0
+
+
+
+Estimated Total Final Storage Locations used per day 1632.0

@@ -1,0 +1,225 @@
+;{CR23X}
+;WILLOW CREEK
+;
+;10 Hz SAMPLING
+*Table 1 Program
+  01: .1        Execution Interval (seconds) ;
+
+;CSAT 3D SONIC ANEMOMETER
+1:  SDM-CSAT3 (P107)
+ 1: 1        Reps
+ 2: 3        SDM Address
+ 3: 91       Trigger and Get wind & Ts data
+ 4: 1        Ux Input Location [ Ux        ]
+
+2:  If (X<=>F) (P89)
+ 1: 5        X Loc [ CSAT_Diag ]
+ 2: 1        =
+ 3: 61440    F
+ 4: 21       Set Flag 1 Low
+
+3:  If Flag/Port (P91)
+ 1: 21       Do if Flag 1 is Low
+ 2: 30       Then Do
+
+4:  If (X<=>F) (P89)
+ 1: 5        X Loc [ CSAT_Diag ]
+ 2: 3        >=
+ 3: 0        F
+ 4: 30       Then Do
+
+5:  If (X<=>F) (P89)
+ 1: 5        X Loc [ CSAT_Diag ]
+ 2: 2        <>
+ 3: 61503    F
+ 4: 30       Then Do
+
+6:  Do (P86)
+ 1: 11       Set Flag 1 High
+
+7:  SDM-CSAT3 (P107)
+ 1: 1        Reps
+ 2: 3        SDM Address
+ 3: 10       Set Execution Parameter
+ 4: 1        Ux Input Location [ Ux        ]
+
+8:  End (P95)
+
+9:  End (P95)
+
+10:  End (P95)
+
+11:  Do (P86)
+ 1: 10       Set Output Flag High (Flag 0)
+
+*Table 2 Program
+  01: 30        Execution Interval (seconds)
+
+;BATTERY VOLTAGE
+1:  Batt Voltage (P10)
+ 1: 9        Loc [ Battery   ]
+
+;CS105 BAROMETRIC PRESSURE SENSOR
+
+2:  Volt (SE) (P1)
+ 1: 1        Reps
+ 2: 25       5000 mV, 60 Hz Reject, Fast Range
+ 3: 1        SE Channel
+ 4: 6        Loc [ P         ]
+ 5: .184     Mult
+ 6: 661.065  Offset
+
+;237 LEAF WETNESS SENSOR
+3:  AC Half Bridge (P5)
+ 1: 1        Reps
+ 2: 13       200 mV, Fast Range
+ 3: 2        SE Channel
+ 4: 2        Excite all reps w/Exchan 2
+ 5: 2500     mV Excitation
+ 6: 7        Loc [ Leaf_Wet  ]
+ 7: 1.0      Mult
+ 8: 0.0      Offset
+
+4:  Z=1/X (P42)
+ 1: 7        X Loc [ Leaf_Wet  ]
+ 2: 7        Z Loc [ Leaf_Wet  ]
+
+5:  Z=X+F (P34)
+ 1: 7        X Loc [ Leaf_Wet  ]
+ 2: -101.0   F
+ 3: 7        Z Loc [ Leaf_Wet  ]
+
+;CHILLED MIRROR HYGROMETER
+
+6:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 25       5000 mV, 60 Hz Reject, Fast Range
+ 3: 4        DIFF Channel
+ 4: 10       Loc [ Dew_Pt    ]
+ 5: .01      Mult
+ 6: 10.4     Offset
+
+7:  Z=X*F (P37)
+ 1: 10       X Loc [ Dew_Pt    ]
+ 2: 6.25     F
+ 3: 10       Z Loc [ Dew_Pt    ]
+
+;MULTPLEXER
+8:  Do (P86)
+ 1: 44       Set Port 4 High
+
+9:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 1        Loop Count
+
+10:  Do (P86)
+ 1: 75       Pulse Port 5
+
+11:  Delay w/Opt Excitation (P22)
+ 1: 1        Ex Channel
+ 2: 0000     Delay W/Ex (units = 0.01 sec)
+ 3: 1        Delay After Ex (units = 0.01 sec)
+ 4: 0        mV Excitation
+
+;RTD TEMPERATURE PROBE
+12:  Full Bridge w/mv Excit (P9)
+ 1: 1        Reps
+ 2: 24       1000 mV, 60 Hz Reject, Slow, Ex Range
+ 3: 24       1000 mV, 60 Hz Reject, Slow, Br Range
+ 4: 2        DIFF Channel
+ 5: 3        Excite all reps w/Exchan 3
+ 6: 2500     mV Excitation
+ 7: 8        Loc [ RTD_T     ]
+ 8: 1.0      Mult
+ 9: 0.0      Offset
+
+13:  Polynomial (P55)
+ 1: 1        Reps
+ 2: 8        X Loc [ RTD_T     ]
+ 3: 8        F(X) Loc [ RTD_T     ]
+ 4: -250.18  C0
+ 5: 238.66   C1
+ 6: 11.628   C2
+ 7: 0.0      C3
+ 8: 0.0      C4
+ 9: 0.0      C5
+
+14:  Z=X+F (P34)
+ 1: 8        X Loc [ RTD_T     ]
+ 2: -.0283   F
+ 3: 8        Z Loc [ RTD_T     ]
+
+15:  End (P95)
+
+16:  Do (P86)
+ 1: 54       Set Port 4 Low
+
+17:  If time is (P92)
+ 1: 0     -- Minutes (Seconds --) into a
+ 2: 1        Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+18:  Set Active Storage Area (P80)
+ 1: 02       Final Storage Area 2
+ 2: 2        Array ID
+
+19:  Real Time (P77)
+ 1: 1111     Year,Day,Hour/Minute,Seconds (midnight = 0000)
+
+20:  Average (P71)
+ 1: 1        Reps
+ 2: 6        Loc [ P         ]
+
+21:  Histogram (P75)
+ 1: 1        Reps
+ 2: 1        No. of Bins
+ 3: 1        Closed Form
+ 4: 7        Bin Select Value Loc [ Leaf_Wet  ]
+ 5: 12       WV Loc Option [ _________ ]
+ 6: 0.0      Low Limit
+ 7: 150      High Limit
+
+*Table 3 Subroutines
+
+End Program
+
+-Input Locations-
+1 Ux        5 0 2
+2 Uy        1 0 0
+3 Uz        9 0 2
+4 Ts        9 0 2
+5 CSAT_Diag 17 3 2
+6 P         1 1 1
+7 Leaf_Wet  1 3 3
+8 RTD_T     1 2 3
+9 Battery   1 0 1
+10 Dew_Pt    1 1 2
+11 _________ 0 0 0
+12 _________ 1 1 0
+13 _________ 0 0 0
+14 _________ 1 0 0
+15 _________ 0 0 0
+16 _________ 0 0 0
+17 _________ 0 0 0
+18 _________ 0 0 0
+19 _________ 0 0 0
+20 _________ 0 0 0
+21 _________ 0 0 0
+22 _________ 0 0 0
+23 _________ 0 0 0
+24 _________ 0 0 0
+25 _________ 0 0 0
+26 _________ 0 0 0
+27 _________ 0 0 0
+28 _________ 0 0 0
+-Program Security-
+0
+0
+0
+-Mode 4-
+-Final Storage Area 2-
+500000
+-CR10X ID-
+0
+-CR10X Power Up-
+3

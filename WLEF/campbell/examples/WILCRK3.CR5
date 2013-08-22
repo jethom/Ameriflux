@@ -1,0 +1,809 @@
+'CR5000
+'Changed Time Series DATA TABLE: Number of records from 1000 to -1 which avails all avaialbe memory (after 
+'other memory requirements are met)to ts data. (DataTable (ts_data,flag(8),-1) New filename=WilCrk2.CR5.  
+'5/14/02 Set CSAT3 Const angle to -56 (head pointing at 304). Deployed system at Willow Creek
+'WilCrk1.CR5 is derived from rt_mst_2.cr5 (see below). It was edited by Ed Swiatek on May 10,2002 so that it
+'supports "Custom" Menu
+'rt_mst_1.cr5 is based on 'c:\cr5000\programs\3d_li_eb5k1_1.cr5
+'written by Ed Swiatek, CSI, 12 July 01
+'    This file was edited in the field by RT on 7/24/01 according to instructions sent by Myron via email 7/23/2001 
+'    Edited file was save as :RT_MST_2.CR5 - Also fixed the missing ")" problems found by Myron.
+
+'Based on flx5k1_1.cr5.
+
+' This CR5000 program measures turbulent sensors at 10 or 20 Hz.  The time series can be
+'saved to a PC Card.  The CR5000 will also compute on-line turbulent fluxes from the
+'measured data.  The flux table saves all the cross products that are required to rotate
+'the on-line fluxes into natural wind coordinates in post processing following:
+'
+' Kaimal, J. C. and Finnigan, J. J.: 1994, Atmospheric Boundary Layer Flows, Their
+'   Structure and Measurement, Oxford University Press, New York, 289 pages.
+'
+' Tanner, C. B. and Thurtell, G . W.: 1969, Anemoclinometer measurements of reynolds
+'   stress and heat transport in the atmospheric surface layer, Final Report, United
+'   States Army Electronics Command, Atmospheric Sciences Laboratory, Fort Huachuca,
+'   Arizona.
+
+
+'The following sensors are measured:
+'
+'CSAT3             three dimensional sonic anemometer
+'CS7500 (LI-7500)  open path infrared gas analyzer (co2 and h2o)
+'HMP45C            temperature and relative humidity probe
+'FW05		    Fine Wire Themocouple
+'Q7.1 		    Net Radiometer
+
+
+
+'The sign convention for the fluxes, except net radiation, is positive away from the
+'surface and negative toward the surface.
+'
+' The CR5000 will introduce delays into the CSAT3 and analog measurements (T_ref, FW05)
+'data.  These delays match the fixed 302.369 mSec delay that Campbell Scientific
+'programs into the CS7500 (LI-7500) of the CS7500 (LI-7500) irga (see page 3-23 of the
+'LI-7500 manual published by Li-Cor).  The delays are a function of the Scan Interval
+'and are computed automatically by the program.
+'
+
+'*** Unit Definitions ***
+
+'Units	Units
+'C		Celsius
+'degrees	degrees (angle)
+'g		grams
+'J		Joules
+'kg		kilograms
+'kPa		kilopascals
+'m		meters
+'mg		milligrams
+'mSeconds	milliseconds
+'mV		millivolts
+'s		seconds
+'V		volts
+'W		Watts
+
+
+
+'*** Operation ***
+'
+' Set the constant SCAN_INTERVAL to 100 mSec (10 Hz) or 50 mSec (20 Hz).  The
+'appropriate value of the constants CSAT_OPT, ANALOG_DELAY, and CSAT_DELAY will be
+'computed by the CR5000.  Connect all the sensors to the CR5000 as described in the
+'Wiring section.
+'
+'Download the program to the CR5000.  To start collecting time series data, set flag(8)
+'high or set Custom Menu option "Save Time Series" to Yes.  When servicing the station,
+'set flag(7) low or set Custom Menu option "Save Fluxes?" to No, note that if flag(7)
+'("Save Fluxes?") is not set back to high (Yes), no flux data will be saved.
+
+
+'*** User Control in "Custom" Menu ***
+
+'The Custom Menu allows the station operator to conveniently change the status of the 
+'Program Control Flags using the CR5000 keyboard display.
+
+'Save Fluxes?		Change to "No" when cleaning webs from CSAT3 or performing other
+'[flag(7)]		 site maintenance.  This "bad" data will not be included in the
+'				 on-line fluxes.
+'				Change to "Yes" (default) to start processing flux data.
+'Save Time Series?	Change to "No" (default) to stop collecting time series on the PC
+'[flag(8)]		Card.
+'				Change to "Yes" to begin collecting time series on PC Card.
+
+
+
+'*** Program Control Flags ***
+'
+'flag(7) Set low when cleaning webs from CSAT3 or performing other site maintenance.
+'         This "bad" data will not be included in the on-line fluxes.
+'        Set high (default) to start processing flux data.
+'flag(8) Set low (default) to stop collecting time series on the PC Card.
+'        Set high to begin collecting time series on PC Card.
+
+
+
+
+'*** Wiring ***
+
+'SDM INPUT
+'SDM-C1	CSAT3 SDM Data (green)
+'		CS7500 (LI-7500) SDM Data (gray)
+'SDM-C2	CSAT3 SDM Clock (white)
+'		CS7500 (LI-7500) SDM Clock (blue)
+'SDM-C3	CSAT3 SDM Enable (brown)
+'		CS7500 (LI-7500) SDM Enable (brown)
+'G		CSAT3 SDM reference/shield (black/clear)
+' 		CS7500 (LI-7500) SDM reference/shield (black/white)
+
+'ANALOG INPUT
+'5H            FW05 (purple)
+'5L		FW05 (red)
+
+'8H		Q7.1 signal (red)
+'8L		Q7.1 signal reference (black)
+'gnd		Q7.1 shield (clear)
+
+'9H		HMP45C temperature signal (yellow)
+'9L		HMP45C signal reference (purple)
+'gnd		HMP45C shield (clear)		
+'
+'10H		HMP45C relative humidity signal (blue)
+'10L		short jumper wire to 9L
+'gnd
+'
+'POWER OUT
+'5V		HMP45C power control (orange)
+'12V		HMP45C power (red)
+'G		HMP45C power reference (black)
+'
+'POWER IN
+'12V		CR5000 (red)
+'G		CR5000 (black)
+
+'EXTERNAL POWER SUPPLY
+'12V		CSAT3 power (red)
+'		CS7500 (LI-7500) power (red with white)
+'		CR5000 (red)
+'G		CSAT3 power reference (black)
+'		CSAT3 power shield (clear)
+'		CS7500 (LI-7500) power reference (red with black)
+'		CS7500 (LI-7500) ground (green)
+'		CR5000 (black)
+
+'*** Constants ***
+
+
+' () -> Compass coordinate system
+' {} -> Right handed coordinate system aligned to magnetic North
+'
+'
+' ANGLE_FROM_NORTH    (N)
+'                 \   {-x}
+'                  \   |
+' CSAT3          \     |
+' Transducers ->  *    |
+'                  \   |
+'                   \  |
+'                    \ |
+'    (W) {-y} --------[ ]--------> {+y} (E)
+'                    / |
+'         CSAT3 Block  |
+'                      |
+'                      |
+'                      v
+'                     {+x}
+'                     (S)
+'
+'If the CSAT3 head is pointing West of North (above figure), the
+'constant, ANGLE_FROM_NORTH, is negative.  If the CSAT3 head is pointing
+'East of North, the constant, ANGLE_FROM_NORTH, is positive.
+'
+'The program computes the Compass wind direction, using the constant ANGLE_FROM_NORTH,
+'and a CSAT3 wind direction.  Good CSAT3 wind directions are between -90 to 0 and 0 to
+'90 degrees (-pi/2 to 0 and 0 to pi/2 radians), i.e. the wind is blowing into the CSAT3
+'sensor head.
+
+Const ANGLE_FROM_NORTH = -56	'Negative when West of North, positive when East of
+						' North (degrees).
+
+
+'Measurement Rate					'10 Hz			20 Hz
+Const SCAN_INTERVAL = 100			'100 (mSec)		50 (mSec)
+
+'Output period
+Const OUTPUT_INTERVAL = 10			'On-line flux data output interval in minutes.
+
+
+
+Const CSAT_OPT = INT (1/SCAN_INTERVAL * 1000)	'10 (Hz)			20 (Hz)
+Const ANALOG_DELAY = INT (300/SCAN_INTERVAL + 1)	'4 (3 scan delay)	7 (6 scan delay)
+Const CSAT_DELAY = INT (ANALOG_DELAY - 2)		'2 (1 scan delay)	5 (4 scan delay)
+'Const INTERVAL = INT (OUTPUT_INTERVAL/2)          'Half of output interval in minutes.
+'Const INTERVAL_1 = INTERVAL + 1				'One minute after interval.
+
+Const Q7_1_POS_CAL = 9.12			'Unique positive multiplier for Q7.1.
+Const Q7_1_NEG_CAL = 11.20			'Unique negative multiplier for Q7.1.
+
+
+Const CP = 1004.67				'Estimate of heat capacity of air [J/(kg K)].
+Const LV = 2440				'Estimate of the latent heat of vaporization [J/g].
+Const SDM_PER = 30				'Default SDM clock speed, 30 uSec bit period.
+
+Const A_0 = 6.107799961			'Coefficients for the sixth order approximating
+Const A_1 = 4.436518521e-1		' saturation vapor pressure polynomial (Lowe,
+Const A_2 = 1.428945805e-2		' Paul R., 1976.:  An approximating polynomial for
+Const A_3 = 2.650648471e-4		' computation of saturation vapor pressure, J. Appl.
+Const A_4 = 3.031240396e-6		' Meteor., 16, 100-103).
+Const A_5 = 2.034080948e-8		
+Const A_6 = 6.136820929e-11
+
+Const YES = -1					'Yes is defined as True or -1.
+Const NO = 0					'No is defined as False or 0.
+
+
+'*** Variables ***
+
+'CSAT3 variables with additional one or four scan delay.
+Public wind(5)					'Wind, temperature, and diagnostic data from CSAT3.
+Alias wind(1) = Ux
+Alias wind(2) = Uy
+Alias wind(3) = Uz
+Alias wind(4) = Ts
+Alias wind(5) = diag_csat
+Units wind = m/s
+Units Ts = C
+Units diag_csat = unitless
+
+
+'CS7500 has a fixed delay of 302.369 mSec (three scans at 10 Hz or six scans at 20 Hz).
+Public irga(4)			'Co2, h2o, pressure, and diagnostic from the CS7500 (LI-7500).
+Alias irga(1) = co2
+Alias irga(2) = h2o
+Alias irga(3) = press
+Alias irga(4) = diag_irga
+Units co2 = mg/(m^3)
+Units h2o = g/(m^3)
+Units press = kPa
+Units diag_irga = unitless
+
+
+Public diag_bits(9)				'Warning flags.
+Alias diag_bits(1) = del_T_f		'Delta temperature warning flag.
+Alias diag_bits(2) = track_f		'Tracking (signal lock) warning flag.
+Alias diag_bits(3) = amp_h_f		'Amplitude warning high flag.
+Alias diag_bits(4) = amp_l_f		'Amplitude low warning flag.
+Alias diag_bits(5) = chopper_f	'Chopper warning flag.
+Alias diag_bits(6) = detector_f	'Detector warning flag.
+Alias diag_bits(7) = pll_f		'PLL warning flag.
+Alias diag_bits(8) = sync_f		'Synchronization warning flag.
+Alias diag_bits(9) = agc			'Automatic gain control.
+Units diag_bits = unitless
+
+
+'Analog variables with three or six scan delay.
+Public tc_ref				'Thermocouple reference temperature.
+Public FW				'Fine Wire Thermocouple.
+Public fw_in(1)			'Fine Wire Thermocouple.
+Units tc_ref = C
+Units FW = C
+
+'No delay on meteorological sensors.
+Public rho_a				'Density of moist air.
+Public hmp(3)				'HMP45C vapor density, temperature and relative humidity.
+Public e					'HMP45C vapor pressure.
+Public e_sat				'Saturation vapor pressure.
+Alias hmp(1) = h2o_hmp
+Alias hmp(2) = t_hmp
+Alias hmp(3) = rh_hmp
+Units rho_a = kg/(m^3)
+Units h2o_hmp = g/(m^3)
+Units t_hmp = C
+Units rh_hmp = fraction
+Units e = kPa
+Units e_sat = kPa
+
+
+'No delay energy balance sensor.
+Public Rn(1)
+Public hor_wind
+Units Rn = W/m^2
+
+'Flux variables.
+Public Fc_irga(1)	'CO2 flux.
+Public LE_irga(1)	'Latent heat flux from CS7500 (LI-7500).
+Public Hs(1)		'Sensible heat flux using sonic temperature.
+Public H(1)		'Sensible heat flux using Fine Wire temperature
+Public tau(1)		'Momentum flux. 
+Public u_star(1)	'Friction velocity.
+Public cov_out(46)	'Covariances of wind and scalars, wind vector.
+Units Fc_irga = mg/(m^2 s)
+Units LE_irga = W/m^2
+Units Hs = W/m^2
+Units H = W/m^2
+Units tau = kg m/s^2
+Units u_star = m/s
+
+
+
+'Aliases for covariances.
+Alias cov_out(1) = Uz_Uz
+Alias cov_out(2) = Uz_Ux
+Alias cov_out(3) = Uz_Uy
+Alias cov_out(4) = Uz_co2
+Alias cov_out(5) = Uz_h2o
+Alias cov_out(6) = Uz_Ts
+Alias cov_out(7) = Uz_FW
+Alias cov_out(8) = Ux_Ux
+Alias cov_out(9) = Ux_Uy
+Alias cov_out(10) = Ux_co2
+Alias cov_out(11) = Ux_h2o
+Alias cov_out(12) = Ux_Ts
+Alias cov_out(13) = Ux_FW
+Alias cov_out(14) = Uy_Uy
+Alias cov_out(15) = Uy_co2
+Alias cov_out(16) = Uy_h2o
+Alias cov_out(17) = Uy_Ts
+Alias cov_out(18) = Uy_FW
+Alias cov_out(19) = co2_co2
+Alias cov_out(20) = co2_h20
+Alias cov_out(21) = co2_Ts
+Alias cov_out(22) = co2_FW
+Alias cov_out(23) = h20_h20
+Alias cov_out(24) = h20_Ts
+Alias cov_out(25) = h20_FW
+Alias cov_out(26) = Ts_Ts
+Alias cov_out(27) = Ts-FW
+Alias cov_out(28) = Fw-Fw
+Units Uz_Uz = (m/s)^2
+Units Uz_Ux = (m/s)^2
+Units Uz_Uy = (m/s)^2
+Units Uz_co2 = mg/(m^2 s)
+Units Uz_h2o = g/(m^2 s)
+Units Uz_Ts = m C/s
+Units Uz_FW = mC/s
+Units Ux_Ux = (m/s)^2
+Units Ux_Uy = (m/s)^2
+Units Ux_co2 = mg/(m^2 s)
+Units Ux_h2o = g/(m^2 s)
+Units Ux_Ts = m C/s
+Units Ux_FW = mC/s
+Units Uy_Uy = (m/s)^2
+Units Uy_co2 = mg/(m^2 s)
+Units Uy_h2o = g/(m^2 s)
+Units Uy_Ts = m C/s
+Units Uy_FW = m C/s
+Units co2_co2 = (mg/m^3)^2
+Units h2o_h2o = (g/m^3)^2
+Units Ts_Ts = C^2
+Units FW_FW = C^2
+
+
+'Wind directions and speed.
+'Alias cov_out(29) = wnd_dir_compass
+Alias cov_out(29) = wnd_spd_1
+Alias cov_out(30) = rslt_wnd_spd_1
+Alias cov_out(31) = wnd_dir_compass
+Alias cov_out(32) = std_wnd_dir_1
+
+Alias cov_out(33) = wnd_spd_2
+Alias cov_out(34) = rslt_wnd_spd_2
+Alias cov_out(35) = wnd_dir_csat3
+Alias cov_out(36) = std_wnd_dir_2
+Units wnd_dir_compass = degrees
+Units wnd_spd = m/s
+Units rslt_wnd_spd = m/s
+Units wnd_dir_csat3 = degrees
+Units std_wnd_dir_1 = degrees
+
+'Diagnostic variables.
+Public disable_flag_on(2)	'Intermediate processing disable.
+      'disable_flag_on(1)	'Set high when CSAT3 has no data.
+      'disable_flag_on(2)	'Set high when CS7500 (LI-7500) failed to send data.
+Public n(1)				'Number of samples in the on-line covariances.
+Public warnings(2)
+Alias warnings(1) = csat_warnings	'Number of scans that at least one CSAT3
+							' warning flag was on.
+Alias warnings(2) = irga_warnings	'Number of scans that the CS7500 (LI-7500)
+							' reported NaN.
+Units n = unitless
+Units warnings = unitless
+
+Public batt_volt(1)
+Units batt_volt = V
+
+
+'Program Control flags.
+Public flag(8)
+
+
+'Measurement variables before delays.
+Dim wind_in(5)				'CSAT3 data, before adding delay.
+Dim tc_ref_in(1)				'TC reference temperature, before adding delay.
+'DIM FW_in(1)				'FW05 fine Wire Thermocuple before adding delay
+
+
+'Arrays to store delayed data.
+Dim analog_data(3)			'Three or six scan old data from the Data Table scan_3_6.
+Dim csat_data(5)			'One or four scan old data from the Data Table scan_1_4.
+
+
+'Working variables.
+Dim cov_in(8)				'Array used in the covariance instruction.
+Dim j					'Counter variable.
+Dim scan_count				'Counts the number scans that have been executed.
+Dim hex_number				'Used to break down the diagnostic bits from the CSAT3.
+Dim wind_east				'Uy wind in compass coordinate system.
+Dim wind_north				'Ux wind in compass coordinate system.
+Dim delays_loaded			'A flag that gets set after three or six scans have been
+						' executed.  This flag is used to ensure that the Data
+						' Table scan_1_4 and scan_3_6 are loaded with data.
+
+
+'*** Data Tables ***
+
+
+'Delay the analog measurements by three or six scans.
+DataTable (scan_3_6,TRUE,ANALOG_DELAY)
+
+  Sample (1,tc_ref_in,IEEE4)
+  Sample (1,fw_in(1),IEEE4)
+  
+EndTable
+
+
+
+'Delay the CSAT3 measurements by one or four scans.
+DataTable (scan_1_4,TRUE,CSAT_DELAY)
+
+  Sample (5,wind_in(1),IEEE4)
+
+EndTable
+
+
+
+'Set flag(8) high or set "Save Time Series?" custom menu option to Yes to save time
+'series data.
+DataTable (ts_data,flag(8),-1)
+  DataInterval (0,SCAN_INTERVAL,mSec,100)
+  CardOut (0,-1)
+
+  Sample (3,wind(1),IEEE4)'x,y,z
+  Sample (2,irga(1),IEEE4)'Co2,H20
+  Sample (1,Ts,IEEE4)'CSAT3 Temp
+  Sample (1,FW,IEEE4)'FW05 Temp
+  Sample (1,press,IEEE4)'Irga pressure
+  Sample (1,diag_csat,IEEE4)'Csat3 diagnostics
+
+EndTable
+
+
+
+'Compute the covariances of vertical wind, co2, h2o, sonic temperature and Fine Wire, as well as
+'the other cross products, required to rotate the data into natural wind coordinates.
+'This data is output every OUTPUT_INTERVAL minutes.
+DataTable (comp_cov,TRUE,1)
+  DataInterval (0,OUTPUT_INTERVAL,min,1)
+
+  Covariance (7,cov_in(1),IEEE4,(disable_flag_on(1) OR disable_flag_on(2) OR NOT (flag(7))),28)
+  WindVector (1,wind_east,wind_north,IEEE4,(disable_flag_on(1) OR NOT (flag(7))),0,1,2)
+  WindVector (1,Uy,Ux,IEEE4,(disable_flag_on(1) OR NOT (flag(7))),0,1,2)
+    
+EndTable
+
+
+'This table will hold twenty-eight days of flux data.  This data is
+' output every OUTPUT_INTERVAL minutes.
+DataTable (flux,TRUE,2016)
+  DataInterval (0,OUTPUT_INTERVAL,Min,10)
+  CardOut (0,4032)
+
+  Sample (1,Fc_irga(1),IEEE4)
+  Sample (1,LE_irga(1),IEEE4)
+  Sample (1,Hs(1),IEEE4)
+  Sample (1,H,IEEE4)
+  Sample (1,tau(1),IEEE4)
+  Sample (1,u_star(1),IEEE4)
+  Sample (19,cov_out(1),IEEE4)
+  Sample (1, cov_out(23),IEEE4)
+  Sample (1,cov_out(26),IEEE4)
+  Sample (1,cov_out(28),IEEE4)
+
+  Average (1,Rn,IEEE4,0)
+  Average (3,wind(1),IEEE4,(disable_flag_on(1) OR NOT (flag(7)))
+  Average (2,irga(1),IEEE4,(disable_flag_on(2) OR NOT (flag(7)))
+  Average (1,Ts,IEEE4,(disable_flag_on(1) OR NOT (flag(7)))
+  Average (1,FW,IEEE4,(disable_flag_on(1) OR NOT (flag(7)))
+
+  Average (1,rho_a,IEEE4,disable_flag_on(2))
+  Average (3,h2o_hmp,IEEE4,FALSE)
+  Average (1,press,IEEE4,disable_flag_on(2))
+  Average (1,tc_ref,IEEE4,FALSE)
+
+  Sample (1,wnd_dir_compass,IEEE4)
+  Sample (1,wnd_dir_csat3,IEEE4)
+  Sample (1,wnd_spd_1,IEEE4)
+  Sample (1,wnd_spd_2,IEEE4)
+  Sample (1,rslt_wnd_spd_1,IEEE4)
+  Sample (1,rslt_wnd_spd_2,IEEE4)
+  Sample (1,std_wnd_dir_1,IEEE4)
+'  Sample (1,std_wnd_dir_2,IEEE4)
+
+  Average (1,batt_volt,IEEE4,FALSE)
+
+  StdDev (1,rho_a,IEEE4,disable_flag_on(2))
+  StdDev (3,hmp(1),IEEE4,FALSE)
+ 
+  Totalize (1,n(1),IEEE4,FALSE)
+  Totalize (2,warnings(1),IEEE4,FALSE)
+  Totalize (4,diag_bits(1),IEEE4,FALSE)
+  Totalize (4,diag_bits(5),IEEE4,FALSE)
+  Average (1,agc,IEEE4,disable_flag_on(2))
+EndTable
+
+
+'*** Define Custom Menus ***
+
+
+DisplayMenu ("Program Control",100)
+
+  MenuItem ("Save Fluxes?",flag(7))
+  MenuPick (Yes,No)
+
+  MenuItem ("Save Time Series?",flag(8))
+  MenuPick (Yes,No)
+
+EndMenu
+
+
+
+
+'*** Program ***
+
+
+BeginProg
+
+ 'Save fluxes on compile.
+  flag(7) = TRUE
+
+ 'Set all CSAT3 variables to NaN.
+  For j = 1 To 5
+    wind_in(j) = NaN
+  Next j
+
+ 'Set all CS7500 (LI-7500) variables to NaN.
+  For j = 1 To 4
+    irga(j) = NaN
+  Next j
+    
+ 'Set the SDM clock speed.
+  SDMSpeed (SDM_PER)
+
+  Scan (SCAN_INTERVAL,mSec,10,0)
+    
+   'Thermocouple reference temperature.
+    PanelTemp (tc_ref_in,250)
+
+   'Measure Fine Wire TC
+   TCDiff (fw_in(1),1,mV20C,5,TypeE,tc_ref_in,True ,200,250,1.0,0)
+      
+
+   'Get CSAT3 wind and sonic temperature data.
+    CSAT3 (wind_in(1),1,3,91,CSAT_OPT)
+
+    
+   'Get CS7500 (LI-7500) data. 
+    CS7500 (irga(1),1,7,6)
+        
+   'Convert CS7500 (LI-7500) data from molar density [mmol/m^3] to mass density. 
+   ' 44 [g/mol] - molecular weight of carbon dioxide
+   ' 0.018 [g/mmol] - molecular weight of water vapor
+    If ( NOT (co2 = -99999) ) Then ( co2 = co2 * 44 )
+    h2o = h2o * 0.018
+
+
+   'Measure the HMP45C temperature and fraction humidity.
+    VoltDiff (hmp(2),2,mV1000,9,TRUE,200,250,0.1,0)
+
+   'Find the engineering units for the HMP45C temperature and humidity.
+    t_hmp = t_hmp - 40
+    rh_hmp = rh_hmp * 0.01
+
+   'Find the HMP45C vapor pressure, in kPa, using a sixth order polynomial (Lowe, 1976).
+    e_sat = 0.1*(A_0+t_hmp*(A_1+t_hmp*(A_2+t_hmp*(A_3+t_hmp*(A_4+t_hmp*(A_5+t_hmp*A_6))))))
+    e = e_sat * rh_hmp
+    
+   'Compute the HMP45C vapor density.
+    h2o_hmp = e/((t_hmp+273.15)*0.0004615)
+
+   'Compute moist air density.
+    rho_a = (press-e)/((t_hmp+273.15)*0.28704)+(h2o_hmp/1000)
+
+  'Measure the Q7.1 net radiometer.
+   VoltDiff (Rn(1),1,mV200C,8,TRUE,200,250,1,0)
+
+   'Get the battery voltage from the Status Table.
+    batt_volt(1) = Status.Battery(1,1)
+
+   'Delay the analog measurements by three or six scans.
+    CallTable scan_3_6
+
+   'Delay the CSAT3 measurements by one or four scans.
+    CallTable scan_1_4
+
+    If ( NOT delays_loaded ) Then ( scan_count = scan_count + 1 )
+    If ( scan_count = ANALOG_DELAY ) Then ( delays_loaded = TRUE )
+
+   'Load in analog measurements that have been delayed by three or six scans.
+    GetRecord (analog_data(1),scan_3_6,ANALOG_DELAY)
+    tc_ref = analog_data(1)
+    FW = analog_data(2)
+
+    
+   'Load in CSAT3 measurements that have been delayed by one or four scans.
+    GetRecord (csat_data(1),scan_1_4,CSAT_DELAY)
+    Ux = csat_data(1)
+    Uy = csat_data(2)
+    Uz = csat_data(3)
+    Ts = csat_data(4)
+    diag_csat = csat_data(5)
+
+    wind_east = -1 * csat_data(2)
+    wind_north = csat_data(1)
+
+
+   'Turn on the intermediate processing disable flag when the CSAT3 is reporting NaN, a
+   'Lost Trigger (&hf000), No Data (&hf03f), an SDM error (&hf001), or wrong CSAT3 embedded code
+   '(&hf002).
+    If ( (diag_csat = NaN) OR (diag_csat = &hf000) OR (diag_csat = &hf03f) OR (diag_csat = &hf001) OR (diag_csat = &hf002) ) Then
+      disable_flag_on(1) = TRUE
+    Else
+     'Check for any warning flags in CSAT3 data.  Filter all measurements associated
+     ' with the CSAT3, when the warning flags are set.
+           If (diag_csat AND &hf000) Then
+        csat_warnings = 1
+        disable_flag_on(1) = TRUE
+      Else
+        csat_warnings = 0
+        disable_flag_on(1) = FALSE
+      EndIf
+    EndIf
+
+   'Keep the four most significant bits of the diagnostic word.
+    diag_csat = INT ((diag_csat AND &hf000)/&h1000 + 0.5)
+    
+   'Break down the four most significant bits of the diagnostic word
+   ' into a delta temperature flag, poor signal lock (tracking flag),
+   ' amplitude high flag, and amplitude low flag.
+    hex_number = &h0008
+    For j = 1 to 4
+      If ( ((diag_csat AND hex_number) = hex_number) AND NOT (diag_csat = &h000f) ) Then
+        diag_bits(j) = 1
+      Else
+        diag_bits(j) = 0
+      EndIf
+
+      If ( diag_csat = NaN ) Then ( diag_bits(j) = NaN )
+
+      hex_number = INT ((hex_number/&h0002) + 0.5)
+    Next j
+    
+   'Preserve the four special CSAT3 diagnostic codes. 
+    If ( (disable_flag_on(1) = TRUE) AND (csat_warnings = 0) ) Then diag_csat = csat_data(5)
+
+
+
+   'Compute the AGC.
+    agc = INT ((diag_irga AND &h000f) * 6.25 + 0.5)
+
+   'Keep the four most significant bits of the CS750 (LI-7500) diagnostic word
+   ' and swap bits.
+    diag_irga = (NOT (INT ((diag_irga AND &h00f0)/&h0010 + 0.5)) AND &h000f)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+   'Turn on the intermediate processing disable flag when the CS7500 (LI-7500) has
+   ' failed to send data to the CR5000 via SDM.
+    If ( (ABS (co2) >= 99990) OR (co2 = NaN) ) Then
+      disable_flag_on(2) = TRUE
+    Else
+     'Check for any warning flags in CS7500 (LI-7500) data.  Filter all measurements
+     ' associated with the CS7500 (LI-7500), when the warning flags are set.
+      If (diag_irga AND &h000f) Then
+        irga_warnings = 1
+        disable_flag_on(2) = TRUE
+      Else
+        irga_warnings = 0
+        disable_flag_on(2) = FALSE
+      EndIf
+    EndIf
+
+
+   'Decompose the warning flags.  Li-Cor uses reverse logic, e.g. bit set is okay.
+   'The program changes the logic, e.g. bit not set is okay.
+    hex_number = &h0008
+    For j = 1 to 4
+      If ( (diag_irga AND hex_number) = hex_number) Then
+        diag_bits(j+4) = 1
+      Else
+        diag_bits(j+4) = 0
+      EndIf
+
+	 If ( (ABS (co2) >= 99990) OR (co2 = NaN) ) Then ( diag_bits(j+4) = NaN )
+
+      hex_number = INT ((hex_number/&h2) + 0.5)
+    Next j
+
+
+'Apply calibration and wind correction to net radiometer measurement.
+    If (NOT (disable_flag_on(1))) Then
+      hor_wind = SQR (Ux^2 + Uy^2)
+      If (Rn(1) > 0) Then
+        Rn(1) = Rn(1) * Q7_1_POS_CAL * (1 + (0.0132 * hor_wind)/(0.066 + (0.2 * hor_wind)))
+      Else
+        Rn(1) = Rn(1) * Q7_1_NEG_CAL * ((0.00174 * hor_wind) + 0.99755)
+      EndIf
+    Else
+      If (Rn(1) > 0) Then
+        Rn(1) = Rn(1) * Q7_1_POS_CAL * 1.045
+      Else
+        Rn(1) = Rn(1) * Q7_1_NEG_CAL
+      EndIf
+    EndIf
+
+
+   'Perform time series and flux processing only after the Table scan_3_6 is loaded
+   ' with data.
+    If ( delays_loaded ) Then
+     'Write a file mark to the time series table every six hours.  The file mark is written
+     ' only to the PC Card if time series data are being stored, e.g. flag(8) ("Save Time
+     ' Series?") is high (Yes).  This flag must be set high by the station operator
+     ' using PC9000 or the CR5000 keyboard.
+      If ( flag(8) AND IfTime (0,360,Min) ) Then ( FileMark (ts_data) )
+      CallTable ts_data
+
+     'Load cov_in() array for the covariance computation.
+      cov_in(1) = Uz
+      cov_in(2) = Ux
+      cov_in(3) = Uy
+      cov_in(4) = co2
+      cov_in(5) = h2o
+      cov_in(6) = Ts
+      cov_in(7) = FW
+
+      CallTable comp_cov
+
+     'Keep track of the number of samples in the covariances.
+      If ( NOT disable_flag_on(1) AND NOT disable_flag_on(2) AND flag(7) ) Then
+        n(1) = 1
+      Else
+        n(1) = 0
+      EndIf
+
+
+      If ( comp_cov.Output(1,1) ) Then
+
+        GetRecord (cov_out(1),comp_cov,1)
+
+       'The compass wind direction will be between 0 and 360 degrees.
+        wnd_dir_compass = (wnd_dir_compass + ANGLE_FROM_NORTH)
+        If ( wnd_dir_compass ) < 0 Then ( wnd_dir_compass = wnd_dir_compass + 360)
+        wnd_dir_compass = wnd_dir_compass MOD 360
+        
+       'The CSAT3 wind direction will be between 0 to 180 degrees and 0 to -180 degrees
+       ' (0 to pi radians and 0 to -pi radians).
+        If ( wnd_dir_csat3 ) > 180 Then ( wnd_dir_csat3 = wnd_dir_csat3 - 360 )
+
+       'Compute on-line fluxes.
+        Fc_irga(1) = Uz_co2
+        LE_irga(1) = LV * Uz_h2o
+        Hs(1) = rho_a * CP * Uz_Ts
+        H = rho_a*cp*Uz_FW
+
+        tau(1) = SQR ((Uz_Ux*Uz_Ux) + (Uz_Uy*Uz_Uy))
+        u_star(1) = SQR (tau(1))
+        tau(1) = rho_a * tau(1)
+        
+      EndIf
+
+      CallTable flux
+
+    EndIf
+
+    
+  NextScan
+
+EndProg

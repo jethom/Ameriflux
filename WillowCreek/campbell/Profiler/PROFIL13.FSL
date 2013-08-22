@@ -1,0 +1,70 @@
+Final Storage Label File for:  PROFIL13.CSI
+Date:  2/14/1999
+Time:  18:10:15
+
+107 Input_Storage   1.00 Sec
+1 PAR_Glb_AVG  L
+2 PAR_Dif_AVG  L
+
+314 Input_Storage   3.00 Min
+1 Year_RTM  L
+2 Day_RTM  L
+3 Hour_Minute_RTM  L
+4 ID  L
+5 Avg_T  H
+6 Avg_P  H
+7 Avg_CO2  H
+
+2 Output_Table  10.00 Min
+1 2 L
+2 Year_RTM  H
+3 Day_RTM  H
+4 Hour_Minute_RTM  H
+5 Battery_AVG  H
+6 AirT_200_AVG  H
+7 AirT_100_AVG  H
+8 AirT_75_AVG  H
+9 AirT_50_AVG  H
+10 AirT_25_AVG  H
+11 SoilT_0_AVG  H
+12 SoilT_5_AVG  H
+13 SoilT_10_AVG  H
+14 SoilT_20_AVG  H
+15 SoilT_50_AVG  H
+16 SoilT_100_AVG  H
+17 TreeT_N_AVG  H
+18 TreeT_S_AVG  H
+19 Heatflux_AVG  H
+20 SoilW_5_AVG  H
+21 SoilW_10_AVG  H
+22 SoilW_20_AVG  H
+23 SoilW_50_AVG  H
+24 SoilW_100_AVG  H
+25 PAR_60ft_AVG  H
+26 PAR_40ft_AVG  H
+27 PAR_25ft_AVG  H
+28 PAR_2m_AVG  H
+29 WSpd_80ft_AVG  H
+30 WSpd_40ft_AVG  H
+31 WSpd_2m_AVG  H
+32 WDir_80ft_AVG  H
+33 WDir_40ft_AVG  H
+34 WDir_2m_AVG  H
+35 AirT_80ft_AVG  H
+36 AirT_60ft_AVG  H
+37 AirT_40ft_AVG  H
+38 AirT_25ft_AVG  H
+39 AirT_2m_AVG  H
+40 RH_80ft_AVG  H
+41 RH_60ft_AVG  H
+42 RH_40ft_AVG  H
+43 RH_25ft_AVG  H
+44 RH_2m_AVG  H
+45 NRad_Cs_AVG  H
+46 NRad_Cd_AVG  H
+47 xPAR_Glb_AVG  H
+48 xPAR_Dif_AVG  H
+49 Err_flag  H
+
+
+Estimated Total Final Storage Locations used per day 14112.0

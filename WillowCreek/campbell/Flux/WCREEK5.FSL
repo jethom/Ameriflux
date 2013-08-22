@@ -1,0 +1,39 @@
+Final Storage Label File for:  WCREEK5.CSI
+Date:  6/28/1999
+Time:  21:59:34
+
+114 Output_Table   0.10 Sec
+1 114 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 Seconds_RTM  L
+6 Ux  H
+7 Uy  H
+8 Uz  H
+9 Ts  H
+10 CSAT_Diag  H
+11 CO2  H
+12 H20  H
+13 LI_P  H
+14 LI_T  H
+
+2 Output_Table   1.00 Min
+1 2 L
+2 Year_RTM  H
+3 Day_RTM  H
+4 Hour_Minute_RTM  H
+5 RTD_T  H
+6 Atm_P  H
+7 Dew_Pt  H
+8 Solar_In  H
+9 Solar_Out  H
+10 IR_In  H
+11 IR_Out  H
+12 KZ_T  H
+13 Battery  H
+14 Leaf_Wet  H
+15 Solar_In_STD  H
+
+
+Estimated Total Final Storage Locations used per day 19915200.0

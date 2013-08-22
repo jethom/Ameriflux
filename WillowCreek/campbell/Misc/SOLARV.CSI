@@ -1,0 +1,97 @@
+;{CR10X}
+;CSI Program to monitor solar panel charging
+;
+;{CR10X}
+;
+*Table 1 Program
+  01: 60        Execution Interval (seconds)
+
+;DATALOGGER BATTERY VOLATAGE 
+1:  Batt Voltage (P10)
+ 1: 1        Loc [ bvolt     ]
+
+2:  Volt (SE) (P1)
+ 1: 1        Reps
+ 2: 25       2500 mV 60 Hz Rejection Range
+ 3: 1        SE Channel
+ 4: 2        Loc [ bankvolt  ]
+ 5: .01112   Mult
+ 6: 0.0      Offset
+
+3:  Temp (107) (P11)
+ 1: 1        Reps
+ 2: 6        SE Channel
+ 3: 2        Excite all reps w/E2
+ 4: 3        Loc [ ref_t     ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+4:  Thermocouple Temp (DIFF) (P14)
+ 1: 1        Reps
+ 2: 1        2.5 mV Slow Range
+ 3: 2        DIFF Channel
+ 4: 1        Type T (Copper-Constantan)
+ 5: 3        Ref Temp (Deg. C) Loc [ ref_t     ]
+ 6: 4        Loc [ batt_t    ]
+ 7: 1.0      Mult
+ 8: 0.0      Offset
+
+5:  If time is (P92)
+ 1: 0        Minutes (Seconds --) into a
+ 2: 60       Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+6:  Real Time (P77)
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000)
+
+7:  Average (P71)
+ 1: 4        Reps
+ 2: 1        Loc [ bvolt     ]
+
+*Table 2 Program
+  02: 0.0000    Execution Interval (seconds)
+
+*Table 3 Subroutines
+
+End Program
+
+-Input Locations-
+1 bvolt     1 1 1
+2 bankvolt  1 1 1
+3 ref_t     1 2 1
+4 batt_t    1 1 1
+5 _________ 0 0 0
+6 _________ 0 0 0
+7 _________ 0 0 0
+8 _________ 0 0 0
+9 _________ 0 0 0
+10 _________ 0 0 0
+11 _________ 0 0 0
+12 _________ 0 0 0
+13 _________ 0 0 0
+14 _________ 0 0 0
+15 _________ 0 0 0
+16 _________ 0 0 0
+17 _________ 0 0 0
+18 _________ 0 0 0
+19 _________ 0 0 0
+20 _________ 0 0 0
+21 _________ 0 0 0
+22 _________ 0 0 0
+23 _________ 0 0 0
+24 _________ 0 0 0
+25 _________ 0 0 0
+26 _________ 0 0 0
+27 _________ 0 0 0
+28 _________ 0 0 0
+-Program Security-
+0000
+0000
+0000
+-Mode 4-
+-Final Storage Area 2-
+0
+-CR10X ID-
+0
+-CR10X Power Up-
+3

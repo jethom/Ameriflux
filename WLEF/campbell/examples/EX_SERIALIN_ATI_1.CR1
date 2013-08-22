@@ -1,0 +1,72 @@
+'CR1000 Series Datalogger
+
+' ex_SerialIn_ATI.cr1
+
+'Sensor Wiring:
+'  ATI			     CR1000
+'   Tx			      C2
+'   trigger       C3
+'   G				      G
+
+'Declare Public Variables
+SequentialMode
+
+Public ATIString as STRING * 50
+Public SerialData(5) as STRING * 50
+
+'change alias names as desired
+Alias SerialData(1)=a
+Alias SerialData(2)=b
+Alias SerialData(3)=c
+Alias SerialData(4)=d
+Alias SerialData(5)=e
+
+'Define Data Table
+DataTable (ATI,1,-1)
+	Sample (1,a,FP2)
+	Sample (1,b,FP2)
+	Sample (1,c,FP2)
+	Sample (1,d,FP2)
+	Sample (1,e,FP2)
+EndTable
+
+'Main Program, make sure of the ATI baud rate, change scan rate and delay as desired
+BeginProg
+	SerialOpen (Com1,9600,0,0,60)
+	Scan (1,Sec,0,0)
+
+		'send low-going pulse to prompt for data
+		PortSet (3,0)
+		Delay (0,1,mSec)
+
+		'set string to sensor output - comment out after testing:
+		ATIString="-0006 0002-0000 3447 035220" 'example string from sensor
+
+		'read string from ATI sensor (uncomment to read sensor):
+		'SerialIn (ATIString,Com1,20,10,30) '10 = LF, 13 = CR
+
+		'parse string:
+
+		'get first number
+		a=Mid (ATIString,1,5)
+
+		'get second number
+		b=Mid (ATIString,7,4)
+
+		'get third number
+		c=Mid (ATIString,11,5)
+
+		'get fourth number
+		d=Mid (ATIString,17,4)
+
+		'get fifth number
+		e=Mid (ATIString,22,6)
+
+		'set port high
+		PortSet (3,1)
+		SerialFlush (Com1)
+
+		CallTable ATI
+	NextScan
+EndProg
+
