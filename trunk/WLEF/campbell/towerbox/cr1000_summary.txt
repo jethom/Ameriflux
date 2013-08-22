@@ -1,0 +1,45 @@
+See program notes for specific wiring and setup info
+
+FAST MEASUREMENTS:
+SERIAL
+ATI
+
+SE, 0-5000 mV
+1 co2
+2 h2o
+3 li_t
+
+SE w/CURS100, 0-5000 mV
+5 sample_t
+6 sample_p
+
+
+SLOW MEASUREMENTS:
+SE, 0-2500 mV
+4 T
+5 RH
+
+SE, 0-5000 mV
+6 sample flow
+7 ref flow
+
+DIFF, 0-25 mV
+7 up pyran
+8 down pryan
+
+
+AC
+LiCOR
+
+12V POWER
+Unregulated
+CR1000
+Freewave
+ATI
+pump
+
+Regulated (CR1000 port)
+T/RH
+Flow meters
+RTD
+PT

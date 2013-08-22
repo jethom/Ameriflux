@@ -1,0 +1,44 @@
+Program Trace Information File for:  TTRAILER.CSI
+Date: 7/13/2005
+Time: 21:39:55
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|1 Volt (SE)                    36.2   36.2   36.2     36.2   36.2   36.2
+1|2|2 Volt (Diff)                  42.0   78.2   78.2     42.0   78.2   78.2
+1|3|86 Do                           0.3   78.5   78.5      0.3   78.5   78.5
+ Output Flag Set @ 13 for Array 103
+1|4|78 Resolution                   0.4   78.9   78.9      0.4   78.9   78.9
+1|5|70 Sample                       0.2   79.1   79.1      2.1   81.0   81.0
+ Output Data 4 Values
+1|6|92 If time is                   0.7   79.8   79.8      0.7   81.7   81.7
+ Output Flag Set @ 16 for Array 2
+1|7|80 Set Active Storage Area      0.3   80.1   80.1      0.3   82.0   82.0
+1|8|77 Real Time                    0.2   80.3   80.3      3.8   85.8   85.8
+ Output Data 3 Values
+1|9|71 Average                      2.8   83.1   83.1     10.3   96.1   96.1
+ Output Data 2 Values
+1|10|70 Sample                      0.2   83.3   83.3      0.9   97.0   97.0
+ Output Data 1 Values
+
+Program Table 1 Execution Interval    0.203 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec   83.3 w/Output   97.0
+
+Table 1 Estimated Total Final Storage Locations used per day 4276317.6
+
+
+
+Estimated Total Final Storage Locations used per day 4276317.6

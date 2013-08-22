@@ -1,0 +1,31 @@
+Final Storage Label File for:  TBOX_V1.CSI
+Date:  10/24/2004
+Time:  17:41:17
+
+103 Output_Table   0.20 Sec
+1 103 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 Seconds_RTM  L
+6 ux  H
+7 uy  H
+8 uz  H
+9 sonic_t  H
+10 li_c  H
+11 li_q  H
+12 li_t  H
+13 li_p  H
+
+2 Output_Table   1.00 Min
+1 2 L
+2 Year_RTM  H
+3 Day_RTM  H
+4 Hour_Minute_RTM  H
+5 air_t_AVG  H
+6 rh_AVG  H
+7 s_flow  H
+8 r_flow  H
+
+
+Estimated Total Final Storage Locations used per day 8960971.0

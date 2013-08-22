@@ -1,0 +1,68 @@
+Program Trace Information File for:  HANDAR6.CSI
+Date: 3/8/2003
+Time: 08:57:51
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|91 If Flag/Port                 0.2    0.2    0.2      0.2    0.2    0.2
+1|2|86 Do                           0.2    0.4    0.4      0.2    0.4    0.4
+1|3|105 SDI-12 Recorder               *    0.4    0.4        *    0.4    0.4
+1|4|68 Extended Parameters 4 Digit   0.1    0.5    0.5      0.1    0.5    0.5
+1|5|105 SDI-12 Recorder               *    0.5    0.5        *    0.5    0.5
+1|6|68 Extended Parameters 4 Digit   0.1    0.6    0.6      0.1    0.6    0.6
+1|7|105 SDI-12 Recorder               *    0.6    0.6        *    0.6    0.6
+1|8|68 Extended Parameters 4 Digit   0.1    0.7    0.7      0.1    0.7    0.7
+1|9|95 End                          0.2    0.9    0.9      0.2    0.9    0.9
+1|10|105 SDI-12 Recorder              *    0.9    0.9        *    0.9    0.9
+1|11|105 SDI-12 Recorder              *    0.9    0.9        *    0.9    0.9
+1|12|105 SDI-12 Recorder              *    0.9    0.9        *    0.9    0.9
+1|13|31 Z=X                         0.4    1.3    1.3      0.4    1.3    1.3
+1|14|30 Z=F                         0.5    1.8    1.8      0.5    1.8    1.8
+1|15|36 Z=X*Y                       0.7    2.5    2.5      0.7    2.5    2.5
+1|16|30 Z=F                         0.5    3.0    3.0      0.5    3.0    3.0
+1|17|38 Z=X/Y                       1.5    4.5    4.5      1.5    4.5    4.5
+1|18|31 Z=X                         0.4    4.9    4.9      0.4    4.9    4.9
+1|19|30 Z=F                         0.5    5.4    5.4      0.5    5.4    5.4
+1|20|36 Z=X*Y                       0.7    6.1    6.1      0.7    6.1    6.1
+1|21|30 Z=F                         0.5    6.6    6.6      0.5    6.6    6.6
+1|22|38 Z=X/Y                       1.5    8.1    8.1      1.5    8.1    8.1
+1|23|31 Z=X                         0.4    8.5    8.5      0.4    8.5    8.5
+1|24|30 Z=F                         0.5    9.0    9.0      0.5    9.0    9.0
+1|25|36 Z=X*Y                       0.7    9.7    9.7      0.7    9.7    9.7
+1|26|30 Z=F                         0.5   10.2   10.2      0.5   10.2   10.2
+1|27|38 Z=X/Y                       1.5   11.7   11.7      1.5   11.7   11.7
+1|28|92 If time is                  0.4   12.1   12.1      0.4   12.1   12.1
+ Output Flag Set @ 128 for Array 10
+1|29|80 Set Active Storage Area     0.2   12.3   12.3      0.2   12.3   12.3
+1|30|77 Real Time                   0.1   12.4   12.4      2.2   14.5   14.5
+ Output Data 3 Values
+1|31|71 Average                     1.2   13.6   13.6      4.8   19.3   19.3
+ Output Data 2 Values
+1|32|71 Average                     1.2   14.8   14.8      4.8   24.1   24.1
+ Output Data 2 Values
+1|33|71 Average                     1.2   16.0   16.0      4.8   28.9   28.9
+ Output Data 2 Values
+
+Program Table 1 Execution Interval    2.000 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec   16.0 w/Output   28.9
+
+Table 1 Estimated Total Final Storage Locations used per day 14400.0
+
+
+
+Estimated Total Final Storage Locations used per day 14400.0
+
+*Execution time is unknown.

@@ -1,0 +1,18 @@
+Final Storage Label File for:  LATEST2.CSI
+Date:  8/6/1998
+Time:  17:15:39
+
+114 Output_Table   0.10 Sec
+1 114 L
+
+2 Output_Table   1.00 Sec
+1 2 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 Seconds_RTM  L
+6 Atm_P_AVG  L
+7 Leaf_Wet_BIN01  L
+
+
+Estimated Total Final Storage Locations used per day 604800.0

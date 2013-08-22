@@ -1,0 +1,54 @@
+Program Trace Information File for:  TRAILER_V1.csi
+Date: 7/24/2006
+Time: 19:50:46
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|1 Volt (SE)                    14.9   14.9   14.9     14.9   14.9   14.9
+1|2|31 Z=X                          0.4   15.3   15.3      0.4   15.3   15.3
+1|3|30 Z=F x 10^n                   0.5   15.8   15.8      0.5   15.8   15.8
+1|4|36 Z=X*Y                        0.7   16.5   16.5      0.7   16.5   16.5
+1|5|30 Z=F x 10^n                   0.5   17.0   17.0      0.5   17.0   17.0
+1|6|38 Z=X/Y                        1.5   18.5   18.5      1.5   18.5   18.5
+1|7|31 Z=X                          0.4   18.9   18.9      0.4   18.9   18.9
+1|8|30 Z=F x 10^n                   0.5   19.4   19.4      0.5   19.4   19.4
+1|9|36 Z=X*Y                        0.7   20.1   20.1      0.7   20.1   20.1
+1|10|30 Z=F x 10^n                  0.5   20.6   20.6      0.5   20.6   20.6
+1|11|38 Z=X/Y                       1.5   22.1   22.1      1.5   22.1   22.1
+1|12|31 Z=X                         0.4   22.5   22.5      0.4   22.5   22.5
+1|13|30 Z=F x 10^n                  0.5   23.0   23.0      0.5   23.0   23.0
+1|14|36 Z=X*Y                       0.7   23.7   23.7      0.7   23.7   23.7
+1|15|30 Z=F x 10^n                  0.5   24.2   24.2      0.5   24.2   24.2
+1|16|38 Z=X/Y                       1.5   25.7   25.7      1.5   25.7   25.7
+1|17|2 Volt (Diff)                  8.3   34.0   34.0      8.3   34.0   34.0
+1|18|1 Volt (SE)                    5.3   39.3   39.3      5.3   39.3   39.3
+1|19|2 Volt (Diff)                  3.1   42.4   42.4      3.1   42.4   42.4
+1|20|86 Do                          0.2   42.6   42.6      0.2   42.6   42.6
+ Output Flag Set @ 120 for Array 120
+1|21|77 Real Time                   0.1   42.7   42.7      2.2   44.8   44.8
+ Output Data 4 Values
+1|22|78 Resolution                  0.4   43.1   43.1      0.4   45.2   45.2
+1|23|70 Sample                      0.1   43.2   43.2      3.7   48.9   48.9
+ Output Data 16 Values
+
+Program Table 1 Execution Interval    0.100 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec   43.2 w/Output   48.9
+
+Table 1 Estimated Total Final Storage Locations used per day 31968000
+
+
+
+Estimated Total Final Storage Locations used per day 31968000

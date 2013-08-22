@@ -1,0 +1,18 @@
+Final Storage Label File for:  MET_V1.csi
+Date:  8/14/2006
+Time:  16:27:55
+
+108 Output_Table   1.00 Min
+1 108 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 par_AVG  L
+6 pyran_AVG  L
+7 air_t_AVG  L
+8 rh_AVG  L
+9 precip_TOT  L
+10 atm_p_AVG  H
+
+
+Estimated Total Final Storage Locations used per day 15840

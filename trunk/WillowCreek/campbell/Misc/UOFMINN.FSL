@@ -1,0 +1,36 @@
+Final Storage Label File for:  UOFMINN.CSI
+Date:  5/1/1998
+Time:  13:31:03
+
+67 Input_Storage  1.00 Min
+1 GH___W_m2_AVG  L
+2 DN___W_m2_AVG  L
+3 DH___W_m2_AVG  L
+4 AT______F_AVG  L
+5 __________AVG  L
+
+511 Output_Table  15.00 Min
+1 511 L
+2 Revision  L
+3 Year_RTM  L
+4 Day_RTM  L
+5 Hour_Minute_RTM  L
+6 _GH__W_m2_AVG  L
+7 _DN__W_m2_AVG  L
+8 _DH__W_m2_AVG  L
+9 _AT_____F_AVG  L
+10 Err_flag  H
+
+252 Output_Table  60.00 Min
+1 252 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 Vbat____V_AVG  L
+6 min_ind_AVG  L
+7 Well_wdth_AVG  L
+8 C_AVG  L
+9 Err_flag  L
+
+
+Estimated Total Final Storage Locations used per day 1272.0

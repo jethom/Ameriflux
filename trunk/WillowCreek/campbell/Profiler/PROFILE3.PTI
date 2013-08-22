@@ -1,0 +1,343 @@
+Program Trace Information File for:  PROFILE3.CSI
+Date: 11/4/1998
+Time: 14:30:15
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|1 Volt (SE)                     9.6    9.6    9.6      9.6    9.6    9.6
+1|2|31 Z=X                          0.7   10.3   10.3      0.7   10.3   10.3
+1|3|30 Z=F                          1.0   11.3   11.3      1.0   11.3   11.3
+1|4|36 Z=X*Y                        1.5   12.8   12.8      1.5   12.8   12.8
+1|5|30 Z=F                          1.0   13.8   13.8      1.0   13.8   13.8
+1|6|36 Z=X*Y                        1.5   15.3   15.3      1.5   15.3   15.3
+1|7|31 Z=X                          0.7   16.0   16.0      0.7   16.0   16.0
+1|8|30 Z=F                          1.0   17.0   17.0      1.0   17.0   17.0
+1|9|36 Z=X*Y                        1.5   18.5   18.5      1.5   18.5   18.5
+1|10|30 Z=F                         1.0   19.5   19.5      1.0   19.5   19.5
+1|11|36 Z=X*Y                       1.5   21.0   21.0      1.5   21.0   21.0
+1|12|30 Z=F                         1.0   22.0   22.0      1.0   22.0   22.0
+1|13|33 Z=X+Y                       1.2   23.2   23.2      1.2   23.2   23.2
+1|14|52 Running Average            13.2   36.4   36.4     13.2   36.4   36.4
+1|15|92 If time is                  0.4   36.8   36.8      0.4   36.8   36.8
+1|16|10 Batt Voltage                8.3   45.1   45.1      8.3   45.1   45.1
+1|17|11 Temp (107)                  9.9   55.0   55.0      9.9   55.0   55.0
+1|18|86 Do                          0.3   55.3   55.3      0.3   55.3   55.3
+1|19|86 Do                          0.3   55.6   55.6      0.3   55.6   55.6
+1|20|87 Beginning of Loop           0.3   55.9   55.9      0.3   55.9   55.9
+ Execution times in the loop are calculated for one pass only.
+1|21|86 Do                          0.3   56.2   56.2      0.3   56.2   56.2
+1|22|22 Excitation with Delay     100.5  156.7  156.7    100.5  156.7  156.7
+1|23|14 Thermocouple Temp (DIFF)   18.0  174.7  174.7     18.0  174.7  174.7
+1|24|27 Period Average (SE)        52.0  226.7  226.7     52.0  226.7  226.7
+1|25|95 End                         0.2  226.9  226.9      0.2  226.9  226.9
+1|26|86 Do                          0.3  227.2  227.2      0.3  227.2  227.2
+1|27|87 Beginning of Loop           0.3  227.5  227.5      0.3  227.5  227.5
+ Execution times in the loop are calculated for one pass only.
+1|28|86 Do                          0.3  227.8  227.8      0.3  227.8  227.8
+1|29|22 Excitation with Delay     100.5  328.3  328.3    100.5  328.3  328.3
+1|30|2 Volt (Diff)                  9.7  338.0  338.0      9.7  338.0  338.0
+1|31|95 End                         0.2  338.2  338.2      0.2  338.2  338.2
+1|32|86 Do                          0.3  338.5  338.5      0.3  338.5  338.5
+1|33|55 Polynomial                    *  338.5  338.5        *  338.5  338.5
+1|34|55 Polynomial                    *  338.5  338.5        *  338.5  338.5
+1|35|55 Polynomial                    *  338.5  338.5        *  338.5  338.5
+1|36|55 Polynomial                    *  338.5  338.5        *  338.5  338.5
+1|37|55 Polynomial                    *  338.5  338.5        *  338.5  338.5
+1|38|37 Z=X*F                       1.2  339.7  339.7      1.2  339.7  339.7
+1|39|95 End                         0.2  339.9  339.9      0.2  339.9  339.9
+1|40|92 If time is                  0.4  340.3  340.3      0.4  340.3  340.3
+ Output Flag Set @ 140 for Array 140
+1|41|77 Real Time                   0.2  340.5  340.5      3.8  344.1  344.1
+ Output Data 3 Values
+1|42|70 Sample                      0.2  340.7  340.7      0.9  345.0  345.0
+ Output Data 1 Values
+1|43|78 Resolution                  0.4  341.1  341.1      0.4  345.4  345.4
+1|44|70 Sample                      0.2  341.3  341.3      1.7  347.1  347.1
+ Output Data 3 Values
+1|45|92 If time is                  0.4  341.7  341.7      0.4  347.5  347.5
+ Output Flag Set @ 145 for Array 2
+1|46|80 Set Active Storage Area     0.3  342.0  342.0      0.3  347.8  347.8
+1|47|77 Real Time                   0.2  342.2  342.2      3.8  351.6  351.6
+ Output Data 3 Values
+1|48|71 Average                     1.7  343.9  343.9      5.9  357.5  357.5
+ Output Data 1 Values
+1|49|71 Average                    17.1  361.0  361.0     67.5  425.0  425.0
+ Output Data 15 Values
+1|50|71 Average                     6.1  367.1  367.1     23.5  448.5  448.5
+ Output Data 5 Values
+
+Program Table 1 Execution Interval    1.000 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec  367.1 w/Output  448.5
+
+Table 1 Estimated Total Final Storage Locations used per day 43920.0
+
+
+--------------- Table 2 ---------------
+2|1|89 If (X<=>F)                   0.6    0.6    0.6      0.6    0.6    0.6
+2|2|30 Z=F                          1.0    1.6    1.6      1.0    1.6    1.6
+2|3|95 End                          0.2    1.8    1.8      0.2    1.8    1.8
+2|4|32 Z=Z+1                        0.8    2.6    2.6      0.8    2.6    2.6
+2|5|93 CASE                         0.3    2.9    2.9      0.3    2.9    2.9
+2|6|83 If Case Location < F         0.5    3.4    3.4      0.5    3.4    3.4
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0    3.4      0.0    0.0    3.4
+  3|2|30 Z=F                        1.0    1.0    4.4      1.0    1.0    4.4
+  3|3|32 Z=Z+1                      0.8    1.8    5.2      0.8    1.8    5.2
+  3|4|95 End                        0.2    2.0    5.4      0.2    2.0    5.4
+  -----End Subroutine 1 ---------
+2|7|83 If Case Location < F         0.5    3.9    5.9      0.5    3.9    5.9
+  ----Subroutine 2---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0    5.9      0.0    0.0    5.9
+  3|2|30 Z=F                        1.0    1.0    6.9      1.0    1.0    6.9
+  3|3|95 End                        0.2    1.2    7.1      0.2    1.2    7.1
+  -----End Subroutine 2 ---------
+2|8|83 If Case Location < F         0.5    4.4    7.6      0.5    4.4    7.6
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0    7.6      0.0    0.0    7.6
+  3|2|30 Z=F                        1.0    1.0    8.6      1.0    1.0    8.6
+  3|3|32 Z=Z+1                      0.8    1.8    9.4      0.8    1.8    9.4
+  3|4|95 End                        0.2    2.0    9.6      0.2    2.0    9.6
+  -----End Subroutine 1 ---------
+2|9|83 If Case Location < F         0.5    4.9   10.1      0.5    4.9   10.1
+  ----Subroutine 3---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   10.1      0.0    0.0   10.1
+  3|2|30 Z=F                        1.0    1.0   11.1      1.0    1.0   11.1
+  3|3|30 Z=F                        1.0    2.0   12.1      1.0    2.0   12.1
+  3|4|95 End                        0.2    2.2   12.3      0.2    2.2   12.3
+  -----End Subroutine 3 ---------
+2|10|83 If Case Location < F        0.5    5.4   12.8      0.5    5.4   12.8
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   12.8      0.0    0.0   12.8
+  3|2|30 Z=F                        1.0    1.0   13.8      1.0    1.0   13.8
+  3|3|32 Z=Z+1                      0.8    1.8   14.6      0.8    1.8   14.6
+  3|4|95 End                        0.2    2.0   14.8      0.2    2.0   14.8
+  -----End Subroutine 1 ---------
+2|11|83 If Case Location < F        0.5    5.9   15.3      0.5    5.9   15.3
+  ----Subroutine 2---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   15.3      0.0    0.0   15.3
+  3|2|30 Z=F                        1.0    1.0   16.3      1.0    1.0   16.3
+  3|3|95 End                        0.2    1.2   16.5      0.2    1.2   16.5
+  -----End Subroutine 2 ---------
+2|12|83 If Case Location < F        0.5    6.4   17.0      0.5    6.4   17.0
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   17.0      0.0    0.0   17.0
+  3|2|30 Z=F                        1.0    1.0   18.0      1.0    1.0   18.0
+  3|3|32 Z=Z+1                      0.8    1.8   18.8      0.8    1.8   18.8
+  3|4|95 End                        0.2    2.0   19.0      0.2    2.0   19.0
+  -----End Subroutine 1 ---------
+2|13|83 If Case Location < F        0.5    6.9   19.5      0.5    6.9   19.5
+  ----Subroutine 3---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   19.5      0.0    0.0   19.5
+  3|2|30 Z=F                        1.0    1.0   20.5      1.0    1.0   20.5
+  3|3|30 Z=F                        1.0    2.0   21.5      1.0    2.0   21.5
+  3|4|95 End                        0.2    2.2   21.7      0.2    2.2   21.7
+  -----End Subroutine 3 ---------
+2|14|83 If Case Location < F        0.5    7.4   22.2      0.5    7.4   22.2
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   22.2      0.0    0.0   22.2
+  3|2|30 Z=F                        1.0    1.0   23.2      1.0    1.0   23.2
+  3|3|32 Z=Z+1                      0.8    1.8   24.0      0.8    1.8   24.0
+  3|4|95 End                        0.2    2.0   24.2      0.2    2.0   24.2
+  -----End Subroutine 1 ---------
+2|15|83 If Case Location < F        0.5    7.9   24.7      0.5    7.9   24.7
+  ----Subroutine 2---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   24.7      0.0    0.0   24.7
+  3|2|30 Z=F                        1.0    1.0   25.7      1.0    1.0   25.7
+  3|3|95 End                        0.2    1.2   25.9      0.2    1.2   25.9
+  -----End Subroutine 2 ---------
+2|16|83 If Case Location < F        0.5    8.4   26.4      0.5    8.4   26.4
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   26.4      0.0    0.0   26.4
+  3|2|30 Z=F                        1.0    1.0   27.4      1.0    1.0   27.4
+  3|3|32 Z=Z+1                      0.8    1.8   28.2      0.8    1.8   28.2
+  3|4|95 End                        0.2    2.0   28.4      0.2    2.0   28.4
+  -----End Subroutine 1 ---------
+2|17|83 If Case Location < F        0.5    8.9   28.9      0.5    8.9   28.9
+  ----Subroutine 3---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   28.9      0.0    0.0   28.9
+  3|2|30 Z=F                        1.0    1.0   29.9      1.0    1.0   29.9
+  3|3|30 Z=F                        1.0    2.0   30.9      1.0    2.0   30.9
+  3|4|95 End                        0.2    2.2   31.1      0.2    2.2   31.1
+  -----End Subroutine 3 ---------
+2|18|83 If Case Location < F        0.5    9.4   31.6      0.5    9.4   31.6
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   31.6      0.0    0.0   31.6
+  3|2|30 Z=F                        1.0    1.0   32.6      1.0    1.0   32.6
+  3|3|32 Z=Z+1                      0.8    1.8   33.4      0.8    1.8   33.4
+  3|4|95 End                        0.2    2.0   33.6      0.2    2.0   33.6
+  -----End Subroutine 1 ---------
+2|19|83 If Case Location < F        0.5    9.9   34.1      0.5    9.9   34.1
+  ----Subroutine 2---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   34.1      0.0    0.0   34.1
+  3|2|30 Z=F                        1.0    1.0   35.1      1.0    1.0   35.1
+  3|3|95 End                        0.2    1.2   35.3      0.2    1.2   35.3
+  -----End Subroutine 2 ---------
+2|20|83 If Case Location < F        0.5   10.4   35.8      0.5   10.4   35.8
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   35.8      0.0    0.0   35.8
+  3|2|30 Z=F                        1.0    1.0   36.8      1.0    1.0   36.8
+  3|3|32 Z=Z+1                      0.8    1.8   37.6      0.8    1.8   37.6
+  3|4|95 End                        0.2    2.0   37.8      0.2    2.0   37.8
+  -----End Subroutine 1 ---------
+2|21|83 If Case Location < F        0.5   10.9   38.3      0.5   10.9   38.3
+  ----Subroutine 3---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   38.3      0.0    0.0   38.3
+  3|2|30 Z=F                        1.0    1.0   39.3      1.0    1.0   39.3
+  3|3|30 Z=F                        1.0    2.0   40.3      1.0    2.0   40.3
+  3|4|95 End                        0.2    2.2   40.5      0.2    2.2   40.5
+  -----End Subroutine 3 ---------
+2|22|83 If Case Location < F        0.5   11.4   41.0      0.5   11.4   41.0
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   41.0      0.0    0.0   41.0
+  3|2|30 Z=F                        1.0    1.0   42.0      1.0    1.0   42.0
+  3|3|32 Z=Z+1                      0.8    1.8   42.8      0.8    1.8   42.8
+  3|4|95 End                        0.2    2.0   43.0      0.2    2.0   43.0
+  -----End Subroutine 1 ---------
+2|23|83 If Case Location < F        0.5   11.9   43.5      0.5   11.9   43.5
+  ----Subroutine 2---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   43.5      0.0    0.0   43.5
+  3|2|30 Z=F                        1.0    1.0   44.5      1.0    1.0   44.5
+  3|3|95 End                        0.2    1.2   44.7      0.2    1.2   44.7
+  -----End Subroutine 2 ---------
+2|24|83 If Case Location < F        0.5   12.4   45.2      0.5   12.4   45.2
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   45.2      0.0    0.0   45.2
+  3|2|30 Z=F                        1.0    1.0   46.2      1.0    1.0   46.2
+  3|3|32 Z=Z+1                      0.8    1.8   47.0      0.8    1.8   47.0
+  3|4|95 End                        0.2    2.0   47.2      0.2    2.0   47.2
+  -----End Subroutine 1 ---------
+2|25|83 If Case Location < F        0.5   12.9   47.7      0.5   12.9   47.7
+  ----Subroutine 3---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   47.7      0.0    0.0   47.7
+  3|2|30 Z=F                        1.0    1.0   48.7      1.0    1.0   48.7
+  3|3|30 Z=F                        1.0    2.0   49.7      1.0    2.0   49.7
+  3|4|95 End                        0.2    2.2   49.9      0.2    2.2   49.9
+  -----End Subroutine 3 ---------
+2|26|83 If Case Location < F        0.5   13.4   50.4      0.5   13.4   50.4
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   50.4      0.0    0.0   50.4
+  3|2|30 Z=F                        1.0    1.0   51.4      1.0    1.0   51.4
+  3|3|32 Z=Z+1                      0.8    1.8   52.2      0.8    1.8   52.2
+  3|4|95 End                        0.2    2.0   52.4      0.2    2.0   52.4
+  -----End Subroutine 1 ---------
+2|27|83 If Case Location < F        0.5   13.9   52.9      0.5   13.9   52.9
+  ----Subroutine 2---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   52.9      0.0    0.0   52.9
+  3|2|30 Z=F                        1.0    1.0   53.9      1.0    1.0   53.9
+  3|3|95 End                        0.2    1.2   54.1      0.2    1.2   54.1
+  -----End Subroutine 2 ---------
+2|28|83 If Case Location < F        0.5   14.4   54.6      0.5   14.4   54.6
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   54.6      0.0    0.0   54.6
+  3|2|30 Z=F                        1.0    1.0   55.6      1.0    1.0   55.6
+  3|3|32 Z=Z+1                      0.8    1.8   56.4      0.8    1.8   56.4
+  3|4|95 End                        0.2    2.0   56.6      0.2    2.0   56.6
+  -----End Subroutine 1 ---------
+2|29|83 If Case Location < F        0.5   14.9   57.1      0.5   14.9   57.1
+  ----Subroutine 3---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   57.1      0.0    0.0   57.1
+  3|2|30 Z=F                        1.0    1.0   58.1      1.0    1.0   58.1
+  3|3|30 Z=F                        1.0    2.0   59.1      1.0    2.0   59.1
+  3|4|95 End                        0.2    2.2   59.3      0.2    2.2   59.3
+  -----End Subroutine 3 ---------
+2|30|83 If Case Location < F        0.5   15.4   59.8      0.5   15.4   59.8
+  ----Subroutine 4---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   59.8      0.0    0.0   59.8
+  3|2|32 Z=Z+1                      0.8    0.8   60.6      0.8    0.8   60.6
+  3|3|95 End                        0.2    1.0   60.8      0.2    1.0   60.8
+  -----End Subroutine 4 ---------
+2|31|95 End                         0.2   15.6   61.0      0.2   15.6   61.0
+2|32|86 Do                          0.3   15.9   61.3      0.3   15.9   61.3
+  ----Subroutine 6---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   61.3      0.0    0.0   61.3
+  3|2|87 Beginning of Loop          0.3    0.3   61.6      0.3    0.3   61.6
+ Execution times in the loop are calculated for one pass only.
+  3|3|30 Z=F                        1.0    1.3   62.6      1.0    1.3   62.6
+  3|4|95 End                        0.2    1.5   62.8      0.2    1.5   62.8
+  3|5|95 End                        0.2    1.7   63.0      0.2    1.7   63.0
+  -----End Subroutine 6 ---------
+2|33|30 Z=F                         1.0   16.9   64.0      1.0   16.9   64.0
+2|34|89 If (X<=>F)                  0.6   17.5   64.6      0.6   17.5   64.6
+2|35|31 Z=X                         0.7   18.2   65.3      0.7   18.2   65.3
+2|36|87 Beginning of Loop           0.3   18.5   65.6      0.3   18.5   65.6
+ Execution times in the loop are calculated for one pass only.
+2|37|32 Z=Z+1                       0.8   19.3   66.4      0.8   19.3   66.4
+2|38|88 If (X<=>Y)                  0.8   20.1   67.2      0.8   20.1   67.2
+2|39|30 Z=F                         1.0   21.1   68.2      1.0   21.1   68.2
+2|40|95 End                         0.2   21.3   68.4      0.2   21.3   68.4
+2|41|95 End                         0.2   21.5   68.6      0.2   21.5   68.6
+2|42|95 End                         0.2   21.7   68.8      0.2   21.7   68.8
+2|43|89 If (X<=>F)                  0.6   22.3   69.4      0.6   22.3   69.4
+2|44|30 Z=F                         1.0   23.3   70.4      1.0   23.3   70.4
+2|45|31 Z=X                         0.7   24.0   71.1      0.7   24.0   71.1
+2|46|30 Z=F                         1.0   25.0   72.1      1.0   25.0   72.1
+2|47|33 Z=X+Y                       1.2   26.2   73.3      1.2   26.2   73.3
+2|48|87 Beginning of Loop           0.3   26.5   73.6      0.3   26.5   73.6
+ Execution times in the loop are calculated for one pass only.
+2|49|32 Z=Z+1                       0.8   27.3   74.4      0.8   27.3   74.4
+2|50|88 If (X<=>Y)                  0.8   28.1   75.2      0.8   28.1   75.2
+2|51|30 Z=F                         1.0   29.1   76.2      1.0   29.1   76.2
+2|52|95 End                         0.2   29.3   76.4      0.2   29.3   76.4
+2|53|95 End                         0.2   29.5   76.6      0.2   29.5   76.6
+2|54|95 End                         0.2   29.7   76.8      0.2   29.7   76.8
+2|55|93 CASE                        0.3   30.0   77.1      0.3   30.0   77.1
+2|56|83 If Case Location < F        0.5   30.5   77.6      0.5   30.5   77.6
+  ----Subroutine 5---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   77.6      0.0    0.0   77.6
+  3|2|87 Beginning of Loop          0.3    0.3   77.9      0.3    0.3   77.9
+ Execution times in the loop are calculated for one pass only.
+  3|3|30 Z=F                        1.0    1.3   78.9      1.0    1.3   78.9
+  3|4|95 End                        0.2    1.5   79.1      0.2    1.5   79.1
+  3|5|95 End                        0.2    1.7   79.3      0.2    1.7   79.3
+  -----End Subroutine 5 ---------
+2|57|83 If Case Location < F        0.5   31.0   79.8      0.5   31.0   79.8
+2|58|30 Z=F                         1.0   32.0   80.8      1.0   32.0   80.8
+2|59|95 End                         0.2   32.2   81.0      0.2   32.2   81.0
+2|60|83 If Case Location < F        0.5   32.7   81.5      0.5   32.7   81.5
+  ----Subroutine 5---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   81.5      0.0    0.0   81.5
+  3|2|87 Beginning of Loop          0.3    0.3   81.8      0.3    0.3   81.8
+ Execution times in the loop are calculated for one pass only.
+  3|3|30 Z=F                        1.0    1.3   82.8      1.0    1.3   82.8
+  3|4|95 End                        0.2    1.5   83.0      0.2    1.5   83.0
+  3|5|95 End                        0.2    1.7   83.2      0.2    1.7   83.2
+  -----End Subroutine 5 ---------
+2|61|83 If Case Location < F        0.5   33.2   83.7      0.5   33.2   83.7
+2|62|30 Z=F                         1.0   34.2   84.7      1.0   34.2   84.7
+2|63|95 End                         0.2   34.4   84.9      0.2   34.4   84.9
+2|64|95 End                         0.2   34.6   85.1      0.2   34.6   85.1
+2|65|104 SDM-CD16 / SDM-CD16AC      2.1   36.7   87.2      2.1   36.7   87.2
+2|66|22 Excitation with Delay      70.5  107.2  157.7     70.5  107.2  157.7
+2|67|86 Do                          0.3  107.5  158.0      0.3  107.5  158.0
+  ----Subroutine 6---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0  158.0      0.0    0.0  158.0
+  3|2|87 Beginning of Loop          0.3    0.3  158.3      0.3    0.3  158.3
+ Execution times in the loop are calculated for one pass only.
+  3|3|30 Z=F                        1.0    1.3  159.3      1.0    1.3  159.3
+  3|4|95 End                        0.2    1.5  159.5      0.2    1.5  159.5
+  3|5|95 End                        0.2    1.7  159.7      0.2    1.7  159.7
+  -----End Subroutine 6 ---------
+2|68|104 SDM-CD16 / SDM-CD16AC      2.1  109.6  161.8      2.1  109.6  161.8
+
+Program Table 2 Execution Interval  120.000 Seconds
+
+Table 2 Estimated Total Program Execution Time in msec  161.8 w/Output  161.8
+
+Table 2 Estimated Total Final Storage Locations used per day    0.0
+
+
+
+Estimated Total Final Storage Locations used per day 43920.0

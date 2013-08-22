@@ -1,0 +1,317 @@
+;{21X}
+;Willow Creek generator start/stop program
+;Writen by: Bruce Cook
+;Last modified: November 2002
+;
+;Datalogger clock: LST
+;
+;flag 1: trigger (high=start generator)
+;flag 2: genset that will be started next (low=kohler, high=onan)
+;flag 3: generator status (high=running)
+;flag 4: timer status (high=timer is running)
+;
+;C1: connected to relay for Kohler generator
+;C2: connected to relay for Onan generator
+;
+;Diff 1: connected to Kohler battery
+;Diff 2: connected to Onan battery
+;
+;? - connections to relay driver?
+;
+; NOTE: Changing the execution interval will change the run time,
+; because the execution interval determines how frequent the timer is advanced.
+
+*Table 1 Program
+  01: 60        Execution Interval (seconds) ;
+
+1:  Batt Voltage (P10) ; measure data logger voltage
+ 1: 1        Loc [ CR21_volt ]
+
+2:  If (X<=>F) (P89) ; Discontinue further start attempts if Kohler/Onan both failed
+ 1: 10       X Loc [ t_attempt ]
+ 2: 1        =
+ 3: 6        F
+ 4: 21       Set Flag 1 Low
+
+3:  If time is (P92) ;  Start generator every 8 hours, at 50 minutes into hour
+ 1: 50       Minutes into a
+ 2: 480      Minute Interval
+ 3: 11       Set Flag 1 High ; set trigger to "start a generator"
+
+4:  If Flag/Input (P91)
+ 1: 11       Do if Flag 1 is High
+ 2: 30       Then Do
+
+     5:  Z=F (P30) ; reset total number of attempts for this time
+      1: 0.0      F
+      2: 10       Z Loc [ t_attempt ]
+
+     6:  If Flag/Input (P91) ; Start Kohler generator...
+      1: 22       Do if Flag 2 is Low
+      2: 30       Then Do
+
+          7:  Z=Z+1 (P32) ; Record number of starts attempted
+           1: 4        Z Loc [ k_attempt ]
+
+          8:  Beginning of Loop (P87) ; Allow Kohler 3 attempts to start
+           1: 1        Delay
+           2: 3        Loop Count
+
+               9:  Z=Z+1 (P32)
+                1: 10       Z Loc [ t_attempt ]
+
+               10:  Do (P86)
+                1: 1        Call Subroutine 1
+
+               11:  If Flag/Port (P91)
+                1: 12       Do if Flag 2 is High
+                2: 31       Exit Loop if True
+
+          12:  End (P95) ; end restart loop
+
+          13:  Do (P86)
+           1: 12       Set Flag 2 High ; reset flag to start Onan next
+
+     14:  Else (P94) ; ...or start Onan generator
+
+          15:  Z=Z+1 (P32) ; Record number of starts attempted
+           1: 7        Z Loc [ o_attempt ]
+
+          16:  Beginning of Loop (P87) ; Allow generator 3 attempts to start
+           1: 1        Delay
+           2: 3        Loop Count
+
+               17:  Z=Z+1 (P32) ; record total attempts this period
+                1: 10       Z Loc [ t_attempt ]
+
+               18:  Do (P86)
+                1: 2        Call Subroutine 2
+
+               19:  If Flag/Port (P91)
+                1: 12       Do if Flag 2 is High
+                2: 31       Exit Loop if True
+
+          20:  End (P95) ; end restart loop
+
+          21:  Do (P86)
+           1: 22       Set Flag 2 Low ; reset flag to start Kohler next
+
+     22:  End (P95) ; end start Onan generator
+
+23:  End (P95) ; end start of Kohlor or Onan generator
+
+24:  If Flag/Port (P91) ;  If generator has started....
+ 1: 13       Do if Flag 3 is High
+ 2: 30       Then Do
+
+     25:  Do (P86) ; Discontinue further start attempts
+      1: 21       Set Flag 1 Low
+
+     26:  Do (P86) ; Reset generator status flag
+      1: 23       Set Flag 3 Low
+
+     27:  Z=F (P30) ; Reset timer
+      1: 0        F ;
+      2: 2        Z Loc [ timer     ]
+
+     28:  Do (P86) ; Set timer flag high
+      1: 14       Set Flag 4 High
+
+29:  End (P95) ; End "do if generator has started"
+
+30:  If Flag/Port (P91) ; Turn off generator after counting x number of minutes
+ 1: 14       Do if Flag 4 is High
+ 2: 30       Then Do
+
+     31:  Z=Z+1 (P32) ; Index timer
+      1: 2        Z Loc [ timer     ]
+
+     32:  If (X<=>F) (P89) ; Stop generator after 60 minutes of charging
+      1: 2        X Loc [ timer     ]
+      2: 1        =
+      3: 60       F
+      4: 30       Then Do
+
+          33:  Set Port (P20) ; Kohler generator
+           1: 00       Set Low
+           2: 1        Port Number ;
+
+          34:  Set Port (P20) ; Onan generator
+           1: 00       Set Low
+           2: 2        Port Number
+
+          35:  Do (P86) ; Set count flag low
+           1: 24       Set Flag 4 Low
+
+     36:  End (P95) ; End "stop generator"
+
+37:  End (P95) ; End run-time
+
+*Table 2 Program
+  02: 0.0000    Execution Interval (seconds)
+
+*Table 3 Subroutines
+
+1:  Beginning of Subroutine (P85) ; start Kohler generator
+ 1: 1        Subroutine 1
+
+     2:  Set Port (P20)
+      1: 01       Set High
+      2: 1        Port Number ;
+
+     3:  Excitation with Delay (P22) ; crank for 30 seconds
+      1: 1        Ex Channel
+      2: 0000     Delay w/Ex (units = 0.01 sec)
+      3: 3000     Delay After Ex (units = 0.01 sec)
+      4: 0.0      mV Excitation
+
+     4:  Volt (Diff) (P2)
+      1: 1        Reps
+      2: 05       5000 mV Slow Range
+      3: 1        DIFF Channel
+      4: 3        Loc [ k_batt    ]
+      5: 1.0      Mult
+      6: 0.0      Offset
+
+     5:  If (X<=>F) (P89) ; generator has started and is charging starting battery
+      1: 3        X Loc [ k_batt    ]
+      2: 3        >=
+      3: 13       F
+      4: 30       Then Do
+
+          6:  Do (P86)
+           1: 13       Set Flag 3 High
+
+          7:  Z=Z+1 (P32) ; Record sucessful start
+           1: 5        Z Loc [ k_starts  ]
+
+     8:  Else (P94) ; generator has not started
+
+          9:  Set Port (P20) ; Stop cranking
+           1: 0        Set Low
+           2: 1        Port Number
+
+     10:  End (P95)
+
+11:  End (P95) ; end subroutine 1
+
+12:  Beginning of Subroutine (P85) ; Start Onan generator
+ 1: 2        Subroutine 2
+
+     13:  Set Port (P20)
+      1: 01       Set High
+      2: 2        Port Number ;
+
+     14:  Excitation with Delay (P22) ; crank for 30 seconds
+      1: 1        Ex Channel
+      2: 0000     Delay w/Ex (units = 0.01 sec)
+      3: 3000     Delay After Ex (units = 0.01 sec)
+      4: 0.0      mV Excitation
+
+     15:  Volt (Diff) (P2)
+      1: 1        Reps
+      2: 05       5000 mV Slow Range
+      3: 1        DIFF Channel
+      4: 6        Loc [ o_batt    ]
+      5: 1.0      Mult
+      6: 0.0      Offset
+
+     16:  If (X<=>F) (P89) ; generator has started and is charging starting battery
+      1: 6        X Loc [ o_batt    ]
+      2: 3        >=
+      3: 13       F
+      4: 30       Then Do
+
+          17:  Do (P86)
+           1: 13       Set Flag 3 High
+
+          18:  Z=Z+1 (P32) ; Record sucessful start
+           1: 8        Z Loc [ o_starts  ]
+
+     19:  Else (P94) ; generator has not started
+
+          20:  Set Port (P20) ; stop cranking
+           1: 0        Set Low
+           2: 2        Port Number
+
+     21:  End (P95)
+
+22:  End (P95) ; end subroutine 2
+
+End Program
+
+-Input Locations-
+1 CR21_volt 1 0 1
+2 timer     1 2 2
+3 k_batt    1 1 1
+4 k_attempt 1 1 1
+5 k_starts  1 1 1
+6 o_batt    1 1 1
+7 o_attempt 1 1 1
+8 o_starts  1 1 1
+9 _________ 0 0 0
+10 t_attempt 1 3 3
+11 _________ 0 0 0
+12 _________ 0 0 0
+13 _________ 1 0 0
+14 _________ 0 0 0
+15 _________ 0 0 0
+16 _________ 0 0 0
+17 _________ 0 0 0
+18 _________ 0 0 0
+19 _________ 0 0 0
+20 _________ 0 0 0
+21 _________ 0 0 0
+22 _________ 0 0 0
+23 _________ 0 0 0
+24 _________ 0 0 0
+25 _________ 0 0 0
+26 _________ 0 0 0
+27 _________ 0 0 0
+28 _________ 0 0 0
+29 _________ 0 0 0
+30 _________ 1 0 0
+31 _________ 1 0 0
+32 _________ 0 0 0
+33 _________ 0 0 0
+34 _________ 0 0 0
+35 _________ 0 0 0
+36 _________ 0 0 0
+37 _________ 0 0 0
+38 _________ 0 0 0
+39 _________ 0 0 0
+40 _________ 0 0 0
+41 _________ 0 0 0
+42 _________ 0 0 0
+43 _________ 0 0 0
+44 _________ 0 0 0
+45 _________ 0 0 0
+46 _________ 0 0 0
+47 _________ 0 0 0
+48 _________ 0 0 0
+49 _________ 0 0 0
+50 _________ 0 0 0
+51 _________ 0 0 0
+52 _________ 0 0 0
+53 _________ 0 0 0
+54 _________ 0 0 0
+55 _________ 0 0 0
+56 _________ 0 0 0
+57 _________ 0 0 0
+58 _________ 0 0 0
+59 _________ 0 0 0
+60 _________ 0 0 0
+61 _________ 0 0 0
+62 _________ 0 0 0
+63 _________ 0 0 0
+64 _________ 1 0 0
+65 _________ 0 0 0
+66 _________ 1 0 0
+67 _________ 0 0 0
+68 _________ 0 0 0
+69 _________ 0 0 0
+70 _________ 1 0 0
+-Program Security-
+0
+0000
+0000

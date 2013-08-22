@@ -1,0 +1,26 @@
+Final Storage Label File for:  SOLAR.CSI
+Date:  8/17/1999
+Time:  17:23:49
+
+1 Output_Table   1.00 Min
+1 1 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 solar_in  H
+6 solar_out  H
+7 net_rad  H
+8 par  H
+9 solar_in_STD  H
+
+2 Output_Table  10.00 Min
+1 2 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 t_AVG  L
+6 rh_AVG  L
+7 battery_AVG  L
+
+
+Estimated Total Final Storage Locations used per day 21168.0

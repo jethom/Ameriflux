@@ -1,0 +1,67 @@
+Final Storage Label File for:  WCRK1-2-03.csi
+Date:  12/31/2002
+Time:  11:06:55
+
+226 Output_Table   3.00 Min
+1 226 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 _________  L
+6 _________  H
+7 _________  H
+8 _________  H
+
+2 Output_Table  10.00 Min
+1 2 L
+2 Year_RTM  H
+3 Day_RTM  H
+4 Hour_Minute_RTM  H
+5 _________  H
+6 _________  H
+7 _________  H
+8 _________  H
+9 _________  H
+10 _________  H
+11 _________  H
+12 _________  H
+13 _________  H
+14 _________  H
+15 _________  H
+16 _________  H
+17 _________  H
+18 _________  H
+19 _________  H
+20 _________  H
+21 _________  H
+22 _________  H
+23 _________  H
+24 _________  H
+25 __________AVG  H
+26 __________AVG  H
+27 __________AVG  H
+28 __________AVG  H
+29 __________S_WVT  H
+30 __________D1_WVT  H
+31 __________S_WVT  H
+32 __________D1_WVT  H
+33 __________S_WVT  H
+34 __________D1_WVT  H
+35 __________AVG  H
+36 __________AVG  H
+37 __________AVG  H
+38 __________AVG  H
+39 __________AVG  H
+40 __________AVG  H
+41 __________AVG  H
+42 __________AVG  H
+43 __________AVG  H
+44 __________AVG  H
+45 Net_Rad_W_AVG  H
+46 __________AVG  H
+47 __________AVG  H
+48 __________AVG  H
+49 _________  H
+
+
+Estimated Total Final Storage Locations used per day 19392.0

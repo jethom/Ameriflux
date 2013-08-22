@@ -1,0 +1,109 @@
+;{CR10X}
+;01/14/99 2d sonic test porgram
+; connected with SDI-12 interface to C4
+;
+*Table 1 Program
+  01: 1         Execution Interval (seconds)
+
+1:  If Flag/Port (P91)
+ 1: 28       Do if Flag 8 is Low
+ 2: 30       Then Do
+
+2:  Do (P86)
+ 1: 18       Set Flag 8 High
+
+3:  SDI-12 Recorder (P105)
+ 1: 0        SDI-12 Address
+ 2: 00       SDI-12 Command
+ 3: 4        Port ;
+ 4: 1        Loc [ wspeed    ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+4:  Extended Parameters 4 Digit (P68)
+ 1: 88       Option ;ASCII X
+ 2: 85       Option ;ASCII U
+ 3: 50       Option ;ASCII km/hr
+ 4: 0000     Option
+ 5: 0000     Option
+ 6: 0000     Option
+ 7: 0000     Option
+ 8: 0000     Option
+
+5:  End (P95)
+
+;initiate measurement aM
+6:  SDI-12 Recorder (P105)
+ 1: 0        SDI-12 Address
+ 2: 00       SDI-12 Command
+ 3: 4        Port
+ 4: 1        Loc [ wspeed    ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+;convert km/hr --> m/s (note: velocity units unchanged)
+wspeed=wspeed*1000/3600
+
+7:  If time is (P92)
+ 1: 0        Minutes (Seconds --) into a
+ 2: 1        Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+8:  Set Active Storage Area (P80)
+ 1: 1        Final Storage Area 1
+ 2: 010      Array ID
+
+9:  Real Time (P77)
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000)
+
+10:  Average (P71)
+ 1: 2        Reps
+ 2: 1        Loc [ wspeed    ]
+
+*Table 2 Program
+  02: 0         Execution Interval (seconds)
+
+*Table 3 Subroutines
+
+End Program
+
+-Input Locations-
+1 wspeed    1 1 2
+2 wdir      1 1 0
+3 xvelocity 1 0 0
+4 yvelocity 1 0 0
+5 CSI_R     1 0 0
+6 CSI_1     1 0 0
+7 _________ 0 0 0
+8 _________ 0 0 0
+9 _________ 0 0 0
+10 _________ 0 0 0
+11 _________ 0 0 0
+12 _________ 0 0 0
+13 _________ 0 0 0
+14 _________ 0 0 0
+15 _________ 0 0 0
+16 _________ 0 0 0
+17 _________ 0 0 0
+18 _________ 0 0 0
+19 _________ 0 0 0
+20 _________ 0 0 0
+21 _________ 0 0 0
+22 _________ 0 0 0
+23 _________ 0 0 0
+24 _________ 0 0 0
+25 _________ 0 0 0
+26 _________ 0 0 0
+27 _________ 0 0 0
+28 _________ 0 0 0
+-Program Security-
+0000
+0000
+0000
+-Mode 4-
+-Final Storage Area 2-
+0
+-CR10X ID-
+0
+-CR10X Power Up-
+3

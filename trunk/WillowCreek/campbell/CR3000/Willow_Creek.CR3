@@ -1,0 +1,347 @@
+'CR3000 Series Datalogger
+
+'date: Mar. 17, 2010  
+' Tables for aspirated PRT1000 temp data - 5 min., 1/2 hr. & 1 hr. 
+' includes the running 12 five minute temp for NWS 
+' Using 2 relay boards: 
+' control for switching aspirator fans 
+' low voltage disconnect at 11.5 V
+
+' from updated NOAA version 6.001, 4/21/2009
+'original program author: Mark Hall - for USCRN
+'modified by Bob Evans  - for FS Climate Research Network 
+'individually calibrated coefficients for each temp sensor with logger sn# 4210 
+
+'Willow Creek
+
+'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+'WIRING
+
+' Thermometrics PRT #1 (6a)
+'Ix1 Red
+'H11 Red
+'Ixr Wht
+'L11 Wht
+'outer braid in contact with tower for ground
+
+' Thermometrics PRT #2 (6b)
+'Ix2 Red
+'H12 Red
+'Ixr Wht
+'L12 Wht
+'outer braid in contact with tower for ground
+
+' Thermometrics PRT #3 (6c)
+'Ix3 Red
+'H13 Red
+'Ixr Wht
+'L13 Wht
+'outer braid in contact with tower for ground
+
+'C2  to CTRL on low voltage disconnect relay 1 - Org 
+'C3  to CTRL on aspirator relay 2 - yellow 
+
+' MetOne dual aspirator
+'C5  Fan #1 (A, hall output) - Brn
+'C6  Fan #2 (B, hall output) - Blu  
+'G on Logger - Power Commons from Fan A & B - Blk & Grn 
+'wht/brn striped (shield) also to G
+
+'Common Ground (grounding bar) - to Ground lug on logger (all grounds are tied together) 
+
+' Relay module 1 for low voltage disconnect 
+'NC  to 12V on aspirator relay module through 3A fuse
+'NO  not used
+'Comm  not used
+'CTRL  C2 from Logger - White 
+'GND  to common Ground 
+'12V  +12V on Logger - Red 
+
+' Relay module 2 for aspirator 
+'NC  +12 VDC Power (Fan A - #1) - Red from aspirator 
+'NO  +12 VDC Power (Fan B - #2) - White from aspirator
+'Comm  not used  
+'CTRL  C3 from Logger - yellow 
+'GND  to common Ground (common to -12V battery) 
+'12V  to low voltage disconnect relay NC through 3A fuse 
+
+'/////////////////////////////////////////////////////////////// 
+
+'---------------thermometrics calibration-------------------------
+
+' PRT Calibration Constants for SENSOR #1 (6a)
+
+Const C2T1=0
+Const C1T1=0.256403
+Const C0T1=-256.348114
+
+' PRT Calibration Constants for SENSOR #2 (6b)
+
+Const C2T2=0
+Const C1T2=.256450
+Const C0T2=-256.363979
+
+' PRT Calibration Constants for SENSOR #3 (6c)
+
+Const C2T3=0
+Const C1T3=.2562997
+Const C0T3=-256.272304
+
+'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+'Declare Constants 
+Dim H 
+
+'Declare Public Variables
+
+Public T1Cal, T2Cal, T3Cal
+Public FANSP1, FANSP2
+Public BATV
+Public TAIR1_5mn, TAIR2_5mn, TAIR3_5mn 
+Public TAIR1(12)
+Public TAIR2(12)
+Public TAIR3(12)
+Public FANStat 'Location for Fan PortGet Instruction
+Public FANSP1AV, FANSP2AV
+Public RTD1_Res, RTD2_Res, RTD3_Res
+Public MO_DAY
+Public Table_ID 
+Public NWST, NWST1, NWST2, NWST3
+
+' Declare Time Variables
+
+Public rTime(9)		 'declare as public and dimension rTime to 9
+
+Alias rTime(1) = Year		 'assign the alias Year to rTime(1)
+Alias rTime(2) = Month		 'assign the alias Month to rTime(2)
+Alias rTime(3) = Day_		 'assign the alias Day to rTime(3)
+Alias rTime(4) = Hour		 'assign the alias Hour to rTime(4)
+Alias rTime(5) = Minute		 'assign the alias Minute to rTime(5)
+Alias rTime(6) = Second		 'assign the alias Second to rTime(6)
+Alias rTime(7) = uSecond		 'assign the alias uSecond to rTime(7)
+Alias rTime(8) = WeekDay		 'assign the alias WeekDay to rTime(8)
+Alias rTime(9) = Day_of_Year		 'assign the alias Day_of_Year to rTime(9)
+Public DaySec, HrMin
+
+'Data Tables
+
+'Define Data Table for 5 minute values to store  on Logger for past 3 hours
+
+DataTable (TBL_5min,1,-1)
+		 DataInterval (0,5,Min,10)
+		 Sample (1,TAIR1_5mn,FP2)
+		 Sample (1,TAIR2_5mn,FP2)
+		 Sample (1,TAIR3_5mn,FP2)
+
+		 Average (1,FANSP1,FP2,False)
+		 Average (1,FANSP2,FP2,False)
+		 Average (1,BATV,FP2,False)
+		 
+EndTable
+
+'Define Data Table for 1/2 hour values 
+
+DataTable (TBL_30min,1,-1)
+		 DataInterval (0,30,Min,10)
+		 Sample (1,Year,FP2)
+		 Sample (1,Day_of_Year,FP2)
+		 Sample (1,HrMin,FP2)
+		 Minimum (1,TAIR1_5mn,IEEE4,False,False)
+		 Minimum (1,TAIR2_5mn,IEEE4,False,False)
+		 Minimum (1,TAIR3_5mn,IEEE4,False,False)
+		 Maximum (1,TAIR1_5mn,IEEE4,False,False)
+		 Maximum (1,TAIR2_5mn,IEEE4,False,False)
+		 Maximum (1,TAIR3_5mn,IEEE4,False,False)
+		 Average (1,T1Cal,FP2,False)
+		 Average (1,T2Cal,FP2,False)
+		 Average (1,T3Cal,FP2,False)
+		 StdDev (1,T1Cal,FP2,False)
+		 StdDev (1,T2Cal,FP2,False)
+		 StdDev (1,T3Cal,FP2,False)
+		 Average (1,FANSP1,FP2,False)
+		 Average (1,FANSP2,FP2,False)
+		 Average (1,BATV,FP2,False)
+		   
+EndTable 
+
+' Define Data Table for hourly values to store on Datalogger long term
+
+DataTable (Hr_TBL,1,-1)
+		 DataInterval (0,60,Min,10)
+		 Sample (1,Year,FP2)
+		 Sample (1,Day_of_Year,FP2)
+		 Sample (1,HrMin,FP2)
+		 Sample (12,TAIR1(),FP2)
+		 Sample (12,TAIR2(),FP2)
+		 Sample (12,TAIR3(),FP2)
+		 Minimum (1,TAIR1_5mn,IEEE4,False,False)
+		 Minimum (1,TAIR2_5mn,IEEE4,False,False)
+		 Minimum (1,TAIR3_5mn,IEEE4,False,False)
+		 Maximum (1,TAIR1_5mn,IEEE4,False,False)
+		 Maximum (1,TAIR2_5mn,IEEE4,False,False)
+		 Maximum (1,TAIR3_5mn,IEEE4,False,False)
+		 StdDev (1,T1Cal,FP2,False)
+		 StdDev (1,T2Cal,FP2,False)
+		 StdDev (1,T3Cal,FP2,False)
+		 Average (1,FANSP1,FP2,False)
+		 Average (1,FANSP2,FP2,False)
+		 Average (1,BATV,FP2,False)
+
+EndTable
+
+' for running 12 five minute temp for NWS 
+ 
+DataTable (NWS,True,12)
+  DataInterval (0,5,Min,10)
+  Sample (1,HrMin,IEEE4)
+  Sample (1,NWST,IEEE4)
+
+EndTable
+
+'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+
+'Main Program
+
+BeginProg
+
+
+		 Scan (10,Sec,0,0)
+
+		 		 'Record Time in Array
+
+		 		 RealTime( rTime )
+		 		 MO_DAY=Month*10.0+Day_
+		 		 DaySec=Sec+(60.0*((Hour*60.0)+Minute))
+		 		 HrMin=Hour*100+Minute
+
+
+		 'RTD1 Temperature Probe measurement:
+    Resistance (RTD1_Res,1,mV200,11,Ix1,1,167,True ,True ,0,_60Hz,1.0,0)
+    T1Cal=C2T1*((RTD1_Res)^2)+C1T1*RTD1_Res+C0T1
+
+    'RTD2 Temperature Probe measurement:
+    Resistance (RTD2_Res,1,mV200,12,Ix2,1,167,True ,True ,0,_60Hz,1,0)
+    T2Cal=C2T2*((RTD2_Res)^2)+C1T2*RTD2_Res+C0T2
+
+    'RTD3 Temperature Probe measurement:
+    Resistance (RTD3_Res,1,mV200,13,Ix3,1,167,True ,True ,0,_60Hz,1,0)
+    T3Cal=C2T3*((RTD3_Res)^2)+C1T3*RTD3_Res+C0T3
+
+
+		 		 ' Measure Fan speeds
+
+		 		 PulseCount (FANSP1,1,15,0,0,0.1,0)
+		 		 PulseCount (FANSP2,1,16,0,0,0.1,0)
+
+
+		 		 '  Measure Datalogger battery voltage
+
+		 		 Battery (BATV)
+		 		 
+		 		 ' Calculate Five Minute Average Temperatures
+
+		 		 AvgRun (TAIR1_5mn,1,T1Cal,30)
+
+		 		 AvgRun (TAIR2_5mn,1,T2Cal,30)
+
+		 		 AvgRun (TAIR3_5mn,1,T3Cal,30)
+
+' Calculate One Minute Running Averages of Fan Speeds
+
+		 		 AvgRun (FANSP1AV,1,FANSP1,6)
+		 		 AvgRun (FANSP2AV,1,FANSP2,6)
+
+
+		 		 '  Program Control Instructions
+
+		 		 ' Control Port 2 is used for Relay Board configured as Low Voltage Disconnect
+
+		 		 ' If Battery Voltage is less than 11.5, disconnect the load
+
+		 		 If BATV < 11.5 Then PortSet (2,1)
+
+		 		 ' If Battery Voltage is greater than 11.8, reconnect the load
+
+		 		 If BATV > 11.8 Then PortSet (2,0)
+
+		 		 'Control Port 3 to control which Fan is powered, if Fan 1 stops, switch to Fan 2
+		 		 ' Check Fan speeds every five minutes
+
+		 		 PortGet (FANStat,3)
+
+		 		 If IfTime (0,5,Min)
+		 		 If FANStat = 0 Then
+		 		 		 If FANSP1AV < 80 Then
+		 		 		 		 If BATV > 11.8 Then PortSet (3,1)
+		 		 		 EndIf
+		 		 EndIf
+		 		 If FanStat = 1 Then
+		 		 		 If FANSP2AV < 80 Then
+		 		 		 		 If BATV > 11.8 Then PortSet (3,0)
+		 		 		 EndIf
+		 		 EndIf
+		 		 EndIf
+		 		 
+ 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 
+
+		 		 'Call 5 Minute Output Table
+
+		 		 CallTable (TBL_5min)
+
+'5 Minute Calculations
+
+		 		 ' Temperature readings for the last 12 five minute periods
+
+		 		 if IfTime (0,5,Min)
+
+		 		 For H=1 to 12
+
+		 		 		 TAIR1(H)=TBL_5min.TAIR1_5mn(1,H)
+		 		 		 TAIR2(H)=TBL_5min.TAIR2_5mn(1,H)
+		 		 		 TAIR3(H)=TBL_5min.TAIR3_5mn(1,H)
+		 		 		 
+          Next H 
+          EndIf
+
+ 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  
+ 
+       '  Calculations for NWS Temp Go Here:
+
+      ' Temp Calculations:
+
+      FANSP1AV=TBL_5min.FANSP1_Avg(1,1)
+      FANSP2AV=TBL_5min.FANSP2_Avg(1,1)
+
+      NWST1=TAIR1(1)
+      NWST2=TAIR2(1)
+      NWST3=TAIR3(1)
+
+      If NWST1 >= NWST2 AND NWST2 > NWST3 Then NWST=NWST2
+      If NWST1 >= NWST3 AND NWST3 > NWST2 Then NWST=NWST3
+      If NWST3 >= NWST1 AND NWST1 > NWST2 Then NWST=NWST1
+      If NWST3 >= NWST2 AND NWST2 > NWST1 Then NWST=NWST2
+      If NWST2 >= NWST3 AND NWST3 > NWST1 Then NWST=NWST3
+      If NWST2 >= NWST1 AND NWST1 > NWST3 Then NWST=NWST1 
+      
+     CallTable (NWS) 
+     
+'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+ 
+        'Call 1/2 hour table 
+        
+           CallTable TBL_30min 
+           
+  'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  
+        
+        'Call hour output table 
+        
+        CallTable (Hr_TBL)
+
+'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+NextScan
+EndProg
+
+

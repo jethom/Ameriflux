@@ -1,0 +1,93 @@
+Program Trace Information File for:  2GENSETS.CSI
+Date: 11/20/2002
+Time: 10:50:25
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|10 Batt Voltage                 7.6    7.6    7.6      7.6    7.6    7.6
+1|2|89 If (X<=>F)                   0.4    8.0    8.0      0.4    8.0    8.0
+1|3|92 If time is                   0.3    8.3    8.3      0.3    8.3    8.3
+1|4|91 If Flag/Input                0.2    8.5    8.5      0.2    8.5    8.5
+1|5|30 Z=F                          0.3    8.8    8.8      0.3    8.8    8.8
+1|6|91 If Flag/Input                0.2    9.0    9.0      0.2    9.0    9.0
+1|7|32 Z=Z+1                        0.6    9.6    9.6      0.6    9.6    9.6
+1|8|87 Beginning of Loop            0.2    9.8    9.8      0.2    9.8    9.8
+ Execution times in the loop are calculated for one pass only.
+1|9|32 Z=Z+1                        0.6   10.4   10.4      0.6   10.4   10.4
+1|10|86 Do                          0.1   10.5   10.5      0.1   10.5   10.5
+  ----Subroutine 1---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0   10.5      0.0    0.0   10.5
+  3|2|20 Set Port                   0.3    0.3   10.8      0.3    0.3   10.8
+  3|3|22 Excitation with Delay   30001.0 30001.3 30011.8   30001.0 30001.3 30011.8
+  3|4|2 Volt (Diff)                14.7 30016.0 30026.5     14.7 30016.0 30026.5
+  3|5|89 If (X<=>F)                 0.4 30016.4 30026.9      0.4 30016.4 30026.9
+  3|6|86 Do                         0.1 30016.5 30027.0      0.1 30016.5 30027.0
+  3|7|32 Z=Z+1                      0.6 30017.1 30027.6      0.6 30017.1 30027.6
+  3|8|94 Else                       0.2 30017.3 30027.8      0.2 30017.3 30027.8
+  3|9|20 Set Port                   0.3 30017.6 30028.1      0.3 30017.6 30028.1
+  3|10|95 End                       0.2 30017.8 30028.3      0.2 30017.8 30028.3
+  3|11|95 End                       0.2 30018.0 30028.5      0.2 30018.0 30028.5
+  -----End Subroutine 1 ---------
+1|11|91 If Flag/Input               0.2   10.7 30028.7      0.2   10.7 30028.7
+1|12|95 End                         0.2   10.9 30028.9      0.2   10.9 30028.9
+1|13|86 Do                          0.1   11.0 30029.0      0.1   11.0 30029.0
+1|14|94 Else                        0.2   11.2 30029.2      0.2   11.2 30029.2
+1|15|32 Z=Z+1                       0.6   11.8 30029.8      0.6   11.8 30029.8
+1|16|87 Beginning of Loop           0.2   12.0 30030.0      0.2   12.0 30030.0
+ Execution times in the loop are calculated for one pass only.
+1|17|32 Z=Z+1                       0.6   12.6 30030.6      0.6   12.6 30030.6
+1|18|86 Do                          0.1   12.7 30030.7      0.1   12.7 30030.7
+  ----Subroutine 2---------------
+  3|1|85 Beginning of Subroutine    0.0    0.0 30030.7      0.0    0.0 30030.7
+  3|2|20 Set Port                   0.3    0.3 30031.0      0.3    0.3 30031.0
+  3|3|22 Excitation with Delay   30001.0 30001.3 60032.0   30001.0 30001.3 60032.0
+  3|4|2 Volt (Diff)                14.7 30016.0 60046.7     14.7 30016.0 60046.7
+  3|5|89 If (X<=>F)                 0.4 30016.4 60047.1      0.4 30016.4 60047.1
+  3|6|86 Do                         0.1 30016.5 60047.2      0.1 30016.5 60047.2
+  3|7|32 Z=Z+1                      0.6 30017.1 60047.8      0.6 30017.1 60047.8
+  3|8|94 Else                       0.2 30017.3 60048.0      0.2 30017.3 60048.0
+  3|9|20 Set Port                   0.3 30017.6 60048.3      0.3 30017.6 60048.3
+  3|10|95 End                       0.2 30017.8 60048.5      0.2 30017.8 60048.5
+  3|11|95 End                       0.2 30018.0 60048.7      0.2 30018.0 60048.7
+  -----End Subroutine 2 ---------
+1|19|91 If Flag/Input               0.2   12.9 60048.9      0.2   12.9 60048.9
+1|20|95 End                         0.2   13.1 60049.1      0.2   13.1 60049.1
+1|21|86 Do                          0.1   13.2 60049.2      0.1   13.2 60049.2
+1|22|95 End                         0.2   13.4 60049.4      0.2   13.4 60049.4
+1|23|95 End                         0.2   13.6 60049.6      0.2   13.6 60049.6
+1|24|91 If Flag/Input               0.2   13.8 60049.8      0.2   13.8 60049.8
+1|25|86 Do                          0.1   13.9 60049.9      0.1   13.9 60049.9
+1|26|86 Do                          0.1   14.0 60050.0      0.1   14.0 60050.0
+1|27|30 Z=F                         0.3   14.3 60050.3      0.3   14.3 60050.3
+1|28|86 Do                          0.1   14.4 60050.4      0.1   14.4 60050.4
+1|29|95 End                         0.2   14.6 60050.6      0.2   14.6 60050.6
+1|30|91 If Flag/Input               0.2   14.8 60050.8      0.2   14.8 60050.8
+1|31|32 Z=Z+1                       0.6   15.4 60051.4      0.6   15.4 60051.4
+1|32|89 If (X<=>F)                  0.4   15.8 60051.8      0.4   15.8 60051.8
+1|33|20 Set Port                    0.3   16.1 60052.1      0.3   16.1 60052.1
+1|34|20 Set Port                    0.3   16.4 60052.4      0.3   16.4 60052.4
+1|35|86 Do                          0.1   16.5 60052.5      0.1   16.5 60052.5
+1|36|95 End                         0.2   16.7 60052.7      0.2   16.7 60052.7
+1|37|95 End                         0.2   16.9 60052.9      0.2   16.9 60052.9
+
+Program Table 1 Execution Interval   60.000 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec 60052.9 w/Output 60052.9
+
+Table 1 Estimated Total Final Storage Locations used per day    0.0
+
+
+
+Estimated Total Final Storage Locations used per day    0.0

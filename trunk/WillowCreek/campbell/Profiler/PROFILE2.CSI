@@ -1,0 +1,675 @@
+;{CR10X}
+;CO2 PROFILER, SOIL MEASUREMENTS, PAR SENSORS, WIND SPEED/DIRECTION
+;Last updated 5 October 1998
+
+*Table 1 Program
+  01: 1         Execution Interval (seconds)
+
+;TAKE LICOR READING DURING FINAL 15 SECONDS
+1:  Volt (SE) (P1)
+ 1: 3        Reps
+ 2: 15       2500 mV Fast Range
+ 3: 1        SE Channel
+ 4: 1        Loc [ LICOR_T   ]
+ 5: 1        Mult
+ 6: 0.0      Offset ;
+
+LICOR_T=LICOR_T*2*.01
+LICOR_P=LICOR_P*2*0.01522+58.738
+
+2:  Running Average (P52)
+ 1: 3        Reps
+ 2: 1        First Source Loc [ LICOR_T   ]
+ 3: 25       First Destination Loc [ Avg_T     ]
+ 4: 15       Number of Values in Avg Window
+
+;BATTERY VOLTAGE, SOIL/TREE TEMPERATURE, AND SOIL MOISTURE MEASUREMENTS
+3:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 10       Interval (same units as above)
+ 3: 30       Then Do
+
+;BATTERY VOLTAGE
+4:  Batt Voltage (P10)
+ 1: 30       Loc [ Battery   ]
+
+5:  Temp (107) (P11) ; CR10XCR THERMOCOUPLE REFERENCE ON AM416
+ 1: 1        Reps
+ 2: 4        SE Channel
+ 3: 1        Excite all reps w/E1
+ 4: 31       Loc [ Ref_T     ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset ;
+
+6:  Do (P86)
+ 1: 44       Set Port 4 High ; ENABLE AM416
+
+7:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 16       Loop Count
+
+8:  Do (P86)
+ 1: 75       Pulse Port 5 ; PULSE CLOCK
+
+9:  Excitation with Delay (P22)
+ 1: 1        Ex Channel
+ 2: 0        Delay W/Ex (units = 0.01 sec)
+ 3: 50       Delay After Ex (units = 0.01 sec)
+ 4: 0        mV Excitation
+
+10:  Thermocouple Temp (DIFF) (P14) ; SOIL THERMOCOUPLES
+ 1: 1        Reps
+ 2: 1        2.5 mV Slow Range
+ 3: 3        DIFF Channel
+ 4: 1        Type T (Copper-Constantan)
+ 5: 31       Ref Temp (Deg. C) Loc [ Ref_T     ]
+ 6: 32    -- Loc [ TC1       ]
+ 7: 1.0      Mult
+ 8: 0.0      Offset ;
+
+11:  Do (P86) ; CS615 SOIL WATER CONTENT REFLECTOMETER PROBES
+ 1: 46       Set Port 6 High ; ENABLE CS416
+
+12:  Period Average (SE) (P27)
+ 1: 1        Reps
+ 2: 4        200 kHz Max Freq @ 2 V Peak to Peak, Period Output
+ 3: 7        SE Channel
+ 4: 10       No. of Cycles
+ 5: 5        Timeout (units = 0.01 seconds)
+ 6: 48    -- Loc [ TDR1_Per  ]
+ 7: .001     Mult
+ 8: 0.0      Offset
+
+13:  Do (P86)
+ 1: 56       Set Port 6 Low ;; DISABLE CS615s
+
+14:  End (P95) ; END MULTIPLEXER LOOP
+
+15:  Do (P86)
+ 1: 54       Set Port 4 Low ; DISABLE AM416
+
+;CS416 CALCULATIONS
+16:  Polynomial (P55) ; 5 cm (WC1)
+ 1: 1        Reps
+ 2: 54       X Loc [ TDR7_Per  ]
+ 3: 64       F(X) Loc [ 5cm_wat   ]
+ 4: -.5699   C0
+ 5: .9725    C1
+ 6: -.1893   C2
+ 7: 0        C3
+ 8: 0.0      C4
+ 9: 0.0      C5
+
+17:  Polynomial (P55) ; 10 cm (WC2)
+ 1: 1        Reps
+ 2: 55       X Loc [ TDR8_Per  ]
+ 3: 65       F(X) Loc [ 10cm_wat  ] ;
+ 4: -.7428   C0
+ 5: 1.28     C1
+ 6: -.3284   C2
+ 7: 0        C3
+ 8: 0.0      C4
+ 9: 0.0      C5 ;
+
+18:  Polynomial (P55) ; 20 cm (WC3)
+ 1: 1        Reps
+ 2: 56       X Loc [ TDR9_Per  ]
+ 3: 66       F(X) Loc [ 20cm_wat  ]
+ 4: -.9288   C0
+ 5: 1.7187   C1
+ 6: -.5797   C2
+ 7: 0        C3
+ 8: 0.0      C4
+ 9: 0.0      C5
+
+19:  Polynomial (P55) ; 50 cm (WC4)
+ 1: 1        Reps
+ 2: 57       X Loc [ TDR10_Per ]
+ 3: 67       F(X) Loc [ 50cm_wat  ]
+ 4: -.9028   C0
+ 5: 1.5488   C1
+ 6: -.4178   C2
+ 7: 0        C3
+ 8: 0.0      C4
+ 9: 0.0      C5
+
+20:  Polynomial (P55) ; 100 cm (WC5)
+ 1: 1        Reps
+ 2: 58       X Loc [ TDR11_Per ]
+ 3: 68       F(X) Loc [ 100cm_wat ]
+ 4: -.4644   C0
+ 5: .563     C1
+ 6: .124     C2
+ 7: 0        C3
+ 8: 0.0      C4
+ 9: 0.0      C5
+
+21:  End (P95) ; Battery voltage, soil/tree T, soil moisture measurements
+
+;2 MINUTE LICOR OUTPUT
+22:  If time is (P92)
+ 1: 0        Minutes (Seconds --) into a
+ 2: 2        Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+23:  Real Time (P77)
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000) ;
+
+24:  Sample (P70)
+ 1: 1        Reps
+ 2: 24       Loc [ ID        ]
+
+25:  Resolution (P78)
+ 1: 1        High Resolution
+
+26:  Sample (P70)
+ 1: 3        Reps
+ 2: 25       Loc [ Avg_T     ]
+
+;10 MINUTE SOIL/MET SENSOR OUTPUT
+27:  If time is (P92)
+ 1: 0        Minutes (Seconds --) into a
+ 2: 2        Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+28:  Set Active Storage Area (P80)
+ 1: 02       Final Storage Area 2
+ 2: 2        Array ID
+
+29:  Real Time (P77)
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000) ;
+
+30:  Average (P71)
+ 1: 1        Reps
+ 2: 30       Loc [ Battery   ]
+
+31:  Average (P71)
+ 1: 8        Reps
+ 2: 36       Loc [ TC5       ]
+
+32:  Average (P71)
+ 1: 6        Reps
+ 2: 64       Loc [ 5cm_wat   ]
+
+*Table 2 Program
+  02: 120       Execution Interval (seconds)
+
+;RESET COUNTER AFTER 3 HOUR CYCLING IS COMPLETED
+1:  If (X<=>F) (P89)
+ 1: 20       X Loc [ Counter   ]
+ 2: 1        =
+ 3: 92       F
+ 4: 30       Then Do
+
+2:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 20       Z Loc [ Counter   ]
+
+3:  End (P95)
+
+;ADVANCE COUNTER
+4:  Z=Z+1 (P32)
+ 1: 20       Z Loc [ Counter   ]
+
+; ASSIGN COUNT TO SAMPLE/STANDARD
+5:  CASE (P93)
+ 1: 20       Case Loc [ Counter   ]
+
+;1st AIR SAMPLING
+6:  If Case Location < F (P83)
+ 1: 8        F
+ 2: 1        Call Subroutine 1
+
+;2nd AIR SAMPLING
+7:  If Case Location < F (P83)
+ 1: 9        F
+ 2: 2        Call Subroutine 2
+
+8:  If Case Location < F (P83)
+ 1: 15       F
+ 2: 1        Call Subroutine 1
+
+;1st ZERO WITH REFERENCE GAS
+9:  If Case Location < F (P83)
+ 1: 16       F
+ 2: 3        Call Subroutine 3
+
+;3rd AIR SAMPLING
+10:  If Case Location < F (P83)
+ 1: 23       F
+ 2: 1        Call Subroutine 1
+
+;4th AIR SAMPLING
+11:  If Case Location < F (P83)
+ 1: 24       F
+ 2: 2        Call Subroutine 2
+
+12:  If Case Location < F (P83)
+ 1: 30       F
+ 2: 1        Call Subroutine 1
+
+;2nd ZERO WITH REFERENCE GAS
+13:  If Case Location < F (P83)
+ 1: 31       F
+ 2: 3        Call Subroutine 3
+
+;5th AIR SAMPLING
+14:  If Case Location < F (P83)
+ 1: 38       F
+ 2: 1        Call Subroutine 1
+
+;6th AIR SAMPLING
+15:  If Case Location < F (P83)
+ 1: 39       F
+ 2: 2        Call Subroutine 2
+
+16:  If Case Location < F (P83)
+ 1: 45       F
+ 2: 1        Call Subroutine 1
+
+;3rd ZERO WITH REFERENCE GAS
+17:  If Case Location < F (P83)
+ 1: 46       F
+ 2: 3        Call Subroutine 3
+
+;7th AIR SAMPLING
+18:  If Case Location < F (P83)
+ 1: 53       F
+ 2: 1        Call Subroutine 1
+
+;8th AIR SAMPLING
+19:  If Case Location < F (P83)
+ 1: 54       F
+ 2: 2        Call Subroutine 2
+
+20:  If Case Location < F (P83)
+ 1: 60       F
+ 2: 1        Call Subroutine 1
+
+;4th ZERO WITH REFERENCE GAS
+21:  If Case Location < F (P83)
+ 1: 61       F
+ 2: 3        Call Subroutine 3
+
+;9th AIR SAMPLING
+22:  If Case Location < F (P83)
+ 1: 68       F
+ 2: 1        Call Subroutine 1
+
+;10th AIR SAMPLING
+23:  If Case Location < F (P83)
+ 1: 69       F
+ 2: 2        Call Subroutine 2
+
+24:  If Case Location < F (P83)
+ 1: 75       F
+ 2: 1        Call Subroutine 1
+
+;5th ZERO WITH REFERENCE GAS
+25:  If Case Location < F (P83)
+ 1: 76       F
+ 2: 3        Call Subroutine 3
+
+;11th AIR SAMPLING
+26:  If Case Location < F (P83)
+ 1: 83       F
+ 2: 1        Call Subroutine 1
+
+;12th AIR SAMPLING
+27:  If Case Location < F (P83)
+ 1: 84       F
+ 2: 2        Call Subroutine 2
+
+28:  If Case Location < F (P83)
+ 1: 90       F
+ 2: 1        Call Subroutine 1
+
+;6th ZERO WITH REFERENCE GAS
+29:  If Case Location < F (P83)
+ 1: 91       F
+ 2: 3        Call Subroutine 3
+
+;HIGH AND LOW CO2 STANDARDS
+30:  If Case Location < F (P83)
+ 1: 93       F
+ 2: 4        Call Subroutine 4
+
+31:  End (P95) ;  Case end
+
+;SET ALL RELAY LOCATIONS TO "0"
+32:  Do (P86)
+ 1: 6        Call Subroutine 6
+
+;CLEAR LOOP COUNTER
+33:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 23       Z Loc [ Loop      ]
+
+;SET RELAY LOCATIONS (AIR SAMPLES)
+34:  If (X<=>F) (P89)
+ 1: 21       X Loc [ Level     ]
+ 2: 2        <>
+ 3: 0.0      F
+ 4: 30       Then Do
+
+35:  Z=X (P31)
+ 1: 21       X Loc [ Level     ]
+ 2: 24       Z Loc [ ID        ]
+
+36:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 7        Loop Count
+
+37:  Z=Z+1 (P32)
+ 1: 23       Z Loc [ Loop      ]
+
+38:  If (X<=>Y) (P88)
+ 1: 21       X Loc [ Level     ]
+ 2: 1        =
+ 3: 23       Y Loc [ Loop      ]
+ 4: 30       Then Do
+
+39:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 9     -- Z Loc [ 2ft       ]
+
+40:  End (P95)
+
+41:  End (P95)
+
+42:  End (P95)
+
+;SET RELAY LOCATIONS (STANDARDS)
+43:  If (X<=>F) (P89)
+ 1: 22       X Loc [ Std       ]
+ 2: 2        <>
+ 3: 0.0      F
+ 4: 30       Then Do
+
+44:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 8        Z Loc [ Tnk_Swtch ]
+
+ID=Std+7
+
+45:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 3        Loop Count
+
+46:  Z=Z+1 (P32)
+ 1: 23       Z Loc [ Loop      ]
+
+47:  If (X<=>Y) (P88)
+ 1: 22       X Loc [ Std       ]
+ 2: 1        =
+ 3: 23       Y Loc [ Loop      ]
+ 4: 30       Then Do
+
+48:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 16    -- Z Loc [ Ref_gas   ]
+
+49:  End (P95)
+
+50:  End (P95)
+
+51:  End (P95)
+
+;SET RELAY LOCATIONS (POWER)
+52:  CASE (P93)
+ 1: 24       Case Loc [ ID        ]
+
+53:  If Case Location < F (P83)
+ 1: 2        F
+ 2: 5        Call Subroutine 5 ;
+
+54:  If Case Location < F (P83)
+ 1: 8        F
+ 2: 30       Then Do
+
+55:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 6        Z Loc [ Air_Pwr   ]
+
+56:  End (P95)
+
+57:  If Case Location < F (P83)
+ 1: 9        F
+ 2: 5        Call Subroutine 5
+
+58:  If Case Location < F (P83)
+ 1: 12       F
+ 2: 30       Then Do
+
+59:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 7        Z Loc [ Std_Pwr   ]
+
+60:  End (P95)
+
+61:  End (P95)
+
+;TRIGGER SDM-CD16AC AND POWER DOWN
+62:  SDM-CD16 / SDM-CD16AC (P104)
+ 1: 1        Reps
+ 2: 0        Address
+ 3: 4        Loc [ Unused1   ]
+
+63:  Excitation with Delay (P22)
+ 1: 1        Ex Channel
+ 2: 7        Delay W/Ex (units = 0.01 sec)
+ 3: 0000     Delay After Ex (units = 0.01 sec)
+ 4: 0000     mV Excitation
+
+64:  Do (P86)
+ 1: 6        Call Subroutine 6
+
+65:  SDM-CD16 / SDM-CD16AC (P104)
+ 1: 1        Reps
+ 2: 00       Address
+ 3: 4        Loc [ Unused1   ]
+
+*Table 3 Subroutines
+
+1:  Beginning of Subroutine (P85)
+ 1: 1        Subroutine 1
+
+2:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 22       Z Loc [ Std       ]
+
+3:  Z=Z+1 (P32)
+ 1: 21       Z Loc [ Level     ]
+
+4:  End (P95)
+
+5:  Beginning of Subroutine (P85)
+ 1: 2        Subroutine 2
+
+6:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 21       Z Loc [ Level     ]
+
+7:  End (P95)
+
+8:  Beginning of Subroutine (P85)
+ 1: 3        Subroutine 3
+
+9:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 21       Z Loc [ Level     ]
+
+10:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 22       Z Loc [ Std       ]
+
+11:  End (P95)
+
+12:  Beginning of Subroutine (P85)
+ 1: 4        Subroutine 4
+
+13:  Z=Z+1 (P32)
+ 1: 22       Z Loc [ Std       ]
+
+14:  End (P95)
+
+15:  Beginning of Subroutine (P85)
+ 1: 5        Subroutine 5
+
+16:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 3        Loop Count
+
+17:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 5     -- Z Loc [ Tank_Pwr  ]
+
+18:  End (P95)
+
+19:  End (P95)
+
+20:  Beginning of Subroutine (P85)
+ 1: 6        Subroutine 6
+
+21:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 16       Loop Count
+
+22:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 4     -- Z Loc [ Unused1   ]
+
+23:  End (P95) ;
+
+24:  End (P95)
+
+End Program
+
+-Input Locations-
+1 LICOR_T   1 1 1
+2 LICOR_P   1 1 1
+3 CO2       1 1 1
+4 Unused1   1 2 1
+5 Tank_Pwr  1 2 1
+6 Air_Pwr   1 2 1
+7 Std_Pwr   1 2 1
+8 Tnk_Swtch 1 2 4
+9 2ft       1 2 1
+10 5ft       1 2 0
+11 10ft      1 2 0
+12 25ft      1 2 0
+13 45ft      1 2 0
+14 70ft      1 2 0
+15 97ft      1 2 1
+16 Ref_gas   1 2 2
+17 Low_std   1 2 1
+18 Hi_std    1 2 1
+19 Unused2__ 1 2 0
+20 Counter   1 2 2
+21 Level     1 3 2
+22 Std       1 2 3
+23 Loop      1 2 3
+24 ID        1 2 6
+25 Avg_T     1 1 1
+26 Avg_P     1 1 1
+27 Avg_CO2   1 1 1
+28 CSI_R     0 0 0
+29 CSI_1     0 0 0
+30 Battery   1 1 1
+31 Ref_T     1 1 1
+32 TC1       1 0 1
+33 TC2       0 0 0
+34 TC3       0 0 0
+35 TC4       0 0 0
+36 TC5       1 1 0
+37 Surf_T    1 1 0
+38 5cm_T     1 1 0
+39 10cm_T    1 0 0
+40 20cm_T    1 0 0
+41 50cm_T    1 0 0
+42 100cm_T   0 0 0
+43 NTree_T   0 0 0
+44 STree_T   0 0 0
+45 Heatflux  0 0 0
+46 TC15      0 0 0
+47 TC16      0 0 0
+48 TDR1_Per  1 0 1
+49 TDR2_Per  0 0 0
+50 TDR3_Per  1 0 0
+51 TDR4_Per  0 0 0
+52 TDR5_Per  1 0 0
+53 TDR6_Per  1 0 0
+54 TDR7_Per  1 1 0
+55 TDR8_Per  1 1 0
+56 TDR9_Per  1 1 0
+57 TDR10_Per 1 1 0
+58 TDR11_Per 1 1 0
+59 TDR12_Per 1 0 0
+60 TDR13_Per 1 0 0
+61 TDR14_Per 1 0 0
+62 TDR15_Per 1 0 0
+63 TDR16_Per 0 0 0
+64 5cm_wat   1 1 1
+65 10cm_wat  1 0 1
+66 20cm_wat  1 0 1
+67 50cm_wat  1 0 1
+68 100cm_wat 1 0 1
+69 _________ 1 1 0
+70 _________ 0 0 0
+71 _________ 0 0 0
+72 _________ 0 0 0
+73 _________ 0 0 0
+74 _________ 0 0 0
+75 _________ 0 0 0
+76 _________ 0 0 0
+77 _________ 0 0 0
+78 _________ 0 0 0
+79 _________ 0 0 0
+80 _________ 0 0 0
+81 _________ 0 0 0
+82 _________ 0 0 0
+83 _________ 0 0 0
+84 _________ 0 0 0
+85 _________ 0 0 0
+86 _________ 0 0 0
+87 _________ 0 0 0
+88 _________ 0 0 0
+89 _________ 0 0 0
+90 _________ 0 0 0
+91 _________ 0 0 0
+92 _________ 0 0 0
+93 _________ 0 0 0
+94 _________ 0 0 0
+95 _________ 0 0 0
+96 _________ 0 0 0
+97 _________ 0 0 0
+98 _________ 0 0 0
+99 _________ 0 0 0
+100 _________ 0 0 0
+101 _________ 0 0 0
+102 _________ 0 0 0
+103 _________ 1 0 0
+-Program Security-
+0000
+0000
+0000
+-Mode 4-
+-Final Storage Area 2-
+300000
+-CR10X ID-
+0
+-CR10X Power Up-
+3

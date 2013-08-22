@@ -1,0 +1,37 @@
+Final Storage Label File for:  PROFILE2.CSI
+Date:  11/3/1998
+Time:  22:00:08
+
+134 Output_Table   2.00 Min
+1 134 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 ID  L
+6 Avg_T  H
+7 Avg_P  H
+8 Avg_CO2  H
+
+2 Output_Table   2.00 Min
+1 2 L
+2 Year_RTM  H
+3 Day_RTM  H
+4 Hour_Minute_RTM  H
+5 Battery_AVG  H
+6 TC5_AVG  H
+7 Surf_T_AVG  H
+8 5cm_T_AVG  H
+9 10cm_T_AVG  H
+10 20cm_T_AVG  H
+11 50cm_T_AVG  H
+12 100cm_T_AVG  H
+13 NTree_T_AVG  H
+14 5cm_wat_AVG  H
+15 10cm_wat_AVG  H
+16 20cm_wat_AVG  H
+17 50cm_wat_AVG  H
+18 100cm_wat_AVG  H
+19 __________AVG  H
+
+
+Estimated Total Final Storage Locations used per day 35280.0

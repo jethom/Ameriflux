@@ -1,0 +1,143 @@
+;{CR23X}
+;
+; WLEF TRAILER Flux Licors and micromet
+; Written by Bruce Cook, July 2005
+;
+*Table 1 Program
+  01: .2        Execution Interval (seconds)
+
+; LICOR MEASUREMENTS
+1:  Volt (SE) (P1) 
+ 1: 12       Reps
+ 2: 25       5000 mV, 60 Hz Reject, Fast Range
+ 3: 1        SE Channel
+ 4: 1        Loc [ CO2_top   ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+; OUTPUT FAST DATA
+2:  Do (P86)
+ 1: 10       Set Output Flag High (Flag 0)
+
+3:  Set Active Storage Area (P80)
+ 1: 1        Final Storage Area 1
+ 2: 1        Array ID
+
+4:  Real Time (P77)
+ 1: 1111     Year,Day,Hour/Minute,Seconds (midnight = 0000)
+
+5:  Resolution (P78)
+ 1: 1        High Resolution
+
+6:  Sample (P70)
+ 1: 12       Reps
+ 2: 1        Loc [ CO2_top   ]
+
+; OUTPUT SLOW DATA
+7:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 1        Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+8:  Set Active Storage Area (P80)
+ 1: 02       Final Storage Area 2
+ 2: 2        Array ID
+
+9:  Real Time (P77)
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000)
+
+10:  Average (P71)
+ 1: 4        Reps
+ 2: 13       Loc [ PAR       ]
+
+11:  Sample (P70)
+ 1: 2        Reps
+ 2: 17       Loc [ rain      ]
+
+*Table 2 Program ; MICROMET DATA
+  02: 1         Execution Interval (seconds)
+
+; PAR SENSOR
+1:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 12       50 mV, Fast Range
+ 3: 10       DIFF Channel
+ 4: 13       Loc [ PAR       ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+; NET RADIATION
+2:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 14       1000 mV, Fast Range
+ 3: 11       DIFF Channel
+ 4: 14       Loc [ net_rad   ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+; CS500 T/RH PROBE
+3:  Volt (SE) (P1)
+ 1: 2        Reps
+ 2: 25       5000 mV, 60 Hz Reject, Fast Range
+ 3: 23       SE Channel
+ 4: 15       Loc [ air_T     ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+; RAIN GAUGE
+4:  Pulse (P3) ; mm output
+ 1: 1        Reps
+ 2: 1        Pulse Channel 1
+ 3: 02       Switch Closure, All Counts
+ 4: 17       Loc [ rain      ]
+ 5: .1       Mult
+ 6: 0.0      Offset
+
+*Table 3 Subroutines
+
+End Program
+
+-Input Locations-
+1 CO2_top   5 1 1
+2 H2O_top   9 1 1
+3 T_top     9 1 1
+4 P_top     9 1 1
+5 CO2_mid   9 1 1
+6 H2O_mid   9 1 1
+7 T_mid     13 1 1
+8 P_mid     9 1 1
+9 CO2_bot   9 1 1
+10 H2O_bot   9 1 1
+11 T_bot     9 1 1
+12 P_bot     17 1 1
+13 PAR       5 1 1
+14 net_rad   1 0 1
+15 air_T     5 0 1
+16 air_RH    17 0 1
+17 rain      1 1 1
+18 _________ 1 1 0
+19 _________ 1 0 0
+20 _________ 1 0 0
+21 _________ 1 0 0
+22 _________ 1 0 0
+23 _________ 1 0 0
+24 _________ 1 0 0
+25 _________ 1 0 0
+26 _________ 1 0 0
+27 _________ 1 0 0
+28 _________ 0 0 0
+-Program Security-
+0000
+0000
+0000
+-Mode 4-
+-Final Storage Area 2-
+10000
+-CR10X ID-
+0
+-CR10X Power Up-
+3
+-CR10X Compile Setting-
+3
+-CR10X RS-232 Setting-
+-1

@@ -1,0 +1,34 @@
+Final Storage Label File for:  TRAILER.CSI
+Date:  9/2/2004
+Time:  21:34:23
+
+1 Output_Table   0.20 Sec
+1 1 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 Seconds_RTM  L
+6 CO2_top  H
+7 H2O_top  H
+8 T_top  H
+9 P_top  H
+10 CO2_mid  H
+11 H2O_mid  H
+12 T_mid  H
+13 P_mid  H
+14 CO2_bot  H
+15 H2O_bot  H
+16 T_bot  H
+17 P_bot  H
+
+2 Output_Table  60.00 Min
+1 2 L
+2 Year_RTM  H
+3 Day_RTM  H
+4 Hour_Minute_RTM  H
+5 PAR_AVG  H
+6 net_rad_AVG  H
+7 rain_AVG  H
+
+
+Estimated Total Final Storage Locations used per day 12528336.0

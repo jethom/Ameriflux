@@ -1,0 +1,66 @@
+Final Storage Label File for:  PROFILE5.CSI
+Date:  11/8/1998
+Time:  18:55:38
+
+215 Output_Table   2.00 Min
+1 215 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 ID  L
+6 Avg_T  H
+7 Avg_P  H
+8 Avg_CO2  H
+9 PAR_In_AVG  H
+10 PAR_60ft_AVG  H
+11 PAR_40ft_AVG  H
+12 PAR_25ft_AVG  H
+13 PAR_2m_AVG  H
+14 WSpd_80ft_AVG  H
+15 WSpd_40ft_AVG  H
+16 WSpd_2m_AVG  H
+17 WDir_80ft_AVG  H
+18 WDir_40ft_AVG  H
+19 WDir_2m_AVG  H
+20 AirT_80ft_AVG  H
+21 AirT_60ft_AVG  H
+22 AirT_40ft_AVG  H
+23 AirT_25ft_AVG  H
+24 AirT_2m_AVG  H
+25 RH_80ft_AVG  H
+26 RH_60ft_AVG  H
+27 RH_40ft_AVG  H
+28 RH_25ft_AVG  H
+29 RH_2m_AVG  H
+30 NetRad_2m_AVG  H
+31 NetRad2_AVG  H
+
+2 Output_Table   2.00 Min
+1 2 L
+2 Year_RTM  H
+3 Day_RTM  H
+4 Hour_Minute_RTM  H
+5 Battery_AVG  H
+6 AirT_200_AVG  H
+7 AirT_100_AVG  H
+8 AirT_75_AVG  H
+9 AirT_50_AVG  H
+10 AirT_25_AVG  H
+11 SoilT_0_AVG  H
+12 SoilT_5_AVG  H
+13 SoilT_10_AVG  H
+14 SoilT_20_AVG  H
+15 SoilT_50_AVG  H
+16 SoilT_100_AVG  H
+17 TreeT_N_AVG  H
+18 TreeT_S_AVG  H
+19 Heatflux_AVG  H
+20 __________AVG  H
+21 SoilW_5_AVG  H
+22 SoilW_10_AVG  H
+23 SoilW_20_AVG  H
+24 SoilW_50_AVG  H
+25 SoilW_100_AVG  H
+
+
+Estimated Total Final Storage Locations used per day 77040.0

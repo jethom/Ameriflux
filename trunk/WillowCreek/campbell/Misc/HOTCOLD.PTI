@@ -1,0 +1,40 @@
+Program Trace Information File for:  HOTCOLD.CSI
+Date: 6/12/2002
+Time: 15:38:04
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|17 Internal Temperature        14.0   14.0   14.0     14.0   14.0   14.0
+1|2|14 Thermocouple Temp (DIFF)   124.6  138.6  138.6    124.6  138.6  138.6
+1|3|89 If (X<=>F)                   0.4  139.0  139.0      0.4  139.0  139.0
+1|4|86 Do                           0.1  139.1  139.1      0.1  139.1  139.1
+1|5|94 Else                         0.2  139.3  139.3      0.2  139.3  139.3
+1|6|86 Do                           0.1  139.4  139.4      0.1  139.4  139.4
+1|7|95 End                          0.2  139.6  139.6      0.2  139.6  139.6
+1|8|89 If (X<=>F)                   0.4  140.0  140.0      0.4  140.0  140.0
+1|9|86 Do                           0.1  140.1  140.1      0.1  140.1  140.1
+1|10|94 Else                        0.2  140.3  140.3      0.2  140.3  140.3
+1|11|86 Do                          0.1  140.4  140.4      0.1  140.4  140.4
+1|12|95 End                         0.2  140.6  140.6      0.2  140.6  140.6
+
+Program Table 1 Execution Interval   15.000 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec  140.6 w/Output  140.6
+
+Table 1 Estimated Total Final Storage Locations used per day    0.0
+
+
+
+Estimated Total Final Storage Locations used per day    0.0

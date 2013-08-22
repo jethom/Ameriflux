@@ -1,0 +1,173 @@
+;{CR10X}
+; 8 March 2003 - 2d sonic porgram (3 units)
+;
+; Connected with SDI-12 interface to C4 (1m level) and
+; C5 (below-canopy and in-canopy)
+;
+*Table 1 Program
+  01: 3         Execution Interval (seconds)
+
+1:  If Flag/Port (P91)
+ 1: 28       Do if Flag 8 is Low ; reset units on startup
+ 2: 30       Then Do
+
+2:  Do (P86)
+ 1: 18       Set Flag 8 High
+
+3:  SDI-12 Recorder (P105) ; ground level
+ 1: 0        SDI-12 Address
+ 2: 00       SDI-12 Command
+ 3: 4        Port ; control port 4
+ 4: 1        Loc [ wspeed    ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+4:  Extended Parameters 4 Digit (P68)
+ 1: 88       Option ;ASCII X
+ 2: 85       Option ;ASCII U
+ 3: 50       Option ;ASCII km/hr
+ 4: 0000     Option
+ 5: 0000     Option
+ 6: 0000     Option
+ 7: 0000     Option
+ 8: 0000     Option
+
+5:  SDI-12 Recorder (P105) ; below canopy
+ 1: 0        SDI-12 Address
+ 2: 00       SDI-12 Command
+ 3: 5        Port ; control port 5
+ 4: 7        Loc [ wspeed2   ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+6:  Extended Parameters 4 Digit (P68)
+ 1: 88       Option ;ASCII X
+ 2: 85       Option ;ASCII U
+ 3: 50       Option ;ASCII km/hr
+ 4: 0000     Option
+ 5: 0000     Option
+ 6: 0000     Option
+ 7: 0000     Option
+ 8: 0000     Option
+
+7:  SDI-12 Recorder (P105) ; in canopy
+ 1: 2        SDI-12 Address ; address 2
+ 2: 00       SDI-12 Command
+ 3: 5        Port ; control port 5
+ 4: 13       Loc [ wspeed3   ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+8:  Extended Parameters 4 Digit (P68) ;
+ 1: 88       Option ;ASCII X
+ 2: 85       Option ;ASCII U
+ 3: 50       Option ;ASCII km/hr
+ 4: 0000     Option
+ 5: 0000     Option
+ 6: 0000     Option
+ 7: 0000     Option
+ 8: 0000     Option
+
+9:  End (P95)
+
+;initiate measurement aM
+10:  SDI-12 Recorder (P105)
+ 1: 0        SDI-12 Address
+ 2: 00       SDI-12 Command
+ 3: 4        Port
+ 4: 1        Loc [ wspeed    ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+11:  SDI-12 Recorder (P105)
+ 1: 0        SDI-12 Address
+ 2: 00       SDI-12 Command
+ 3: 5        Port
+ 4: 7        Loc [ wspeed2   ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+12:  SDI-12 Recorder (P105)
+ 1: 2        SDI-12 Address
+ 2: 00       SDI-12 Command
+ 3: 5        Port
+ 4: 13       Loc [ wspeed3   ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+;convert km/hr --> m/s (note: velocity units unchanged)
+wspeed=wspeed*1000/3600
+wspeed2=wspeed2*1000/3600
+wspeed3=wspeed3*1000/3600
+
+13:  If time is (P92)
+ 1: 0        Minutes (Seconds --) into a
+ 2: 3     -- Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+14:  Set Active Storage Area (P80)
+ 1: 1        Final Storage Area 1
+ 2: 010      Array ID
+
+15:  Real Time (P77)
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000)
+
+16:  Average (P71)
+ 1: 2        Reps
+ 2: 3        Loc [ xvelocity ]
+
+17:  Average (P71)
+ 1: 2        Reps
+ 2: 9        Loc [ xveloc2   ]
+
+18:  Average (P71)
+ 1: 2        Reps
+ 2: 15       Loc [ xveloc3   ]
+
+*Table 2 Program
+  02: 0         Execution Interval (seconds)
+
+*Table 3 Subroutines
+
+End Program
+
+-Input Locations-
+1 wspeed    1 0 2
+2 wdir      1 0 0
+3 xvelocity 1 1 0
+4 yvelocity 1 1 0
+5 CSI_R     1 0 0
+6 CSI_1     1 0 0
+7 wspeed2   1 0 2
+8 wdir2     1 0 0
+9 xveloc2   1 1 0
+10 yveloc2   1 1 0
+11 _________ 1 0 0
+12 _________ 0 0 0
+13 wspeed3   1 0 2
+14 wdir3     0 0 0
+15 xveloc3   1 1 0
+16 yveloc3   1 1 0
+17 _________ 0 0 0
+18 _________ 0 0 0
+19 _________ 0 0 0
+20 _________ 0 0 0
+21 _________ 0 0 0
+22 _________ 0 0 0
+23 _________ 0 0 0
+24 _________ 0 0 0
+25 _________ 0 0 0
+26 _________ 0 0 0
+27 _________ 0 0 0
+28 _________ 0 0 0
+-Program Security-
+0000
+0000
+0000
+-Mode 4-
+-Final Storage Area 2-
+0
+-CR10X ID-
+0
+-CR10X Power Up-
+3

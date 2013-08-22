@@ -1,0 +1,1791 @@
+;{CR10X}
+;CO2 PROFILER, SOIL MEASUREMENTS, PAR SENSORS, WIND SPEED/DIRECTION
+;Last updated 2 December 1998
+
+*Table 1 Program
+  01: 1         Execution Interval (seconds)
+
+;COLLECT AND AVERAGE LICOR READING (15 SECOND INTERVAL)
+1:  Volt (SE) (P1)
+ 1: 3        Reps
+ 2: 15       2500 mV Fast Range
+ 3: 1        SE Channel
+ 4: 1        Loc [ LICOR_T   ]
+ 5: 1        Mult
+ 6: 0.0      Offset ;
+
+LICOR_T=LICOR_T*2*.01
+LICOR_P=LICOR_P*2*0.01522+58.738
+
+2:  Running Average (P52)
+ 1: 3        Reps
+ 2: 1        First Source Loc [ LICOR_T   ]
+ 3: 25       First Destination Loc [ Avg_T     ]
+ 4: 15       Number of Values in Avg Window
+
+;SHADOWBAND PAR MEASUREMENT, ROTATION AND CALCULATIONS
+3:  Z=F (P30)
+ 1: 2109     F; PAR calibration factor
+ 2: 00       Exponent of 10
+ 3: 101      Z Loc [ PAR_Calib ]; umol s^-1 m^-2 mV^-1
+
+;Initialize ports
+;
+4:  Set Port(s) (P20)
+ 1: 9999     C8,C7,C6,C5 Options
+ 2: 9809     C4..C1 = nc/input/low/nc
+
+;Measure 1 second data
+;
+5:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 1        2.5 mV Slow Range
+ 3: 6        DIFF Channel
+ 4: 102      Loc [ vPAR_Glb  ]
+ 5: -1       Mult ;If negative, set to 1
+ 6: 0.0      Offset
+
+;Multiply by calibration factor
+;
+6:  Z=X*Y (P36)
+ 1: 102      X Loc [ vPAR_Glb  ]
+ 2: 101      Y Loc [ PAR_Calib ]
+ 3: 103      Z Loc [ PAR_Glb   ]
+
+;Set the rotation flag (F1) when it is 24 seconds
+;into the minute (first condition for rotation)
+;
+7:  Time (P18)
+ 1: 0        Seconds into current minute (maximum 60)
+ 2: 60       Mod/By
+ 3: 125      Loc [ t0        ]
+
+8:  IF (X<=>F) (P89)
+ 1: 125      X Loc [ t0        ]
+ 2: 4        <
+ 3: 24       F
+ 4: 22       Set Flag 2 Low
+
+9:  IF (X<=>F) (P89)
+ 1: 125      X Loc [ t0        ]
+ 2: 3        >=
+ 3: 24       F
+ 4: 30       Then Do
+
+10:  If Flag/Port (P91)
+ 1: 22       Do if Flag 2 is Low
+ 2: 11       Set Flag 1 High; (only at 24 sec)
+
+11:  End (P95)
+
+12:  If Flag/Port (P91)
+ 1: 11       Do if Flag 1 is High
+ 2: 30       Then Do; (if 24 seconds into minute)
+
+;Set default diffuse horizontal
+;
+13:  Z=X (P31)
+ 1: 102      X Loc [ vPAR_Glb  ]
+ 2: 104      Z Loc [ vPAR_Dir  ]
+
+14:  If Flag/Port (P91)
+ 1: 11       Do if Flag 1 is High
+ 2: 12       Set Flag 2 High; (high from 24 - 30 sec)
+
+15:  If Flag/Port (P91)
+ 1: 11       Do if Flag 1 is High
+ 2: 21       Set Flag 1 Low; (high only at 24 seconds)
+
+;Set previous rotation error flag = current rot err flag
+;(F4 = F3), then reset current rot err flag
+;
+16:  If Flag/Port (P91)
+ 1: 13       Do if Flag 3 is High
+ 2: 14       Set Flag 4 High
+
+17:  If Flag/Port (P91)
+ 1: 23       Do if Flag 3 is Low
+ 2: 24       Set Flag 4 Low
+
+18:  If Flag/Port (P91)
+ 1: 13       Do if Flag 3 is High
+ 2: 23       Set Flag 3 Low
+
+;Rotate on the 1/2 hr at night (PAR_Glb < 5 umol s^-1 m^-2)
+;
+19:  IF (X<=>F) (P89)
+ 1: 103      X Loc [ PAR_Glb   ]
+ 2: 4        <
+ 3: 5        F
+ 4: 30       Then Do
+
+20:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 30       Interval (same units as above)
+ 3: 30       Then Do
+
+21:  Do (P86)
+ 1: 7        Call Subroutine 7 ; (rotate)
+
+22:  End (P95)
+
+23:  Else (P94); PAR_Glb > 5 umol s^-1 m^-2
+
+24:  Do (P86)
+ 1: 7        Call Subroutine 7 ; (rotate)
+
+;Make the Burst measurement
+;
+25:  Burst Measurement (P23)
+ 1: 1        Input Channels per Scan
+ 2: 11       2.5 mV Fast Range
+ 3: 5        In Chan
+ 4: 0001     Trig/Trig/Dest/Meas Options
+ 5: 2.0      Time per Scan (msec)
+ 6: 0.7      Scans (in thousands)
+ 7: 0000     Samples before Trigger
+ 8: 0.0000   mV Limit
+ 9: 0000     mV Excitation
+10: 350      Loc [ Burst_Dat ]
+11: -1       Mult ;  change to 1 if neg.
+12: 0.0      Offset
+
+;The burst data indicies are:
+;
+;350 to  374    GHr I
+;375 to  1024    Curve data
+;1025 to  1049    GHr II
+;
+;Find the minimum value in the burst data
+;between the indicies of 375 and 1024.  Identify the
+;index of the minimum.
+;
+26:  Spatial Mimimum (P50)
+ 1: 650      Swath
+ 2: 375      First Loc [ Curve_Dat ]
+ 3: 119      Min Option [ min_val   ]
+
+;Check for a Burst Data Error
+;
+27:  Spatial Mimimum (P50); of last 25 samples
+ 1: 25       Swath
+ 2: 1025     First Loc [ GHII      ]
+ 3: 126      Min Option [ t1        ]
+
+28:  Z=X (P31)
+ 1: 119      X Loc [ min_val   ]
+ 2: 127      Z Loc [ t2        ]; Minimum of entire well
+
+29:  Spatial Mimimum (P50)
+ 1: 3        Swath
+ 2: 125      First Loc [ t0        ]; has min of 1st 25 samples
+ 3: 125      Min Option [ t0        ]
+
+30:  IF (X<=>F) (P89)
+ 1: 125      X Loc [ t0        ]
+ 2: 4        <
+ 3: -0.2     F; (in mV)
+ 4: 30       Then Do
+
+31:  Z=Z+1 (P32); If any BD data pts are < -0.2 then
+ 1: 111      Z Loc [ Err_bd    ]; increment BD err count
+
+32:  Z=Z+1 (P32)
+ 1: 112      Z Loc [ Err_flag  ]; Add one to err flag
+
+33:  If Flag/Port (P91)
+ 1: 23       Do if Flag 3 is Low
+ 2: 13       Set Flag 3 High; If BD error occurred
+
+34:  End (P95)
+
+;Continue if there were no rotation errors.
+;
+35:  If Flag/Port (P91)
+ 1: 23       Do if Flag 3 is Low
+ 2: 30       Then Do
+
+;Determine the GH from the rotation data by averaging
+;the first and last 25 samples
+;
+36:  Spatial Average (P51)
+ 1: 25       Swath
+ 2: 350      First Loc [ Burst_Dat ]
+ 3: 127      Avg Loc [ t2        ]
+
+37:  Spatial Average (P51)
+ 1: 25       Swath
+ 2: 1025     First Loc [ GHII      ]
+ 3: 128      Avg Loc [ t3        ]
+
+38:  Spatial Average (P51)
+ 1: 2        Swath
+ 2: 127      First Loc [ t2        ]
+ 3: 106      Avg Loc [ vPAR_Rot  ]
+
+;Move the 50 points around the min to locations
+;200 to 249.  Loc 225 will have the min value.
+;
+39:  Z=F (P30)
+ 1: 200      F
+ 2: 00       Exponent of 10
+ 3: 125      Z Loc [ t0        ]
+
+40:  Z=X+F (P34)
+ 1: 120      X Loc [ min_ind   ]
+ 2: -25      F
+ 3: 126      Z Loc [ t1        ]
+
+41:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 50       Loop Count
+
+42:  Indirect Move (P61)
+ 1: 126   -- Source Loc [ t1        ]
+ 2: 125   -- Destination Loc [ t0        ]
+
+43:  End (P95)
+
+;Calculate the delta array using locs 250-298
+;
+44:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 49       Loop Count
+
+45:  Z=X-Y (P35)
+ 1: 201   -- X Loc [ _________ ]
+ 2: 200   -- Y Loc [ Well_Arr  ]
+ 3: 250   -- Z Loc [ Delta_Arr ]
+
+46:  End (P95)
+
+47:  Spatial Mimimum (P50)
+ 1: 49       Swath
+ 2: 250      First Loc [ Delta_Arr ]
+ 3: 115      Min Option [ x1__val   ]
+
+48:  Spatial Maximum (P49)
+ 1: 49       Swath
+ 2: 250      First Loc [ Delta_Arr ]
+ 3: 117      Max Option [ x2__val   ]
+
+;Determine x1 and x2 indicies in terms of the well array
+;stored in 200-249.
+;
+49:  Z=X+F (P34)
+ 1: 116      X Loc [ x1__ind   ]
+ 2: -50      F
+ 3: 116      Z Loc [ x1__ind   ]
+
+50:  Z=X+F (P34)
+ 1: 118      X Loc [ x2__ind   ]
+ 2: -49      F
+ 3: 118      Z Loc [ x2__ind   ]
+
+;X1 and x2 indicies should be with indicies 200 to 249
+;Well center is halfway between x1 and x2
+;
+51:  Z=X+Y (P33)
+ 1: 116      X Loc [ x1__ind   ]
+ 2: 118      Y Loc [ x2__ind   ]
+ 3: 125      Z Loc [ t0        ]
+
+52:  Z=X*F (P37)
+ 1: 125      X Loc [ t0        ]
+ 2: 0.5      F
+ 3: 122      Z Loc [ cen_ind   ]
+
+;Store the center value
+;
+53:  Z=F (P30)
+ 1: 30       F
+ 2: 00       Exponent of 10
+ 3: 125      Z Loc [ t0        ]
+
+54:  Indirect Move (P61)
+ 1: 122      Source Loc [ cen_ind   ]
+ 2: 125      Destination Loc [ t0        ]
+
+;Calculate the width of the well
+;
+55:  Z=X-Y (P35)
+ 1: 118      X Loc [ x2__ind   ]
+ 2: 116      Y Loc [ x1__ind   ]
+ 3: 114      Z Loc [ Well_wdth ]
+
+;Calculate the diffuse horizontal component if well
+;width is >= 5.  S1 and s2 are well shoulder values
+;
+;DH = (GH - avg[s1,s2]) + well center value
+;
+;where (GH - avg[s1,s2]) is diffuse occluded by band
+;
+56:  IF (X<=>F) (P89)
+ 1: 114      X Loc [ Well_wdth ]
+ 2: 3        >=
+ 3: 5        F
+ 4: 30       Then Do
+
+57:  Z=X+Y (P33)
+ 1: 106      X Loc [ vPAR_Rot  ]
+ 2: 121      Y Loc [ cen_val   ]
+ 3: 128      Z Loc [ t3        ]
+
+;Place s1 value in loc 122; s1 index is at well center
+;minus well width
+;
+58:  Z=F (P30)
+ 1: 122      F
+ 2: 00       Exponent of 10
+ 3: 126      Z Loc [ t1        ]
+
+59:  Z=X-Y (P35)
+ 1: 122      X Loc [ cen_ind   ]
+ 2: 114      Y Loc [ Well_wdth ]
+ 3: 127      Z Loc [ t2        ]
+
+60:  IF (X<=>F) (P89); If s1 falls before well begins,
+ 1: 127      X Loc [ t2        ]; place s1 at well beginning
+ 2: 4        <
+ 3: 100      F
+ 4: 30       Then Do
+
+61:  Z=F (P30)
+ 1: 100      F
+ 2: 00       Exponent of 10
+ 3: 127      Z Loc [ t2        ]
+
+62:  End (P95)
+
+63:  Indirect Move (P61); Move value of well shoulder to loc 35
+ 1: 127      Source Loc [ t2        ]
+ 2: 126      Destination Loc [ t1        ]
+
+;Place the value of s2 in loc 123
+;
+64:  Z=Z+1 (P32)
+ 1: 126      Z Loc [ t1        ]
+
+65:  Z=X+Y (P33)
+ 1: 122      X Loc [ cen_ind   ]
+ 2: 114      Y Loc [ Well_wdth ]
+ 3: 127      Z Loc [ t2        ]
+
+66:  IF (X<=>F) (P89); If s2 falls after well ends, place s2 at
+ 1: 127      X Loc [ t2        ]; end of well
+ 2: 3        >=
+ 3: 149      F
+ 4: 30       Then Do
+
+67:  Z=F (P30)
+ 1: 149      F
+ 2: 00       Exponent of 10
+ 3: 127      Z Loc [ t2        ]
+
+68:  End (P95)
+
+69:  Indirect Move (P61)
+ 1: 127      Source Loc [ t2        ]
+ 2: 126      Destination Loc [ t1        ]
+
+;Average s1 and s2
+;
+70:  Spatial Average (P51)
+ 1: 2        Swath
+ 2: 123      First Loc [ s1__val   ]
+ 3: 126      Avg Loc [ t1        ]
+
+71:  Z=X-Y (P35)
+ 1: 128      X Loc [ t3        ]
+ 2: 126      Y Loc [ t1        ]
+ 3: 104      Z Loc [ vPAR_Dir  ]
+
+72:  Z=X*Y (P36)
+ 1: 104      X Loc [ vPAR_Dir  ]
+ 2: 101      Y Loc [ PAR_Calib ]
+ 3: 105      Z Loc [ PAR_Dir   ]
+
+73:  End (P95); If well width > 5
+
+74:  End (P95); If no burst data pts < -0.2
+
+75:  End (P95); If PAR_Glb > 5 W/m2
+
+76:  End (P95); If 24 seconds into minute (shadowband PAR)
+
+;CANOPY PARs AND ATMOSPHERIC METEOROLOGY
+77:  If time is (P92)
+ 1: 0     -- Minutes (Seconds --) into a
+ 2: 5        Interval (same units as above)
+ 3: 30       Then Do
+
+;AM25T MEASUREMENTS
+78:  Set Port(s) (P20)
+ 1: 3399     C8..C5 = 1ms/1ms/nc/nc
+ 2: 9999     C4..C1 = nc/nc/nc/nc
+
+79:  Do (P86) ; ENABLE AM25T
+ 1: 47       Set Port 7 High
+
+80:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+81:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+82:  Volt (Diff) (P2) ; LI-COR QUANTUM (PAR) SENSOR
+ 1: 1        Reps
+ 2: 3        25 mV Slow Range
+ 3: 5        DIFF Channel
+ 4: 70       Loc [ PAR_60ft  ]
+ 5: 310.0    Mult
+ 6: 0.0      Offset
+
+83:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+84:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+85:  Volt (Diff) (P2) ; LI-COR QUANTUM (PAR) SENSOR
+ 1: 1        Reps
+ 2: 3        25 mV Slow Range
+ 3: 5        DIFF Channel
+ 4: 71       Loc [ PAR_40ft  ]
+ 5: 315.4    Mult
+ 6: 0.0      Offset
+
+86:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+87:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+88:  Volt (Diff) (P2) ; LI-COR QUANTUM (PAR) SENSOR
+ 1: 1        Reps
+ 2: 3        25 mV Slow Range
+ 3: 5        DIFF Channel
+ 4: 72       Loc [ PAR_25ft  ]
+ 5: 377.1    Mult
+ 6: 0.0      Offset
+
+89:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+90:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+91:  Volt (Diff) (P2) ; LI-COR QUANTUM (PAR) SENSOR
+ 1: 1        Reps
+ 2: 3        25 mV Slow Range
+ 3: 5        DIFF Channel
+ 4: 73       Loc [ PAR_2m    ]
+ 5: 331.8    Mult
+ 6: 0.0      Offset
+
+92:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+93:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+94:  Volt (Diff) (P2) ; REBS NET RADIOMETER (2 m)
+ 1: 1        Reps
+ 2: 4        250 mV Slow Range
+ 3: 5        DIFF Channel
+ 4: 96       Loc [ NRad_sign ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset
+
+95:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+96:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+97:  Volt (Diff) (P2) ; RM YOUNG 03002 WIND SENTRY (WIND SPEED)
+ 1: 1        Reps
+ 2: 4        250 mV Slow Range
+ 3: 5        DIFF Channel
+ 4: 74       Loc [ WSpd_80ft ]
+ 5: .045     Mult
+ 6: .2       Offset
+
+98:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+99:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+100:  Volt (Diff) (P2) ; RM YOUNG 03002 WIND SENTRY (WIND SPEED)
+ 1: 1        Reps
+ 2: 4        250 mV Slow Range
+ 3: 5        DIFF Channel
+ 4: 75       Loc [ WSpd_40ft ]
+ 5: .045     Mult
+ 6: .2       Offset
+
+101:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+102:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+103:  Volt (Diff) (P2) ; RM YOUNG 03002 WIND SENTRY (WIND SPEED)
+ 1: 1        Reps
+ 2: 4        250 mV Slow Range
+ 3: 5        DIFF Channel
+ 4: 76       Loc [ WSpd_2m   ]
+ 5: .045     Mult
+ 6: .2       Offset
+
+104:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+105:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+106:  Excite-Delay (SE) (P4) ; RM YOUNG 03002 WIND SENTRY (WIND DIRECTION)
+ 1: 1        Reps
+ 2: 5        2500 mV Slow Range
+ 3: 9        SE Channel
+ 4: 2        Excite all reps w/Exchan 2
+ 5: 2        Delay (units 0.01 sec)
+ 6: 2500     mV Excitation
+ 7: 77       Loc [ WDir_80ft ]
+ 8: .142     Mult
+ 9: 0.0      Offset
+
+107:  Excite-Delay (SE) (P4) ; RM YOUNG 03002 WIND SENTRY (WIND DIRECTION)
+ 1: 1        Reps
+ 2: 5        2500 mV Slow Range
+ 3: 10       SE Channel
+ 4: 2        Excite all reps w/Exchan 2
+ 5: 2        Delay (units 0.01 sec)
+ 6: 2500     mV Excitation
+ 7: 78       Loc [ WDir_40ft ]
+ 8: .142     Mult
+ 9: 0.0      Offset
+
+108:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+109:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+110:  Excite-Delay (SE) (P4) ; RM YOUNG 03002 WIND SENTRY (WIND DIRECTION)
+ 1: 1        Reps
+ 2: 5        2500 mV Slow Range
+ 3: 9        SE Channel
+ 4: 2        Excite all reps w/Exchan 2
+ 5: 2        Delay (units 0.01 sec)
+ 6: 2500     mV Excitation
+ 7: 79       Loc [ WDir_2m   ]
+ 8: .142     Mult
+ 9: 0.0      Offset
+
+111:  Do (P86) ; ENABLE CS500 T/RH PROBES
+ 1: 41       Set Port 1 High
+
+112:  Excitation with Delay (P22)
+ 1: 1        Ex Channel
+ 2: 0000     Delay W/Ex (units = 0.01 sec)
+ 3: 10       Delay After Ex (units = 0.01 sec)
+ 4: 0000     mV Excitation
+
+113:  Volt (SE) (P1) ; CS500 AIR T/RH PROBE (TEMP)
+ 1: 1        Reps
+ 2: 5        2500 mV Slow Range
+ 3: 10       SE Channel
+ 4: 80       Loc [ AirT_80ft ]
+ 5: .1       Mult
+ 6: -40      Offset
+
+114:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+115:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+116:  Volt (SE) (P1) ; CS500 AIR T/RH PROBE (TEMP)
+ 1: 2        Reps
+ 2: 5        2500 mV Slow Range
+ 3: 9        SE Channel
+ 4: 81       Loc [ AirT_60ft ]
+ 5: .1       Mult
+ 6: -40      Offset
+
+117:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+118:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+119:  Volt (SE) (P1) ; CS500 AIR T/RH PROBE (TEMP)
+ 1: 2        Reps
+ 2: 5        2500 mV Slow Range
+ 3: 9        SE Channel
+ 4: 83       Loc [ AirT_25ft ]
+ 5: .1       Mult
+ 6: -40      Offset
+
+120:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+121:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+122:  Volt (SE) (P1) ; CS500 AIR T/RH PROBE (RH)
+ 1: 2        Reps
+ 2: 5        2500 mV Slow Range
+ 3: 9        SE Channel
+ 4: 85       Loc [ RH_80ft   ]
+ 5: .1       Mult
+ 6: 0        Offset
+
+123:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+124:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+125:  Volt (SE) (P1) ; CS500 AIR T/RH PROBE (RH)
+ 1: 2        Reps
+ 2: 5        2500 mV Slow Range
+ 3: 9        SE Channel
+ 4: 87       Loc [ RH_40ft   ]
+ 5: .1       Mult
+ 6: 0        Offset
+
+126:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+127:  Do (P86) ; CLOCK AM25T
+ 1: 78       Pulse Port 8
+
+128:  Volt (SE) (P1) ; CS500 AIR T/RH PROBE (RH)
+ 1: 1        Reps
+ 2: 5        2500 mV Slow Range
+ 3: 9        SE Channel
+ 4: 89       Loc [ RH_2m     ]
+ 5: .1       Mult
+ 6: 0        Offset
+
+129:  Do (P86)
+ 1: 51       Set Port 1 Low ; DISABLE CS500 T/RH PROBES
+
+130:  Do (P86)
+ 1: 57       Set Port 7 Low
+
+131:  Beginning of Loop (P87) ; MINIMUM WIND SPEED LOOP
+ 1: 0000     Delay
+ 2: 3        Loop Count
+
+132:  If (X<=>F) (P89) ; MINIMUM WIND SPEED
+ 1: 74    -- X Loc [ WSpd_80ft ]
+ 2: 4        <
+ 3: .21      F
+ 4: 30       Then Do
+
+133:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 74    -- Z Loc [ WSpd_80ft ]
+
+134:  End (P95) ; END MINIMUM WIND SPEED CORRECTION
+
+135:  End (P95) ; END MINIMUM WIND SPEED LOOP
+
+;STATIC WIND CORRECTION (NETRAD)
+136:  If (X<=>F) (P89)
+ 1: 96       X Loc [ NRad_sign ]
+ 2: 3        >=
+ 3: 0.0      F
+ 4: 30       Then Do
+
+137:  Z=X*F (P37)
+ 1: 96       X Loc [ NRad_sign ]
+ 2: 9.13     F
+ 3: 90       Z Loc [ NRad_Cs   ]
+
+138:  Z=X*F (P37)
+ 1: 90       X Loc [ NRad_Cs   ]
+ 2: 1.045    F
+ 3: 90       Z Loc [ NRad_Cs   ]
+
+139:  Else (P94)
+
+140:  Z=X*F (P37)
+ 1: 96       X Loc [ NRad_sign ]
+ 2: 11.35    F
+ 3: 90       Z Loc [ NRad_Cs   ]
+
+141:  End (P95)
+
+;DYNAMIC WIND CORRECTION (NETRAD)
+142:  If (X<=>F) (P89)
+ 1: 96       X Loc [ NRad_sign ]
+ 2: 3        >=
+ 3: 0        F
+ 4: 30       Then Do
+
+143:  Z=X*F (P37)
+ 1: 76       X Loc [ WSpd_2m   ]
+ 2: .2       F
+ 3: 92       Z Loc [ Rn_C      ]
+
+144:  Z=X*F (P37)
+ 1: 92       X Loc [ Rn_C      ]
+ 2: .066     F
+ 3: 93       Z Loc [ Rn_A      ]
+
+145:  Z=X+F (P34)
+ 1: 92       X Loc [ Rn_C      ]
+ 2: .066     F
+ 3: 94       Z Loc [ Rn_B      ]
+
+146:  Z=X/Y (P38)
+ 1: 93       X Loc [ Rn_A      ]
+ 2: 94       Y Loc [ Rn_B      ]
+ 3: 95       Z Loc [ Rn_CrtnFc ]
+
+147:  Z=Z+1 (P32)
+ 1: 95       Z Loc [ Rn_CrtnFc ]
+
+148:  Z=X*F (P37)
+ 1: 96       X Loc [ NRad_sign ]
+ 2: 9.13     F
+ 3: 91       Z Loc [ NRad_Cd   ]
+
+149:  Z=X*Y (P36)
+ 1: 91       X Loc [ NRad_Cd   ]
+ 2: 95       Y Loc [ Rn_CrtnFc ]
+ 3: 91       Z Loc [ NRad_Cd   ]
+
+150:  Else (P94)
+
+151:  Z=X*F (P37)
+ 1: 76       X Loc [ WSpd_2m   ]
+ 2: .00174   F
+ 3: 93       Z Loc [ Rn_A      ]
+
+152:  Z=X+F (P34)
+ 1: 93       X Loc [ Rn_A      ]
+ 2: .99755   F
+ 3: 95       Z Loc [ Rn_CrtnFc ]
+
+153:  Z=X*F (P37)
+ 1: 96       X Loc [ NRad_sign ]
+ 2: 11.35    F
+ 3: 91       Z Loc [ NRad_Cd   ]
+
+154:  Z=X*Y (P36)
+ 1: 91       X Loc [ NRad_Cd   ]
+ 2: 95       Y Loc [ Rn_CrtnFc ]
+ 3: 91       Z Loc [ NRad_Cd   ]
+
+155:  End (P95) ; END DYNAMIC WIND CORRECTION
+
+156:  End (P95) ; END PAR AND ATMSPHERIC METEOROLOGY MEASUREMENTS
+
+;1 MINUTE SHADOWBAND PAR AVERAGING AND CALCULATIONS
+;Calculate 1-minute averages of 2 data fields.
+;PAR_Glb and PAR_Dir whose 1-min averages will be set
+;to zero if -5 < x < 1.
+;"Zeroing" is desired for irradiance measurements to
+;retrieve clean "0" values throughout the night.
+;Place the 1-minute averages into locations 67 and 69
+;
+157:  If time is (P92)
+ 1: 30    -- Minutes (Seconds --) into a
+ 2: 60       Interval (same units as above)
+ 3: 10       Set Output Flag High
+
+158:  Set Active Storage Area (P80)
+ 1: 3        Input Storage Area
+ 2: 107      Array ID or Loc [ xPAR_Glb  ]
+
+159:  Average (P71)
+ 1: 1        Reps
+ 2: 103      Loc [ PAR_Glb   ]
+
+160:  Average (P71)
+ 1: 1        Reps
+ 2: 105      Loc [ PAR_Dir   ]
+
+;Range checking: if -5 <= x < 1 then x := 0
+;(only perform if on the minute)
+;
+161:  If Flag/Port (P91)
+ 1: 10       Do if Output Flag is High (Flag 0)
+ 2: 30       Then Do
+
+162:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 2        Loop Count
+
+163:  IF (X<=>F) (P89)
+ 1: 107   -- X Loc [ xPAR_Glb  ]
+ 2: 4        <
+ 3: 1        F
+ 4: 30       Then Do
+
+164:  IF (X<=>F) (P89)
+ 1: 107   -- X Loc [ xPAR_Glb  ]
+ 2: 3        >=
+ 3: -5       F
+ 4: 30       Then Do
+
+165:  Z=F (P30)
+ 1: 0.0000   F
+ 2: 00       Exponent of 10
+ 3: 107   -- Z Loc [ xPAR_Glb  ]
+
+;If DH > GH then DH = GH.
+;
+166:  If (X<=>Y) (P88)
+ 1: 108      X Loc [ xPAR_Dir  ]
+ 2: 3        >=
+ 3: 107      Y Loc [ xPAR_Glb  ]
+ 4: 30       Then Do
+
+167:  Z=X (P31)
+ 1: 107      X Loc [ xPAR_Glb  ]
+ 2: 108      Z Loc [ xPAR_Dir  ]
+
+168:  End (P95) ; IF xPAR_Dir > xPAR_Glb
+
+169:  End (P95) ; IF xPAR_Glb < 1
+
+170:  End (P95) ; IF xPAR_Glb >= -5
+
+171:  End (P95); Loop
+
+172:  End (P95) ; IF Output Flag is high
+
+173:  Do (P86)
+ 1: 20       Set Output Flag Low
+
+;BATTERY VOLTAGE, SOIL/TREE TEMPERATURE, AND SOIL MOISTURE MEASUREMENTS
+174:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 10       Interval (same units as above)
+ 3: 30       Then Do
+
+;BATTERY VOLTAGE
+175:  Batt Voltage (P10)
+ 1: 30       Loc [ Battery   ]
+
+176:  Temp (107) (P11) ; CR10XCR THERMOCOUPLE REFERENCE ON AM416
+ 1: 1        Reps
+ 2: 4        SE Channel
+ 3: 1        Excite all reps w/E1
+ 4: 31       Loc [ Ref_T     ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset ;
+
+177:  Do (P86)
+ 1: 44       Set Port 4 High ; ENABLE AM416
+
+178:  Do (P86)
+ 1: 46       Set Port 6 High ; ENABLE CS615s
+
+179:  Beginning of Loop (P87) ; BEGIN THERMOCOUPLE AND TDR MEASUREMENTS
+ 1: 0000     Delay
+ 2: 13       Loop Count
+
+180:  Do (P86)
+ 1: 75       Pulse Port 5 ; PULSE CLOCK
+
+181:  Excitation with Delay (P22)
+ 1: 1        Ex Channel
+ 2: 0        Delay W/Ex (units = 0.01 sec)
+ 3: 10       Delay After Ex (units = 0.01 sec)
+ 4: 0        mV Excitation
+
+182:  Thermocouple Temp (DIFF) (P14) ; AIR AND SOIL THERMOCOUPLES
+ 1: 1        Reps
+ 2: 1        2.5 mV Slow Range
+ 3: 3        DIFF Channel
+ 4: 1        Type T (Copper-Constantan)
+ 5: 31       Ref Temp (Deg. C) Loc [ Ref_T     ]
+ 6: 32    -- Loc [ AirT_200  ]
+ 7: 1.0      Mult
+ 8: 0.0      Offset ;
+
+183:  Period Average (SE) (P27) ; CS615 SOIL WATER CONTENT REFLECTOMETER PROBES
+ 1: 1        Reps
+ 2: 4        200 kHz Max Freq @ 2 V Peak to Peak, Period Output
+ 3: 7        SE Channel
+ 4: 10       No. of Cycles
+ 5: 5        Timeout (units = 0.01 seconds)
+ 6: 48    -- Loc [ TDR1_Per  ]
+ 7: .001     Mult
+ 8: 0.0      Offset
+
+184:  End (P95) ; END THERMOCOUPLE AND TDR MEASUREMENTS
+
+185:  Do (P86)
+ 1: 56       Set Port 6 Low ;; DISABLE CS615s
+
+186:  Beginning of Loop (P87) ; BEGIN HEAT FLUX MEASUREMENT
+ 1: 0000     Delay
+ 2: 1        Loop Count
+
+187:  Do (P86)
+ 1: 75       Pulse Port 5
+
+188:  Excitation with Delay (P22)
+ 1: 1        Ex Channel
+ 2: 0000     Delay W/Ex (units = 0.01 sec)
+ 3: 10       Delay After Ex (units = 0.01 sec)
+ 4: 0000     mV Excitation
+
+189:  Volt (Diff) (P2) ; HFT-3 SOIL HEAT FLUX PLATE
+ 1: 1        Reps
+ 2: 3        25 mV Slow Range
+ 3: 3        DIFF Channel
+ 4: 45       Loc [ Heatflux  ]
+ 5: 37.6     Mult ; W m^-2 mV^-1
+ 6: 0.0      Offset
+
+190:  End (P95) ; END HEAT FLUX MEASUREMENT
+
+191:  Do (P86)
+ 1: 54       Set Port 4 Low ; DISABLE AM416
+
+;CS416 CALCULATIONS
+192:  Polynomial (P55) ; 5 cm (WC1)
+ 1: 1        Reps
+ 2: 54       X Loc [ TDR7_Per  ]
+ 3: 64       F(X) Loc [ SoilW_5   ]
+ 4: -.5699   C0
+ 5: .9725    C1
+ 6: -.1893   C2
+ 7: 0        C3
+ 8: 0.0      C4
+ 9: 0.0      C5
+
+193:  Polynomial (P55) ; 10 cm (WC2)
+ 1: 1        Reps
+ 2: 55       X Loc [ TDR8_Per  ]
+ 3: 65       F(X) Loc [ SoilW_10  ] ;
+ 4: -.7428   C0
+ 5: 1.28     C1
+ 6: -.3284   C2
+ 7: 0        C3
+ 8: 0.0      C4
+ 9: 0.0      C5 ;
+
+194:  Polynomial (P55) ; 20 cm (WC3)
+ 1: 1        Reps
+ 2: 56       X Loc [ TDR9_Per  ]
+ 3: 66       F(X) Loc [ SoilW_20  ]
+ 4: -.9288   C0
+ 5: 1.7187   C1
+ 6: -.5797   C2
+ 7: 0        C3
+ 8: 0.0      C4
+ 9: 0.0      C5
+
+195:  Polynomial (P55) ; 50 cm (WC4)
+ 1: 1        Reps
+ 2: 57       X Loc [ TDR10_Per ]
+ 3: 67       F(X) Loc [ SoilW_50  ]
+ 4: -.9028   C0
+ 5: 1.5488   C1
+ 6: -.4178   C2
+ 7: 0        C3
+ 8: 0.0      C4
+ 9: 0.0      C5
+
+196:  Polynomial (P55) ; 100 cm (WC5)
+ 1: 1        Reps
+ 2: 58       X Loc [ TDR11_Per ]
+ 3: 68       F(X) Loc [ SoilW_100 ]
+ 4: -.4644   C0
+ 5: .563     C1
+ 6: .124     C2
+ 7: 0        C3
+ 8: 0.0      C4
+ 9: 0.0      C5
+
+197:  End (P95) ; END BATTERY, THERMOCOUPLE, TDR, AND HEAT FLUX MEASUREMENTS
+
+;3 MINUTE LICOR OUTPUT
+198:  If time is (P92)
+ 1: 0        Minutes (Seconds --) into a
+ 2: 3        Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+199:  Real Time (P77)
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000) ;
+
+200:  Sample (P70)
+ 1: 1        Reps
+ 2: 24       Loc [ ID        ]
+
+201:  Resolution (P78)
+ 1: 1        High Resolution
+
+202:  Sample (P70)
+ 1: 3        Reps
+ 2: 25       Loc [ Avg_T     ] ;
+
+;10 MINUTE SOIL/MET SENSOR OUTPUT
+203:  If time is (P92)
+ 1: 0        Minutes (Seconds --) into a
+ 2: 10       Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+204:  Set Active Storage Area (P80)
+ 1: 02       Final Storage Area 2
+ 2: 2        Array ID
+
+205:  Real Time (P77)
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000) ;
+
+206:  Average (P71)
+ 1: 1        Reps
+ 2: 30       Loc [ Battery   ]
+
+207:  Average (P71)
+ 1: 14       Reps
+ 2: 32       Loc [ AirT_200  ]
+
+208:  Average (P71)
+ 1: 28       Reps
+ 2: 64       Loc [ SoilW_5   ]
+
+209:  Average (P71)
+ 1: 2        Reps
+ 2: 107      Loc [ xPAR_Glb  ]
+
+210:  Resolution (P78)
+ 1: 1        High Resolution
+
+211:  Sample (P70)
+ 1: 1        Reps
+ 2: 112      Loc [ Err_flag  ]
+
+212:  Resolution (P78)
+ 1: 0        Low Resolution
+
+;Zero error flag
+;
+213:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 112      Z Loc [ Err_flag  ]
+
+214:  Do (P86)
+ 1: 20       Set Output Flag Low (Flag 0)
+
+*Table 2 Program ; 3 MINUTE SAMPLE/STANDARD SWITCHING
+  02: 180       Execution Interval (seconds)
+
+;RESET COUNTER AFTER 3 HOUR CYCLING IS COMPLETED
+1:  If (X<=>F) (P89)
+ 1: 20       X Loc [ Counter   ]
+ 2: 1        =
+ 3: 92       F
+ 4: 30       Then Do
+
+2:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 20       Z Loc [ Counter   ]
+
+3:  End (P95)
+
+;ADVANCE COUNTER
+4:  Z=Z+1 (P32)
+ 1: 20       Z Loc [ Counter   ]
+
+; ASSIGN COUNT TO SAMPLE/STANDARD
+5:  CASE (P93)
+ 1: 20       Case Loc [ Counter   ]
+
+;1st AIR SAMPLING
+6:  If Case Location < F (P83)
+ 1: 8        F
+ 2: 1        Call Subroutine 1
+
+;2nd AIR SAMPLING
+7:  If Case Location < F (P83)
+ 1: 9        F
+ 2: 2        Call Subroutine 2
+
+8:  If Case Location < F (P83)
+ 1: 15       F
+ 2: 1        Call Subroutine 1
+
+;1st ZERO WITH REFERENCE GAS
+9:  If Case Location < F (P83)
+ 1: 16       F
+ 2: 3        Call Subroutine 3
+
+;3rd AIR SAMPLING
+10:  If Case Location < F (P83)
+ 1: 23       F
+ 2: 1        Call Subroutine 1
+
+;4th AIR SAMPLING
+11:  If Case Location < F (P83)
+ 1: 24       F
+ 2: 2        Call Subroutine 2
+
+12:  If Case Location < F (P83)
+ 1: 30       F
+ 2: 1        Call Subroutine 1
+
+;2nd ZERO WITH REFERENCE GAS
+13:  If Case Location < F (P83)
+ 1: 31       F
+ 2: 3        Call Subroutine 3
+
+;5th AIR SAMPLING
+14:  If Case Location < F (P83)
+ 1: 38       F
+ 2: 1        Call Subroutine 1
+
+;6th AIR SAMPLING
+15:  If Case Location < F (P83)
+ 1: 39       F
+ 2: 2        Call Subroutine 2
+
+16:  If Case Location < F (P83)
+ 1: 45       F
+ 2: 1        Call Subroutine 1
+
+;3rd ZERO WITH REFERENCE GAS
+17:  If Case Location < F (P83)
+ 1: 46       F
+ 2: 3        Call Subroutine 3
+
+;7th AIR SAMPLING
+18:  If Case Location < F (P83)
+ 1: 53       F
+ 2: 1        Call Subroutine 1
+
+;8th AIR SAMPLING
+19:  If Case Location < F (P83)
+ 1: 54       F
+ 2: 2        Call Subroutine 2
+
+20:  If Case Location < F (P83)
+ 1: 60       F
+ 2: 1        Call Subroutine 1
+
+;4th ZERO WITH REFERENCE GAS
+21:  If Case Location < F (P83)
+ 1: 61       F
+ 2: 3        Call Subroutine 3
+
+;9th AIR SAMPLING
+22:  If Case Location < F (P83)
+ 1: 68       F
+ 2: 1        Call Subroutine 1
+
+;10th AIR SAMPLING
+23:  If Case Location < F (P83)
+ 1: 69       F
+ 2: 2        Call Subroutine 2
+
+24:  If Case Location < F (P83)
+ 1: 75       F
+ 2: 1        Call Subroutine 1
+
+;5th ZERO WITH REFERENCE GAS
+25:  If Case Location < F (P83)
+ 1: 76       F
+ 2: 3        Call Subroutine 3
+
+;11th AIR SAMPLING
+26:  If Case Location < F (P83)
+ 1: 83       F
+ 2: 1        Call Subroutine 1
+
+;12th AIR SAMPLING
+27:  If Case Location < F (P83)
+ 1: 84       F
+ 2: 2        Call Subroutine 2
+
+28:  If Case Location < F (P83)
+ 1: 90       F
+ 2: 1        Call Subroutine 1
+
+;6th ZERO WITH REFERENCE GAS
+29:  If Case Location < F (P83)
+ 1: 91       F
+ 2: 3        Call Subroutine 3
+
+;HIGH AND LOW CO2 STANDARDS
+30:  If Case Location < F (P83)
+ 1: 93       F
+ 2: 4        Call Subroutine 4
+
+31:  End (P95) ;  Case end
+
+;SET ALL RELAY LOCATIONS TO "0"
+32:  Do (P86)
+ 1: 6        Call Subroutine 6
+
+;CLEAR LOOP COUNTER
+33:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 23       Z Loc [ Loop      ]
+
+;SET RELAY LOCATIONS (AIR SAMPLES)
+34:  If (X<=>F) (P89)
+ 1: 21       X Loc [ Level     ]
+ 2: 2        <>
+ 3: 0.0      F
+ 4: 30       Then Do
+
+35:  Z=X (P31)
+ 1: 21       X Loc [ Level     ]
+ 2: 24       Z Loc [ ID        ]
+
+36:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 7        Loop Count
+
+37:  Z=Z+1 (P32)
+ 1: 23       Z Loc [ Loop      ]
+
+38:  If (X<=>Y) (P88)
+ 1: 21       X Loc [ Level     ]
+ 2: 1        =
+ 3: 23       Y Loc [ Loop      ]
+ 4: 30       Then Do
+
+39:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 9     -- Z Loc [ 2ft       ]
+
+40:  End (P95)
+
+41:  End (P95)
+
+42:  End (P95)
+
+;SET RELAY LOCATIONS (STANDARDS)
+43:  If (X<=>F) (P89)
+ 1: 22       X Loc [ Std       ]
+ 2: 2        <>
+ 3: 0.0      F
+ 4: 30       Then Do
+
+44:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 8        Z Loc [ Tnk_Swtch ]
+
+45:  Beginning of Loop (P87) ; OPEN LOWER 4 LEVELS TO SAMPLE SIDE OF PUMP
+ 1: 0000     Delay
+ 2: 4        Loop Count
+
+46:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 9     -- Z Loc [ 2ft       ]
+
+47:  End (P95)
+
+ID=Std+7
+
+48:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 3        Loop Count
+
+49:  Z=Z+1 (P32)
+ 1: 23       Z Loc [ Loop      ]
+
+50:  If (X<=>Y) (P88)
+ 1: 22       X Loc [ Std       ]
+ 2: 1        =
+ 3: 23       Y Loc [ Loop      ]
+ 4: 30       Then Do
+
+51:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 16    -- Z Loc [ Ref_gas   ]
+
+52:  End (P95)
+
+53:  End (P95)
+
+54:  End (P95)
+
+;SET RELAY LOCATIONS (POWER)
+55:  CASE (P93)
+ 1: 24       Case Loc [ ID        ]
+
+56:  If Case Location < F (P83)
+ 1: 2        F
+ 2: 5        Call Subroutine 5 ;
+
+57:  If Case Location < F (P83)
+ 1: 8        F
+ 2: 30       Then Do
+
+58:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 6        Z Loc [ Air_Pwr   ]
+
+59:  End (P95)
+
+60:  If Case Location < F (P83)
+ 1: 9        F
+ 2: 5        Call Subroutine 5
+
+61:  If Case Location < F (P83)
+ 1: 12       F
+ 2: 30       Then Do
+
+62:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 7        Z Loc [ Std_Pwr   ]
+
+63:  End (P95)
+
+64:  End (P95)
+
+;TRIGGER SDM-CD16AC AND POWER DOWN
+65:  SDM-CD16 / SDM-CD16AC (P104)
+ 1: 1        Reps
+ 2: 0        Address
+ 3: 4        Loc [ Unused1   ]
+
+66:  Excitation with Delay (P22)
+ 1: 1        Ex Channel
+ 2: 7        Delay W/Ex (units = 0.01 sec)
+ 3: 0000     Delay After Ex (units = 0.01 sec)
+ 4: 0000     mV Excitation
+
+67:  Do (P86)
+ 1: 6        Call Subroutine 6
+
+68:  SDM-CD16 / SDM-CD16AC (P104)
+ 1: 1        Reps
+ 2: 00       Address
+ 3: 4        Loc [ Unused1   ]
+
+*Table 3 Subroutines
+
+1:  Beginning of Subroutine (P85)
+ 1: 1        Subroutine 1
+
+2:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 22       Z Loc [ Std       ]
+
+3:  Z=Z+1 (P32)
+ 1: 21       Z Loc [ Level     ]
+
+4:  End (P95)
+
+5:  Beginning of Subroutine (P85)
+ 1: 2        Subroutine 2
+
+6:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 21       Z Loc [ Level     ]
+
+7:  End (P95)
+
+8:  Beginning of Subroutine (P85)
+ 1: 3        Subroutine 3
+
+9:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 21       Z Loc [ Level     ]
+
+10:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 22       Z Loc [ Std       ]
+
+11:  End (P95)
+
+12:  Beginning of Subroutine (P85)
+ 1: 4        Subroutine 4
+
+13:  Z=Z+1 (P32)
+ 1: 22       Z Loc [ Std       ]
+
+14:  End (P95)
+
+15:  Beginning of Subroutine (P85)
+ 1: 5        Subroutine 5
+
+16:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 3        Loop Count
+
+17:  Z=F (P30)
+ 1: 1        F
+ 2: 00       Exponent of 10
+ 3: 5     -- Z Loc [ Tank_Pwr  ]
+
+18:  End (P95)
+
+19:  End (P95)
+
+20:  Beginning of Subroutine (P85)
+ 1: 6        Subroutine 6
+
+21:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 16       Loop Count
+
+22:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 4     -- Z Loc [ Unused1   ]
+
+23:  End (P95) ;
+
+24:  End (P95)
+
+;This subroutine will pulse on the driver
+;relay for the RSB motor and read back
+;through C2 the status of the driver relay.
+;The duration of the pulse on is about
+;200 msec.  C2 is low during rotations.
+;
+;The entire rotation sequence is performed only if the
+;battery voltage is greater than 10.5 V.  This helps
+;protect the battery from being drained during periods
+;of little or no insolation.
+;
+;Loop = 600 = 200ms
+;Loop = 800 = 267ms (use for slow-starting RSPs)
+;
+25:  Beginning of Subroutine (P85)
+ 1: 7        Subroutine 7
+
+26:  Set Port(s) (P20)
+ 1: 9999     C8,C7,C6,C5 Options
+ 2: 9809     C4..C1 = nc/input/low/nc
+
+27:  Read Ports (P25)
+ 1: 2        Mask (0..255); Read C2
+ 2: 125      Loc [ t0        ]
+
+28:  IF (X<=>F) (P89)
+ 1: 125      X Loc [ t0        ]
+ 2: 1        =
+ 3: 0.0000   F
+ 4: 30       Then Do
+
+29:  Z=Z+1 (P32)
+ 1: 110      Z Loc [ Err_off   ]
+
+30:  Z=X+F (P34)
+ 1: 112      X Loc [ Err_flag  ]
+ 2: 16       F
+ 3: 112      Z Loc [ Err_flag  ]
+
+31:  End (P95)
+
+; Pulse C1 for a maximum of 1000 counts.
+; Tests C2 every 10 counts and stop pulsing if motor is off tab
+; Increment Error on if #_pulses reach 100 (meaning 1000 counts)
+;
+32:  Set Port(s) (P20)
+ 1: 9999     C8,C7,C6,C5 Options
+ 2: 9819     C4..C1 = nc/input/high/nc
+
+33:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 113      Z Loc [ _pulses   ]
+
+; Loop for a minimum of 500 counts
+;
+34:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 500      Loop Count
+
+35:  End (P95)
+
+;Test loop sequence for max of 500 more loops
+;
+36:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 50       Loop Count
+
+37:  Beginning of Loop (P87)
+ 1: 0000     Delay
+ 2: 10       Loop Count
+
+38:  End (P95)
+
+39:  Z=Z+1 (P32)
+ 1: 113      Z Loc [ _pulses   ]
+
+40:  If Flag/Port (P91)
+ 1: 52       Do if Port 2 is Low
+ 2: 31       Exit Loop if True
+
+41:  End (P95) ;Pulse loops
+
+; Increment Error on if #_pulses reach maximum
+;
+42:  IF (X<=>F) (P89)
+ 1: 113      X Loc [ _pulses   ]
+ 2: 3        >=
+ 3: 50       F
+ 4: 30       Then Do
+
+43:  Z=Z+1 (P32)
+ 1: 109      Z Loc [ Err_on    ]
+
+44:  Z=X+F (P34)
+ 1: 112      X Loc [ Err_flag  ]
+ 2: 256      F
+ 3: 112      Z Loc [ Err_flag  ]
+
+45:  End (P95) ; Max #_pulses
+
+46:  Set Port(s) (P20)
+ 1: 9999     C8,C7,C6,C5 Options
+ 2: 9809     C4..C1 = nc/input/low/nc
+
+47:  End (P95)
+
+End Program
+
+-Input Locations-
+1 LICOR_T   1 1 1
+2 LICOR_P   1 1 1
+3 CO2       1 1 1
+4 Unused1   1 2 1
+5 Tank_Pwr  1 2 1
+6 Air_Pwr   1 2 1
+7 Std_Pwr   1 2 1
+8 Tnk_Swtch 1 2 4
+9 2ft       1 2 2
+10 5ft       1 2 0
+11 10ft      1 2 0
+12 25ft      1 2 0
+13 45ft      1 2 0
+14 70ft      1 2 0
+15 97ft      1 2 1
+16 Ref_gas   1 2 2
+17 Low_std   1 2 1
+18 Hi_std    1 2 1
+19 Unused2   1 2 0
+20 Counter   1 2 2
+21 Level     1 3 2
+22 Std       1 2 3
+23 Loop      1 2 3
+24 ID        1 2 6
+25 Avg_T     1 1 1
+26 Avg_P     1 1 1
+27 Avg_CO2   1 1 1
+28 CSI_R     0 0 0
+29 CSI_1     0 0 0
+30 Battery   1 1 1
+31 Ref_T     1 1 1
+32 AirT_200  5 1 1
+33 AirT_100  9 1 0
+34 AirT_75   9 1 0
+35 AirT_50   9 1 0
+36 AirT_25   9 1 0
+37 SoilT_0   9 1 0
+38 SoilT_5   9 1 0
+39 SoilT_10  9 1 0
+40 SoilT_20  9 1 0
+41 SoilT_50  9 1 0
+42 SoilT_100 9 1 0
+43 TreeT_N   9 1 0
+44 TreeT_S   9 1 0
+45 Heatflux  17 1 1
+46 _________ 1 0 0
+47 _________ 0 0 0
+48 TDR1_Per  1 0 1
+49 TDR2_Per  0 0 0
+50 TDR3_Per  1 0 0
+51 TDR4_Per  0 0 0
+52 TDR5_Per  1 0 0
+53 TDR6_Per  1 0 0
+54 TDR7_Per  1 0 0
+55 TDR8_Per  1 0 0
+56 TDR9_Per  1 0 0
+57 TDR10_Per 1 0 0
+58 TDR11_Per 1 0 0
+59 TDR12_Per 1 0 0
+60 TDR13_Per 1 0 0
+61 TDR14_Per 1 0 0
+62 _________ 1 0 0
+63 _________ 0 0 0
+64 SoilW_5   5 0 1
+65 SoilW_10  1 0 1
+66 SoilW_20  1 0 1
+67 SoilW_50  1 0 1
+68 SoilW_100 1 0 1
+69 _________ 1 0 0
+70 PAR_60ft  1 0 1
+71 PAR_40ft  1 0 1
+72 PAR_25ft  1 0 1
+73 PAR_2m    1 0 1
+74 WSpd_80ft 1 1 2
+75 WSpd_40ft 1 0 1
+76 WSpd_2m   1 2 1
+77 WDir_80ft 1 0 1
+78 WDir_40ft 1 0 1
+79 WDir_2m   1 0 1
+80 AirT_80ft 1 0 1
+81 AirT_60ft 5 0 1
+82 AirT_40ft 17 0 1
+83 AirT_25ft 5 0 1
+84 AirT_2m   17 0 1
+85 RH_80ft   5 0 1
+86 RH_60ft   17 0 1
+87 RH_40ft   5 0 1
+88 RH_25ft   17 0 1
+89 RH_2m     1 0 1
+90 NRad_Cs   1 1 3
+91 NRad_Cd   1 2 4
+92 Rn_C      1 2 1
+93 Rn_A      1 2 2
+94 Rn_B      1 1 1
+95 Rn_CrtnFc 1 2 3
+96 NRad_sign 1 6 1
+97 _________ 0 0 0
+98 _________ 0 0 0
+99 _________ 0 0 0
+100 _________ 0 0 0
+101 PAR_Calib 1 2 1
+102 vPAR_Glb  1 2 1
+103 PAR_Glb   1 2 1
+104 vPAR_Dir  1 2 2
+105 PAR_Dir   1 1 1
+106 vPAR_Rot  1 1 1
+107 xPAR_Glb  1 5 2
+108 xPAR_Dir  1 2 1
+109 Err_on    1 0 1
+110 Err_off   1 0 1
+111 Err_bd    1 3 1
+112 Err_flag  1 5 4
+113 _pulses   1 1 2
+114 Well_wdth 1 3 1
+115 x1__val   1 1 1
+116 x1__ind   1 3 1
+117 x2__val   1 0 1
+118 x2__ind   1 3 1
+119 min_val   1 2 1
+120 min_ind   1 1 0
+121 cen_val   1 1 0
+122 cen_ind   1 3 1
+123 s1__val   1 1 0
+124 s2__val   0 0 0
+125 t0        1 6 8
+126 t1        1 4 7
+127 t2        1 7 6
+128 t3        1 1 2
+129 _________ 0 0 0
+130 _________ 0 0 0
+131 _________ 0 0 0
+132 _________ 0 0 0
+133 _________ 0 0 0
+134 _________ 0 0 0
+135 _________ 0 0 0
+136 _________ 0 0 0
+137 _________ 0 0 0
+138 _________ 0 0 0
+139 _________ 0 0 0
+140 _________ 0 0 0
+141 _________ 0 0 0
+142 _________ 0 0 0
+143 _________ 0 0 0
+144 _________ 0 0 0
+145 _________ 0 0 0
+146 _________ 0 0 0
+147 _________ 0 0 0
+148 _________ 0 0 0
+149 _________ 0 0 0
+150 _________ 0 0 0
+151 _________ 0 0 0
+152 _________ 0 0 0
+153 _________ 0 0 0
+154 _________ 0 0 0
+155 _________ 0 0 0
+156 _________ 0 0 0
+157 _________ 0 0 0
+158 _________ 0 0 0
+159 _________ 0 0 0
+160 _________ 0 0 0
+161 _________ 0 0 0
+162 _________ 0 0 0
+163 _________ 0 0 0
+164 _________ 0 0 0
+165 _________ 0 0 0
+166 _________ 1 2 0
+167 _________ 0 0 0
+168 _________ 0 0 0
+169 _________ 0 0 0
+170 _________ 0 0 0
+171 _________ 0 0 0
+172 _________ 0 0 0
+173 _________ 0 0 0
+174 _________ 0 0 0
+175 _________ 0 0 0
+176 _________ 0 0 0
+177 _________ 0 0 0
+200 Well_Arr  1 1 0
+201 _________ 1 1 0
+225 Well_Min  0 0 0
+250 Delta_Arr 1 2 1
+350 Burst_Dat 1 2 1
+352 _________ 0 0 0
+375 Curve_Dat 1 2 0
+378 _________ 0 0 0
+1025 GHII      1 3 0
+1026 _________ 0 0 0
+1027 _________ 0 0 0
+1028 _________ 0 0 0
+1029 _________ 0 0 0
+1030 _________ 0 0 0
+1031 _________ 0 0 0
+1032 _________ 0 0 0
+1033 _________ 0 0 0
+1034 _________ 0 0 0
+1035 _________ 0 0 0
+1036 _________ 0 0 0
+1037 _________ 0 0 0
+1038 _________ 0 0 0
+1039 _________ 0 0 0
+1040 _________ 0 0 0
+1041 _________ 0 0 0
+1042 _________ 0 0 0
+1043 _________ 0 0 0
+1044 _________ 0 0 0
+1045 _________ 0 0 0
+1046 _________ 0 0 0
+1047 _________ 0 0 0
+1048 _________ 0 0 0
+1049 _________ 0 0 0
+1050 _________ 0 0 0
+-Program Security-
+0000
+0000
+0000
+-Mode 4-
+-Final Storage Area 2-
+300000
+-CR10X ID-
+0
+-CR10X Power Up-
+3

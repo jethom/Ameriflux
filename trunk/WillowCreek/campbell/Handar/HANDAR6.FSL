@@ -1,0 +1,18 @@
+Final Storage Label File for:  HANDAR6.CSI
+Date:  3/8/2003
+Time:  08:57:51
+
+10 Output_Table   1.00 Min
+1 10 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 xvelocity_AVG  L
+6 __________AVG  L
+7 xveloc2_AVG  L
+8 __________AVG  L
+9 xveloc3_AVG  L
+10 __________AVG  L
+
+
+Estimated Total Final Storage Locations used per day 14400.0
