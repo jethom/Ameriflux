@@ -1,0 +1,414 @@
+'CR3000 Series Datalogger
+'
+'19 Nov 2013
+'Jonathan Thom
+'UW-Madison
+'
+'This CR3000 program runs an open-path eddy covariance (OPEC) system.  It is
+'based on parts of Campbell Scientific OPEC code (v. 2.0, dated 1 Jan 2005)
+'obtained gratis from Ed Swiatek.  If you would like to redistribute this
+'program, ask Ed for permission.
+'
+'Note that the LI-7500 data lags the CSAT3 data (the amount of lag depends on how
+'the LI-7500 was configured) -- this lag is not accounted for with this program.
+'
+'Search for the text string "unique" to find where you put the direction that
+'the sonic anemometer is pointed.
+'
+'The following sensors are measured:
+'
+'CSAT3   3D sonic anemometer (SDM default address = 3)
+'LI-7500 open path IRGA (SDM default address = 7)
+
+
+'*** Unit Definitions ***
+
+'C    Celsius
+'degrees (angle)
+'m    meters
+'s    seconds
+'g    grams
+'mg   milligrams
+'mmol millimoles
+'kPa  kilopascals
+'V    volts
+
+
+'*** Program Control Flags ***
+
+'Save Averages?     "Yes" (default) process averaged data.
+'{save_ave_flag_on} "No" do not process flux data.
+'
+'Save Time Series?  "Yes" (default) save time series data.
+'{save_ts_flag_on}  "No" stop collecting time series data.
+
+
+'*** SDM Wiring ***
+
+'C1 (SDM Data) ---> CSAT3 green + LI-7500 gray
+'C2 (SDM Clock) --> CSAT3 white + LI-7500 blue
+'C3 (SDM Enable) -> CSAT3 brown + LI-7500 brown
+'G  (SDM reference) CSAT3 black + LI-7500 black
+'G  (SDM shield) -> CSAT3 clear + LI-7500 white
+
+
+'*** Constants ***
+
+Const CSAT3_AZIMUTH = 0  'unique value: Compass azimuth of the -x axis.  For the figure
+' below, CSAT3_AZIMUTH = 90.
+
+' () -> Compass coordinate system
+' {} -> Right handed coordinate system aligned to north
+'
+'
+'                  (N)
+'                 {-y}
+'                   |
+'                   |
+'                   |
+'                   |
+'                   |
+'                   |
+' (W) {+x} --------[ ]----X---> {-x} (E)
+'                 / |      \
+'       CSAT3 Block |     CSAT3 Transducers
+'                   |
+'                   |
+'                   v
+'                 {+y}
+'                 (S)
+'
+'The program computes the compass wind direction, using the constant
+' CSAT3_AZIMUTH, and a CSAT3 wind direction.  Good CSAT3 wind directions
+' are between -90 to 0 and 0 to 90 degrees, e.g. the wind is blowing into
+' the CSAT3 sensor head.
+
+
+'Measurement Rate         '10 Hz    20 Hz
+Const SCAN_INTERVAL = 100 '100 mSec 50 mSec
+
+'Output period
+Const OUTPUT_INTERVAL = 30 'Averaged data output interval in minutes.
+Const NUM_DAY_CPU = 14     'Number of days of data to store on the CPU.
+Const NUM_DAY_CRD = 28     'Number of days of data to store on the card.
+
+'Determine scan buffer size and the CSAT3 Execution Parameters
+Const SCAN_BUFFER_SIZE = 300*INT (1000/SCAN_INTERVAL) 'Compute 5 minute scan buffer.
+Const CSAT_OPT = INT (1000/SCAN_INTERVAL) 'Compute CSAT3 Execution Parameter (10 or 20 Hz).
+
+'Compute CPU and card storage size for the AVE DataTables.
+Const AVE_SIZE_CPU = (NUM_DAY_CPU*1440)/OUTPUT_INTERVAL 'Size of flux DataTable on CPU [days].
+Const AVE_SIZE_CRD = (NUM_DAY_CRD*1440)/OUTPUT_INTERVAL 'Size of flux DataTable on card [days].
+
+Const SDM_PER = 30 'Default SDM clock speed.
+
+'Custom Menu constants.
+Const YES = -1  'Yes is defined as -1 (TRUE).
+Const NO = 0    'No is defined as 0 (FALSE).
+
+
+'*** Variables ***
+
+'CR1000 voltage and temperature variables
+Public batt_volt  'CR1000 battery voltage
+Public panel_temp 'CR1000 panel temperature
+Units batt_volt = V
+Units panel_temp = C
+
+'Direction CSAT3 is pointed
+Public CSAT3_compass
+Units CSAT3_compass = degrees
+
+Dim ave_out(7)
+Alias ave_out(2) = wnd_dir_compass
+Alias ave_out(3) = wnd_spd
+Alias ave_out(4) = rslt_wnd_spd
+Alias ave_out(5) = wnd_dir_csat3
+Alias ave_out(6) = sdev_wnd_dir
+Alias ave_out(7) = press_mean
+
+Units wnd_dir_compass = degrees
+Units wnd_spd = m/s
+Units rslt_wnd_spd = m/s
+Units wnd_dir_csat3 = degrees
+Units sdev_wnd_dir = degrees
+Units press_mean = kPa
+
+'Diagnostic variables
+Dim disable_flag_on(4) As Boolean 'Intermediate processing disable flags
+'   Used to filter the sum of CSAT3 diagnostic warning flags:
+'    disable_flag_on(1) 'TRUE when any CSAT3 warning flag is on or NaN
+'    disable_flag_on(2) 'TRUE when CSAT3 diagnostic warning flags are on
+'
+'   Used to filter the sum of LI-7500 diagnostic warning flags:
+'     disable_flag_on(3) 'TRUE when LI-7500 diagnostic warning flags are on or LI-7500 failed to send data
+'     disable_flag_on(4) 'TRUE when LI-7500 diagnostic warning flags are on
+
+
+Dim n  'Number of valid samples during an output interval
+Units n = samples
+
+'CSAT3 and LI-7500 warning flags
+Public diag_bits(8) As Boolean
+Alias diag_bits(1) = del_T_f   'Delta temperature warning flag (CSAT3)
+Alias diag_bits(2) = sig_lck_f 'Poor signal lock warning flag (CSAT3)
+Alias diag_bits(3) = amp_h_f   'Amplitude high warning flag (CSAT3)
+Alias diag_bits(4) = amp_l_f   'Amplitude low warning flag (CSAT3)
+
+Alias diag_bits(5) = chopper_f  'Chopper warning flag (LI-7500)
+Alias diag_bits(6) = detector_f 'Detector warning flag (LI-7500)
+Alias diag_bits(7) = pll_f      'PLL warning flag (LI-7500)
+Alias diag_bits(8) = sync_f     'Synchronization warning flag (LI-7500)
+
+Units diag_bits = samples
+
+Public signalstrength As Long   'signal strength (LI-7500)
+Public diag As Long  'Combined LI-7500 and CSAT3 diagnostics
+Units signalstrength = unitless
+Units diag = unitless
+
+
+'Program Control flags
+'Public save_ave_flag_on As Boolean
+Public save_ts_flag_on As Boolean
+
+
+'No delay CSAT3 data
+Public wind(5)
+Alias wind(1) = Ux
+Alias wind(2) = Uy
+Alias wind(3) = Uz
+Alias wind(4) = Ts
+Alias wind(5) = diag_csat
+Units wind = m/s
+Units Ts = C
+'Units diag_csat = unitless
+
+'No delay LI-7500 data
+Public irga(4)
+Alias irga(1) = co2
+Alias irga(2) = h2o
+Alias irga(3) = press
+Alias irga(4) = diag_irga
+Units co2 = mg/m^3 'LI-7500 output is mmol/m^3, but it's then converted to mg/m^3
+Units h2o = g/m^3  'LI-7500 output is mmol/m^3, but it's then converted to g/m^3
+Units press = kPa
+Units diag_irga = unitless
+
+
+'Working variables
+
+Dim wind_east  'East wind in compass coordinate system
+Dim wind_north 'North wind in compass coordinate system
+
+Dim even_min_flag_on As Boolean 'Used to synchronize the time series output to the even minute
+Dim one_more_record As Boolean  'Used to write one more time series record with a file mark
+
+Dim diag_csat_work As Long 'Working variable used to break out the CSAT3 diagnostic bits
+
+
+'*** Output Data Tables ***
+
+'Online averaged data
+'DataTable (ave,TRUE,AVE_SIZE_CPU)
+'  DataInterval (0,OUTPUT_INTERVAL,Min,10)
+'  CardOut (0,AVE_SIZE_CRD)
+'
+'  Average (1,batt_volt,IEEE4,FALSE)
+'  Average (1,panel_temp,IEEE4,FALSE)
+'
+'  Totalize (1,n,IEEE4,disable_flag_on(1) OR NOT (save_ave_flag_on))
+'  FieldNames ("CSAT3_samples")
+'  Totalize (1,n,IEEE4,NOT (disable_flag_on(1) OR disable_flag_on(2)) OR NOT (save_ave_flag_on))
+'  FieldNames ("CSAT3_warnings")
+'  Sample (1,CSAT3_compass,IEEE4)
+'  Sample (1,wnd_dir_compass,IEEE4)
+'  Sample (1,wnd_dir_csat3,IEEE4)
+'  Sample (1,sdev_wnd_dir,IEEE4)
+'  Sample (1,wnd_spd,IEEE4)
+'  Sample (1,rslt_wnd_spd,IEEE4)
+'
+'  Totalize (1,n,IEEE4,disable_flag_on(3) OR NOT (save_ave_flag_on))
+'  FieldNames ("IRGA_samples")
+'  Totalize (1,n,IEEE4,NOT (disable_flag_on(3) OR disable_flag_on(4)) OR NOT (save_ave_flag_on))
+'  FieldNames ("IRGA_warnings")
+'  Sample (1,press_mean,IEEE4) 'pressure sensor in the LI-7500 is only good to 1 kPa
+'  FieldNames ("IRGA_mean_press")
+'
+'EndTable
+
+
+'Set "Save Time Series?" menu option to "Yes" to save time series data
+DataTable (ts_data,even_min_flag_on,-1)
+  DataInterval (0,SCAN_INTERVAL,mSec,100)
+'  CardOut (1,-1)
+
+  Sample (1,Ux,IEEE4)
+  Sample (1,Uy,IEEE4)
+  Sample (1,Uz,IEEE4)
+  Sample (1,Ts,IEEE4)
+  Sample (1,co2,IEEE4)
+  Sample (1,h2o,IEEE4)
+  Sample (1,diag,FP2)
+
+EndTable
+
+'Compute the wind averages of the sonics and the average IRGA pressure
+'These data are output every OUTPUT_INTERVAL minutes
+
+'DataTable (comp_ave,TRUE,1)
+'  DataInterval (0,OUTPUT_INTERVAL,min,1)
+'  WindVector (1,wind_east,wind_north,IEEE4,(disable_flag_on(1) OR NOT (save_ave_flag_on)),0,1,1)
+'  WindVector (1,Uy,Ux,IEEE4,(disable_flag_on(1) OR NOT (save_ave_flag_on)),0,1,2)
+'  Average (1,press,IEEE4,disable_flag_on(3) OR NOT (save_ave_flag_on))
+'
+'EndTable
+'
+
+'*** Define Program Control Menu ***
+
+'DisplayMenu ("Program Control",TRUE)
+'
+'  MenuItem ("Save Averages?",save_ave_flag_on)
+'  MenuPick (YES,NO)
+'  MenuItem ("Save Time Series?",save_ts_flag_on)
+'  MenuPick (YES,NO)
+'
+'EndMenu
+
+
+'*** Program ***
+
+BeginProg
+
+  n = 1
+
+'  save_ave_flag_on = TRUE 'Save averages on compile
+  save_ts_flag_on = TRUE  'Save time series on compile
+  Move (wind(),5,NaN,1)  'Set all CSAT3U variables to NaN
+  Move (irga(),4,NaN,1) 'Set all LI-7500 variables to NaN
+  SDMSpeed (SDM_PER) 'Set the SDM clock speed
+
+  Scan (SCAN_INTERVAL,mSec,SCAN_BUFFER_SIZE,0)
+
+    Battery (batt_volt)        'Measure the battery voltage
+    PanelTemp (panel_temp,250) 'CR1000 panel temperature
+    CSAT3 (wind(),1,3,91,CSAT_OPT) 'Trigger and Get wind, sonic temperature, and diagnostic value
+    CS7500 (irga(),1,7,6)         'Get CO2 and H2O molar density [mmol/m3], pressure [kPa], and diagnostic value
+
+'    'Convert winds for compass wind vector computation.
+'    wind_east = -1*Uy
+'    wind_north = Ux
+
+    'Convert LI-7500 data from molar density [mmol/m^3] to mass density
+    ' 44 [mg/mmol] - molecular weight of carbon dioxide
+    ' 0.018 [g/mmol] - molecular weight of water vapor
+    If (NOT (co2 = -99999)) Then (co2 = co2*44)
+    h2o = h2o*0.018
+
+    'Define 61502 as NaN
+    If (diag_csat = NaN) Then (diag_csat = 61502)
+
+    'Break up the four CSAT3x warning flags into four separate bits
+    diag_csat_work = diag_csat
+    del_T_f = diag_csat_work AND &h8000
+    sig_lck_f = diag_csat_work AND &h4000
+    amp_h_f = diag_csat_work AND &h2000
+    amp_l_f = diag_csat_work AND &h1000
+
+    'Turn on the intermediate processing disable flag when any CSAT3 warning flag is
+    ' high, including the special cases NaN (61502), a Lost Trigger (61440), No Data
+    ' (61503), an SDM error (61441), or wrong CSAT3 embedded code (61442).
+    disable_flag_on(1) = diag_csat_work AND &hf000
+
+    'Turn on only when CSAT3 diagnostic warning flags are set.
+    disable_flag_on(2) = ((del_T_f OR sig_lck_f OR amp_h_f OR amp_l_f) AND NOT (Ts = NaN))
+
+    'Save the four most significant bits of the CSAT3 diagnostics, except for the
+    ' special cases NaN (61502), a Lost Trigger (61440), No Data (61503), an SDM
+    ' error (61441), or wrong CSAT3 embedded code (61442).
+    ' but remap the CSAT3 diagnostics so the two byte FP2 compactly holds the diagnostics
+
+    If diag_csat_work < &hf000 Then
+      diag_csat = INT (diag_csat_work/&h1000) 'no special cases
+    ElseIf diag_csat_work = &hf000 Then
+      diag_csat = &b1001 'lost trigger special case becomes 9
+    ElseIf diag_csat_work = &hf03f Then
+      diag_csat = &b1010 'no data special case becomes 10
+    ElseIf diag_csat_work = &hf002 Then
+      diag_csat = &b1011 'wrong CSAT3 embedded code special case becomes 11
+    ElseIf diag_csat_work = &hf003 Then
+      diag_csat = &b1100 'SDM error special case becomes 12
+    ElseIf diag_csat_work = &hf03e Then
+      diag_csat = &b1101 'NaN special case becomes 13
+    Else
+      diag_csat = &b1111 'take no chances
+    EndIf
+
+    'Swap the LI-7500 diagnostic bit state.
+    diag_irga = diag_irga XOR &h00f0
+
+    'Turn on the intermediate processing disable flag when the LI-7500 has failed to
+    ' send data to the CR1000 via SDM.  Set all flags high and rail the signalstrength to 100.
+    If ((co2 < -99990) OR (co2 = NaN)) Then (diag_irga = &h00ff)
+
+    'Compute the signal strength
+    signalstrength = INT ((diag_irga AND &h000f)*6.67)
+
+    'Break up the four LI-7500 warning flags into four separate bits
+    chopper_f = diag_irga AND &h0080
+    detector_f = diag_irga AND &h0040
+    pll_f = diag_irga AND &h0020
+    sync_f = diag_irga AND &h0010
+
+    'Turn on the intermediate processing disable flag when any LI-7500 warning flag
+    ' is high, including the special cases NaN or an SDM error.
+    disable_flag_on(3) = diag_irga AND &h00f0
+
+    'Turn on only when LI-7500 diagnostic warning flags are set.
+    disable_flag_on(4) = ((chopper_f OR detector_f OR pll_f OR sync_f) AND NOT (diag_irga >= &h00ff))
+
+    'Combine the complete LI-7500 diagnostics with the remapped CSAT3 diagnostics
+    diag = diag_irga + diag_csat * &h100
+
+    'Write a file mark to the time series table every half hour.  The filemark is written
+    ' only to the card if time series data are being stored.
+    If ((even_min_flag_on) AND (IfTime (0,30,Min))) Then (FileMark (ts_data))
+
+    'Start saving the time series data on an even minute boundary
+    If ((save_ts_flag_on) AND (NOT (even_min_flag_on))) Then
+      If (IfTime (0,1,Min)) Then (even_min_flag_on = TRUE)
+    Else
+      If ((NOT (save_ts_flag_on)) AND (even_min_flag_on) AND (NOT (one_more_record))) Then
+        FileMark (ts_data)
+        one_more_record = TRUE
+      Else
+        If (one_more_record) Then
+          one_more_record = FALSE
+          even_min_flag_on = FALSE
+        EndIf
+      EndIf
+    EndIf
+
+    CallTable ts_data
+'    CallTable comp_ave
+
+'    If (comp_ave.Output(1,1)) Then
+'
+'      GetRecord (ave_out(1),comp_ave,1)
+'
+'      'Compass wind directions will be between 0 and 360 degrees
+'      CSAT3_compass = CSAT3_AZIMUTH 'writes CSAT3_AZIMUTH into the "ave" table
+'      wnd_dir_compass = (wnd_dir_compass + CSAT3_AZIMUTH) MOD 360
+'
+'      'CSAT3 wind direction will be between 0 to 180 degrees and 0 to -180 degrees
+'      If (wnd_dir_csat3) > 180 Then (wnd_dir_csat3 = wnd_dir_csat3 - 360)
+'
+'    EndIf
+'
+'    'Write a file mark to the ave table
+'    If (IfTime (0,1,Day)) Then (FileMark (ave))
+'    CallTable ave
+
+  NextScan
+EndProg

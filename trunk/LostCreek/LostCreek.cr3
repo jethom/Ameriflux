@@ -1,0 +1,615 @@
+'CR3000 Series Datalogger
+'
+'19 Nov 2013
+'Jonathan Thom
+'UW-Madison
+'
+'This CR3000 program runs an open-path eddy covariance (OPEC) system.  It is
+'based on parts of Campbell Scientific OPEC code (v. 2.0, dated 1 Jan 2005)
+'obtained gratis from Ed Swiatek.  If you would like to redistribute this
+'program, ask Ed for permission.
+
+' this includes the LI-7700 open path CH4 instrument.
+'
+'Note that the LI-7500 data lags the CSAT3 data (the amount of lag depends on how
+'the LI-7500 was configured) -- this lag is not accounted for with this program.
+'
+'Search for the text string "unique" to find where you put the direction that
+'the sonic anemometer is pointed.
+'
+'The following sensors are measured:
+'
+'CSAT3   3D sonic anemometer (SDM default address = 3)
+'LI-7500 open path IRGA (SDM default address = 7)
+
+
+'*** Unit Definitions ***
+
+'C    Celsius
+'degrees (angle)
+'m    meters
+'s    seconds
+'g    grams
+'mg   milligrams
+'mmol millimoles
+'kPa  kilopascals
+'V    volts
+
+
+'*** Program Control Flags ***
+
+'Save Averages?     "Yes" (default) process averaged data.
+'{save_ave_flag_on} "No" do not process flux data.
+'
+'Save Time Series?  "Yes" (default) save time series data.
+'{save_ts_flag_on}  "No" stop collecting time series data.
+
+
+'*** SDM Wiring ***
+
+'C1 (SDM Data) ---> CSAT3 green + LI-7500 blue
+'C2 (SDM Clock) --> CSAT3 white + LI-7500 white
+'C3 (SDM Enable) -> CSAT3 brown + LI-7500 brown
+'G  (SDM reference) CSAT3 black + LI-7500 black
+'G  (SDM shield) -> CSAT3 clear + LI-7500 white
+
+' LI7700 wiring
+' connect directly to ethernet port on CR3000
+
+'*** Constants ***
+
+Const CSAT3_AZIMUTH = 0  'unique value: Compass azimuth of the -x axis.  For the figure
+' below, CSAT3_AZIMUTH = 90.
+
+' () -> Compass coordinate system
+' {} -> Right handed coordinate system aligned to north
+'
+'
+'                  (N)
+'                 {-y}
+'                   |
+'                   |
+'                   |
+'                   |
+'                   |
+'                   |
+' (W) {+x} --------[ ]----X---> {-x} (E)
+'                 / |      \
+'       CSAT3 Block |     CSAT3 Transducers
+'                   |
+'                   |
+'                   v
+'                 {+y}
+'                 (S)
+'
+'The program computes the compass wind direction, using the constant
+' CSAT3_AZIMUTH, and a CSAT3 wind direction.  Good CSAT3 wind directions
+' are between -90 to 0 and 0 to 90 degrees, e.g. the wind is blowing into
+' the CSAT3 sensor head.
+
+
+'Measurement Rate         '10 Hz    20 Hz
+Const SCAN_INTERVAL = 100 '100 mSec 50 mSec
+
+'Output period
+Const OUTPUT_INTERVAL = 30 'Averaged data output interval in minutes.
+Const NUM_DAY_CPU = 14     'Number of days of data to store on the CPU.
+Const NUM_DAY_CRD = 28     'Number of days of data to store on the card.
+
+'Determine scan buffer size and the CSAT3 Execution Parameters
+Const SCAN_BUFFER_SIZE = 400*INT (1000/SCAN_INTERVAL) 'Compute 5 minute scan buffer.
+Const CSAT_OPT = INT (1000/SCAN_INTERVAL) 'Compute CSAT3 Execution Parameter (10 or 20 Hz).
+
+'Compute CPU and card storage size for the AVE DataTables.
+Const AVE_SIZE_CPU = (NUM_DAY_CPU*1440)/OUTPUT_INTERVAL 'Size of flux DataTable on CPU [days].
+Const AVE_SIZE_CRD = (NUM_DAY_CRD*1440)/OUTPUT_INTERVAL 'Size of flux DataTable on card [days].
+'
+' constants for sensors
+' net radiometer CNR4 131286 (calibration date 5 april 2013)
+Const pyran_top_mult= 1000/12.96
+Const pyran_bot_mult=1000/12.68
+Const pyrgeo_top_mult = 1000/6.32
+Const pyrgeo_bot_mult = 1000/6.94
+'
+'  need LI190 multipliers, 49840
+'   calibration constant C = 6.57 microamps per 1000 micromoles s-1 m-2
+'    PAR_Cal = 1000/(C * 0.604)
+Const PAR_Cal = 251.998
+Dim cnr4_mult(4)
+Public cnr4(4),cnr4_prt_R,cnr4_T_C,Rs_R0
+Alias cnr4(1) = SW_down
+Alias cnr4(2) = SW_up
+Alias cnr4(3) = LW_down
+Alias cnr4(4) = LW_up
+Units SW_down = W/m^2
+Units SW_up = W/m^2
+Units LW_down = W/m^2
+Units LW_up = W/m^2
+Units cnr4_T_C = C
+Public atmpres
+Units atmpres = hPa+500
+Public TRHData(2)
+Alias TRHData(1)= airTC
+Alias TRHData(2)= RH
+Units airTC = C
+Units RH = %
+Public rain_mm
+Units rain_mm = mm
+Public CS451(2)
+Alias CS451(1) = Level
+Alias CS451(2) = Water_Temp_C
+Units Level = psi
+Units Water_Temp_C = C
+Public PAR_Den
+Units PAR_Den = micro-mol/s/m^2
+
+'
+Const SDM_PER = 30 'Default SDM clock speed.
+'Const Output_interval = 30 'Diagnostic Data table output interval.
+Const Buffer_Size = 527
+Const NBE = 237 'Number of bytes expected
+Public LI7700_time(3) As Long
+Public LI7700(22)
+Public diag_bits(16) As Boolean
+Public tcp_close As Boolean
+Public tcp_open As Boolean
+Public tcpip_socket_status As Long
+Alias LI7700_time(1) = milliseconds
+Alias LI7700_time(2) = seconds
+Alias LI7700_time(3) = nanoseconds
+Alias LI7700(4) = Diag_li7700
+Alias LI7700(5) = CH4_density
+Alias LI7700(6) = CH4_mole_fraction
+Alias LI7700(7) = Temperature
+Alias LI7700(8) = press_li7700
+Alias LI7700(9) = RSSI
+Alias LI7700(10) = Drop_rate
+Alias LI7700(11) = Aux(8)
+Alias LI7700(19) = TC(3)
+Alias LI7700(22) = DATA_checksum
+Alias diag_bits(1) = box_connected
+Alias diag_bits(2) = bad_aux_tc3
+Alias diag_bits(3) = bad_aux_tc2
+Alias diag_bits(4) = bad_aux_tc1
+Alias diag_bits(5) = motor_failure
+Alias diag_bits(6) = calibrating
+Alias diag_bits(7) = bottom_heater_on
+Alias diag_bits(8) = top_heater_on
+Alias diag_bits(9) = pump_on
+Alias diag_bits(10) = motor_spinning
+Alias diag_bits(11) = block_tmpr_unregulated
+Alias diag_bits(12) = laser_tmpr_unregulated
+Alias diag_bits(13) = bad_tmpr
+Alias diag_bits(14) = ref_unlocked
+Alias diag_bits(15) = no_signal
+Alias diag_bits(16) = not_ready
+Units milliseconds = ms
+Units seconds = s
+Units nanoseconds = ns
+Units CH4_density = mmol/m^3
+Units CH4_mole_fraction = umol/mol
+Units Temperature = C
+Units press_li7700 = kPa+50
+Units RSSI = %
+Units Drop_rate = %
+Public socket As Long
+Public DATA_string As String * NBE
+Public NBR As Long 'Number of bytes returned in DATA_string
+Dim checksum_datalogger
+Dim checksum_flag As Boolean
+Dim diag_work As Long
+'*** Variables ***
+
+' voltage and temperature variables
+Public batt_volt  ' battery voltage
+Public panel_temp ' panel temperature
+Units batt_volt = V
+Units panel_temp = C
+
+'Direction CSAT3 is pointed
+Public CSAT3_compass
+Units CSAT3_compass = degrees
+
+'Diagnostic variables
+Dim disable_flag_on(4) As Boolean 'Intermediate processing disable flags
+'   Used to filter the sum of CSAT3 diagnostic warning flags:
+'    disable_flag_on(1) 'TRUE when any CSAT3 warning flag is on or NaN
+'    disable_flag_on(2) 'TRUE when CSAT3 diagnostic warning flags are on
+'
+'   Used to filter the sum of LI-7500 diagnostic warning flags:
+'     disable_flag_on(3) 'TRUE when LI-7500 diagnostic warning flags are on or LI-7500 failed to send data
+'     disable_flag_on(4) 'TRUE when LI-7500 diagnostic warning flags are on
+
+
+Dim n  'Number of valid samples during an output interval
+Units n = samples
+
+'CSAT3 and LI-7500 warning flags
+Public diag_bits2(8) As Boolean
+Alias diag_bits2(1) = del_T_f   'Delta temperature warning flag (CSAT3)
+Alias diag_bits2(2) = sig_lck_f 'Poor signal lock warning flag (CSAT3)
+Alias diag_bits2(3) = amp_h_f   'Amplitude high warning flag (CSAT3)
+Alias diag_bits2(4) = amp_l_f   'Amplitude low warning flag (CSAT3)
+
+Alias diag_bits2(5) = chopper_f  'Chopper warning flag (LI-7500)
+Alias diag_bits2(6) = detector_f 'Detector warning flag (LI-7500)
+Alias diag_bits2(7) = pll_f      'PLL warning flag (LI-7500)
+Alias diag_bits2(8) = sync_f     'Synchronization warning flag (LI-7500)
+
+Units diag_bits2 = samples
+
+Public signalstrength As Long   'signal strength (LI-7500)
+Public diag As Long  'Combined LI-7500 and CSAT3 diagnostics
+Units signalstrength = %
+Units diag = unitless
+
+
+'Program Control flags
+'Public save_ave_flag_on As Boolean
+Public save_ts_flag_on As Boolean
+
+
+'No delay CSAT3 data
+Public wind(5)
+Alias wind(1) = Ux
+Alias wind(2) = Uy
+Alias wind(3) = Uz
+Alias wind(4) = Ts
+Alias wind(5) = diag_csat
+Units Ux = m/s
+Units Uy = m/s
+Units Uz = m/s
+Units Ts = C
+Units diag_csat = unitless
+'Units diag_csat = unitless
+
+'No delay LI-7500 data
+Public irga(4)
+Alias irga(1) = co2
+Alias irga(2) = h2o
+Alias irga(3) = press_li7500
+Alias irga(4) = diag_irga
+Public diag_irga_orig
+Units co2 = mg/m^3 'LI-7500 output is mmol/m^3, but it's then converted to mg/m^3
+Units h2o = g/m^3  'LI-7500 output is mmol/m^3, but it's then converted to g/m^3
+Units press_li7500 = kPa+50
+Units diag_irga = unitless
+
+'Working variables
+
+Dim diag_csat_work As Long 'Working variable used to break out the CSAT3 diagnostic bits
+
+
+'*** Output Data Tables ***
+
+DataTable (ts_data,true,-1)
+  DataInterval (0,SCAN_INTERVAL,mSec,100)
+  Sample (1,Ux,IEEE4)
+  Sample (1,Uy,IEEE4)
+  Sample (1,Uz,IEEE4)
+  Sample (1,Ts,FP2)
+  Sample(1,diag_csat,UINT2)
+  Sample (1,co2,IEEE4)   ' mass density
+  Sample (1,h2o,IEEE4)   ' mass density   mass/m^3
+  Sample(1,press_li7500,fp2)
+  Sample (1,diag_irga,UINT2)
+  Sample(1,CH4_density,IEEE4) ' molar density  micromoles/m^3
+  ' Sample(1,CH4_mole_fraction,IEEE4)
+  Sample(1,Temperature,FP2)
+  Sample(1,press_li7700,fp2)
+  Sample (1,Diag_li7700,UINT2)
+  ' Sample(1,RSSI,FP2)
+EndTable
+
+DataTable(metvalues,true,-1)
+  DataInterval(0,1,min,100)
+  Average(1,panel_temp, fp2,0)
+  Average(1,batt_volt,fp2,0)
+  Average(4,cnr4,ieee4,0)
+  Average(1,cnr4_T_C,ieee4,0)
+  Average(1,PAR_Den,fp2,0)
+  Average(1,atmpres,fp2,0) ' add 500 to get the correct pressure
+  Average(1,airTC,fp2,0)
+  Average(1,RH, fp2, 0)
+  Totalize(1,rain_mm, fp2, 0)
+  Average(1,Level,fp2,0)
+  Average(1,Water_Temp_C,fp2,0)
+EndTable
+
+DataTable(dailydiag,true,-1)   ' this will totalize the number of errors in a day. 
+  DataInterval(0,360,min,0)
+  Totalize(1,n,uint4,NOT(diag_bits2(1)))
+  FieldNames("Del_T_f_csat3:")
+  Totalize(1,n,uint4,NOT(diag_bits2(2)))
+  FieldNames("sig_lock_wrn_csat3:")
+  Totalize(1,n,uint4,NOT(diag_bits2(3)))
+  FieldNames("amp_h_csat3:")
+  Totalize(1,n,uint4,NOT(diag_bits2(4)))
+  FieldNames("amp_l_csat3:")
+  Totalize(1,n,uint4,NOT(diag_bits2(5)))
+  FieldNames("chopper_li7500:")
+  Totalize(1,n,uint4,NOT(diag_bits2(6)))
+  FieldNames("detector_li7500:")
+  Totalize(1,n,uint4,NOT(diag_bits2(7)))
+  FieldNames("pll_li7500:")
+  Totalize(1,n,uint4,NOT(diag_bits2(8)))
+  FieldNames("sync_li7500:")
+  Average(1,signalstrength,FP2,0)
+  fieldnames("signalstrength_li7500")
+  Totalize(1,n,uint4,NOT(motor_failure))
+  FieldNames("motor_fail_li7700:")
+  Totalize(1,n,uint4,NOT(calibrating))
+  FieldNames("calibrate_li7700:")
+  Totalize(1,n,uint4,NOT(bottom_heater_on))
+  FieldNames("bot_heat_on_li7700:")
+  Totalize(1,n,uint4,NOT(top_heater_on))
+  FieldNames("top_heat_on_li7700:")
+  Totalize(1,n,uint4,NOT(pump_on))
+  FieldNames("pump_on_li7700:")
+  Totalize(1,n,uint4,NOT(motor_spinning))
+  FieldNames("motor_spin_li7700:")
+  Totalize(1,n,uint4,NOT(block_tmpr_unregulated))
+  FieldNames("block_tmpr_unreg_li7700:")
+  Totalize(1,n,uint4,NOT(laser_tmpr_unregulated))
+  FieldNames("laser_tmpr_unreg_li7700:")
+  Totalize(1,n,uint4,NOT(bad_tmpr))
+  FieldNames("bad_tmpr_li7700:")
+  Totalize(1,n,uint4,NOT(ref_unlocked))
+  FieldNames("ref_unlocked_li7700:")
+  Totalize(1,n,uint4,NOT(no_signal))
+  FieldNames("no_signal_li7700:")
+  Totalize(1,n,uint4,NOT(not_ready))
+  FieldNames("not_ready_li7700:")
+  Average(1,RSSI,fp2,0)
+  FieldNames("signalstrength_li7700:")
+  Average(1,Drop_rate,fp2,0)
+  FieldNames("droprate_li7700:")
+EndTable
+
+'*** Program ***
+
+BeginProg
+  PipeLineMode
+  TCPClose (101)
+  socket = TCPOpen ("172.24.23.61",7700,Buffer_Size)
+  WriteIO(&B10,&B10)
+  n=1
+  '  save_ave_flag_on = TRUE 'Save averages on compile
+  save_ts_flag_on = TRUE  'Save time series on compile
+  Move (wind(),5,NaN,1)  'Set all CSAT3U variables to NaN
+  Move (irga(),4,NaN,1) 'Set all LI-7500 variables to NaN
+  Move (milliseconds,3,-99999,1)
+  Move (LI7700(1),21,NaN,1)
+  Move (diag_bits(1),16,TRUE,1)
+
+  SDMSpeed (SDM_PER) 'Set the SDM clock speed
+
+  Scan (SCAN_INTERVAL,mSec,SCAN_BUFFER_SIZE,0)
+    SerialInRecord (socket,DATA_string,&h44,0,&h0A,NBR,01)
+    SplitStr (LI7700_time(1),DATA_string,CHR(09),3,4)
+    SplitStr (LI7700(1),DATA_string,CHR(09),22,4)
+    checksum_flag = (DATA_checksum EQV (CheckSum ("D"&DATA_string,7,NBR-2)))
+    checksum_datalogger = CheckSum ("D"&DATA_string,7,NBR-2)
+    'Break up the Diagnostic into 16 separate bits.
+    If ( (NBR <> 0) AND (checksum_flag) ) Then
+      diag_work = Diag_li7700
+      box_connected = diag_work AND &h0001
+      bad_aux_tc3 = diag_work AND &h0002
+      bad_aux_tc2 = diag_work AND &h0004
+      bad_aux_tc1 = diag_work AND &h0008
+      motor_failure = diag_work AND &h0010
+      calibrating = diag_work AND &h0020
+      bottom_heater_on = diag_work AND &h0040
+      top_heater_on = diag_work AND &h0080
+      pump_on = diag_work AND &h0100
+      motor_spinning = diag_work AND &h0200
+      block_tmpr_unregulated = diag_work AND &h0400
+      laser_tmpr_unregulated = diag_work AND &h0800
+      bad_tmpr = diag_work AND &h1000
+      ref_unlocked = diag_work AND &h2000
+      no_signal = diag_work AND &h4000
+      not_ready = diag_work AND &h8000
+    Else
+      Move (milliseconds,3,-99999,1)
+      Move (LI7700(1),21,NaN,1)
+      Move (diag_bits(1),16,TRUE,1)
+    EndIf
+    ' put li7700 pressure in range for fp2 format
+    press_li7700 = press_li7700 - 50
+    '    If NBR<>0 Then
+    '      CallTable Ethernet_data
+    '    EndIf
+
+
+    CSAT3 (wind(),1,3,91,CSAT_OPT) 'Trigger and Get wind, sonic temperature, and diagnostic value
+    CS7500 (irga(),1,7,6)         'Get CO2 and H2O molar density [mmol/m3], pressure [kPa], and diagnostic value
+    ' put pressure in range for fp2 format
+    press_li7500= press_li7500 -50
+
+    'Convert LI-7500 data from molar density [mmol/m^3] to mass density
+    ' 44 [mg/mmol] - molecular weight of carbon dioxide
+    ' 0.018 [g/mmol] - molecular weight of water vapor
+    If (NOT (co2 = -99999)) Then (co2 = co2*44)
+    h2o = h2o*0.018
+
+    'Define 61502 as NaN
+    If (diag_csat = NaN) Then (diag_csat = 61502)
+
+    'Break up the four CSAT3x warning flags into four separate bits
+    diag_csat_work = diag_csat
+    del_T_f = diag_csat_work AND &h8000
+    sig_lck_f = diag_csat_work AND &h4000
+    amp_h_f = diag_csat_work AND &h2000
+    amp_l_f = diag_csat_work AND &h1000
+
+    'Turn on the intermediate processing disable flag when any CSAT3 warning flag is
+    ' high, including the special cases NaN (61502), a Lost Trigger (61440), No Data
+    ' (61503), an SDM error (61441), or wrong CSAT3 embedded code (61442).
+    disable_flag_on(1) = diag_csat_work AND &hf000
+
+    'Turn on only when CSAT3 diagnostic warning flags are set.
+    disable_flag_on(2) = ((del_T_f OR sig_lck_f OR amp_h_f OR amp_l_f) AND NOT (Ts = NaN))
+
+    'Save the four most significant bits of the CSAT3 diagnostics, except for the
+    ' special cases NaN (61502), a Lost Trigger (61440), No Data (61503), an SDM
+    ' error (61441), or wrong CSAT3 embedded code (61442).
+    ' but remap the CSAT3 diagnostics so the two byte FP2 compactly holds the diagnostics
+
+    If diag_csat_work < &hf000 Then
+      diag_csat = INT (diag_csat_work/&h1000) 'no special cases
+    ElseIf diag_csat_work = &hf000 Then
+      diag_csat = &b1001 'lost trigger special case becomes 9
+    ElseIf diag_csat_work = &hf03f Then
+      diag_csat = &b1010 'no data special case becomes 10
+    ElseIf diag_csat_work = &hf002 Then
+      diag_csat = &b1011 'wrong CSAT3 embedded code special case becomes 11
+    ElseIf diag_csat_work = &hf003 Then
+      diag_csat = &b1100 'SDM error special case becomes 12
+    ElseIf diag_csat_work = &hf03e Then
+      diag_csat = &b1101 'NaN special case becomes 13
+    Else
+      diag_csat = &b1111 'take no chances
+    EndIf
+    diag_irga_orig = diag_irga
+    'Swap the LI-7500 diagnostic bit state.
+    diag_irga = diag_irga XOR &h00f0
+
+    'Turn on the intermediate processing disable flag when the LI-7500 has failed to
+    ' send data to the CR3000 via SDM.  Set all flags high and rail the signalstrength to 100.
+    If ((co2 < -99990) OR (co2 = NaN)) Then (diag_irga = &h00ff)
+
+    'Compute the signal strength
+    signalstrength = INT ((diag_irga AND &h000f)*6.67)
+
+    'Break up the four LI-7500 warning flags into four separate bits
+    chopper_f = diag_irga AND &h0080
+    detector_f = diag_irga AND &h0040
+    pll_f = diag_irga AND &h0020
+    sync_f = diag_irga AND &h0010
+
+    'Turn on the intermediate processing disable flag when any LI-7500 warning flag
+    ' is high, including the special cases NaN or an SDM error.
+    disable_flag_on(3) = diag_irga AND &h00f0
+
+    'Turn on only when LI-7500 diagnostic warning flags are set.
+    disable_flag_on(4) = ((chopper_f OR detector_f OR pll_f OR sync_f) AND NOT (diag_irga >= &h00ff))
+
+    'Combine the complete LI-7500 diagnostics with the remapped CSAT3 diagnostics
+    diag = diag_irga + diag_csat * &h100
+
+    ' rain gauge measurement must be in main part of program
+    ' measure rain gauge
+    ' P1 black
+    ' AG white
+    ' G clear
+    PulseCount(rain_mm,1,1,2,0,0.254,0)
+    CallTable ts_data
+    CallTable metvalues
+    CallTable dailydiag
+    '    CallTable comp_ave
+
+    '    If (comp_ave.Output(1,1)) Then
+    '
+    '      GetRecord (ave_out(1),comp_ave,1)
+    '
+    '      'Compass wind directions will be between 0 and 360 degrees
+    '      CSAT3_compass = CSAT3_AZIMUTH 'writes CSAT3_AZIMUTH into the "ave" table
+    '      wnd_dir_compass = (wnd_dir_compass + CSAT3_AZIMUTH) MOD 360
+    '
+    '      'CSAT3 wind direction will be between 0 to 180 degrees and 0 to -180 degrees
+    '      If (wnd_dir_csat3) > 180 Then (wnd_dir_csat3 = wnd_dir_csat3 - 360)
+    '
+    '    EndIf
+    '
+    '    'Write a file mark to the ave table
+    '    If (IfTime (0,1,Day)) Then (FileMark (ave))
+    '    CallTable ave
+
+  NextScan
+
+  SlowSequence
+  cnr4_mult(1) = pyran_top_mult
+  cnr4_mult(2)= pyran_bot_mult
+  cnr4_mult(3)= pyrgeo_top_mult
+  cnr4_mult(4)= pyrgeo_bot_mult
+  Scan(5,sec,3,0)
+    ' measure supply voltage, panel temp, pressure, temperature, humidity, rain, radiation, li-190
+    Battery (batt_volt)        'Measure the battery voltage
+    PanelTemp (panel_temp,250) 'CR3000 panel temperature
+    ' measure pressure with PTB110/CS106
+    ' SE10 blue
+    ' AG Yellow
+    ' G black
+    ' C2 Green
+    ' 12V Red
+    ' G clear
+    VoltSe(atmpres,1,mV5000,10,False,0,250,.240,0)
+    ' CNR4 radiation measurements
+    ' wiring: Pyranometer upper
+    ' 1H signal red
+    ' 1L signal blue
+    ' gnd jumper to 1L
+    ' Pyranometer lower
+    ' 2H signal white
+    ' 2L singal black (thin wire)
+    ' gnd jumper to 2L
+    ' Pyrgeometer upper
+    ' 3H signal grey
+    ' 3L signal yellow
+    ' gnd jumper to 3L
+    ' Pyrgeometer lower
+    ' 4H signal brown
+    ' 4L signal green
+    ' gnd jumper to 4L
+    ' black shield to G
+    VoltDiff(cnr4(),4,mv20C,1,true,0,250,cnr4_mult(),0)
+    ' CNR4 temperature PT100
+    ' CNR 4 temp sensor wiring
+    ' 8H temp green
+    ' 8L temp yellow
+    ' gnd black big wire
+    ' IX1 temp grey
+    ' IXR temp brown
+    Resistance(cnr4_prt_R,1,mv200,12,Ix1,1,1500,true,true, 0,250,1,0)
+    Rs_R0 = cnr4_prt_R/100
+    PRT(cnr4_T_C,1,Rs_R0,1,0)
+    ' measure CS215temperature/humidity sensor, using control port C7
+    ' 12V red
+    ' White G
+    ' black G
+    ' green C7
+    ' clear G
+    SDI12Recorder(airTC,7,"0","M!",1,0)
+    ' measure water level and temp, using control port C5
+    ' 12V Red
+    ' G black
+    ' C5 white
+    ' G blue
+    ' G yellow
+    ' G clear
+    SDI12Recorder(CS451(),5,"0","M!",1,0)
+    ' li-190
+    ' 9H red
+    ' 9L black
+    ' AG jumper from 9L
+    ' G clear
+    VoltDiff(PAR_Den,1,mv20,9, true,0,250,1,0)
+    If PAR_Den< 0 Then PAR_Den=0
+    PAR_Den = PAR_Den * PAR_Cal
+
+    '  NextScan
+    '  EndSequence
+    '  SlowSequence
+    '  Scan (5,Sec,3,0)
+    tcpip_socket_status = SerialInChk (socket)
+    If ( tcp_close ) Then
+      tcp_close = FALSE
+      TCPClose (socket)
+    EndIf
+    If ( (tcpip_socket_status = -1) OR tcp_open) Then
+      tcp_open = FALSE
+      socket = TCPOpen ("172.24.23.61",7700,Buffer_Size)
+    EndIf
+  NextScan
+  EndSequence
+EndProg

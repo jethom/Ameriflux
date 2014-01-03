@@ -1,0 +1,157 @@
+'CR3000 Series Datalogger
+'To create a different opening program template, type in new
+'instructions and select Template | Save as Default Template
+'date:
+'program author:
+
+'Declare Public Variables
+'Example:
+PipeLineMode
+Const Output_interval = 30 'Diagnostic Data table output interval.
+Const Buffer_Size = 527
+Const NBE = 237 'Number of bytes expected
+Public LI7700_time(3) As Long
+Public LI7700(22)
+Public diag_bits(16) As Boolean
+Public tcp_close As Boolean
+Public tcp_open As Boolean
+Public tcpip_socket_status As Long
+Alias LI7700_time(1) = milliseconds
+Alias LI7700_time(2) = seconds
+Alias LI7700_time(3) = nanoseconds
+Alias LI7700(4) = Diagnostic
+Alias LI7700(5) = CH4_density
+Alias LI7700(6) = CH4_mole_fraction
+Alias LI7700(7) = Temperature
+Alias LI7700(8) = Pressure
+Alias LI7700(9) = RSSI
+Alias LI7700(10) = Drop_rate
+Alias LI7700(11) = Aux(8)
+Alias LI7700(19) = TC(3)
+Alias LI7700(22) = DATA_checksum
+Alias diag_bits(1) = box_connected
+Alias diag_bits(2) = bad_aux_tc3
+Alias diag_bits(3) = bad_aux_tc2
+Alias diag_bits(4) = bad_aux_tc1
+Alias diag_bits(5) = motor_failure
+Alias diag_bits(6) = calibrating
+Alias diag_bits(7) = bottom_heater_on
+Alias diag_bits(8) = top_heater_on
+Alias diag_bits(9) = pump_on
+Alias diag_bits(10) = motor_spinning
+Alias diag_bits(11) = block_tmpr_unregulated
+Alias diag_bits(12) = laser_tmpr_unregulated
+Alias diag_bits(13) = bad_tmpr
+Alias diag_bits(14) = ref_unlocked
+Alias diag_bits(15) = no_signal
+Alias diag_bits(16) = not_ready
+Units milliseconds = ms
+Units seconds = s
+Units nanoseconds = ns
+Units CH4_density = mmol/m^3
+Units CH4_mole_fraction = umol/mol
+Units Temperature = C
+Units Pressure = kPa
+Units RSSI = %
+Units Drop_rate = %
+Units TC() = C
+Dim socket As Long
+Dim DATA_string As String * NBE
+Dim NBR As Long 'Number of bytes returned in DATA_string
+Dim checksum_datalogger
+Dim checksum_flag As Boolean
+Dim diag_work As Long
+'Dim n
+DataTable (Ethernet_data,TRUE,-1)
+ ' Sample (3,milliseconds,Long)
+  Sample (6,Diagnostic,IEEE4)
+'  Sample (1,checksum_datalogger,IEEE4)
+EndTable
+'DataTable (Diagnostic_flags,TRUE,-1)
+'  DataInterval (0,Output_interval,Min,100)
+'  FieldNames ("nnd_7700_Tot") 'No new Data (sensor NOT connected OR powered)
+'  Totalize (1,n,IEEE4,NBR<>0 IMP checksum_flag)
+'  FieldNames ("checksum_err_7700_TOT") 'CheckSum error
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (box_connected))
+'  FieldNames ("box_connected _TOT") 'LI-7550 connected OR NOT
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (bad_aux_tc3))
+'  FieldNames ("bad_aux_tc3_TOT") 'Bad reading at TC3
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (bad_aux_tc2))
+'  FieldNames ("bad_aux_tc2_TOT") 'Bad reading at TC2
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (bad_aux_tc1))
+'  FieldNames ("bad_aux_tc1_TOT") 'Bad reading at TC1
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (motor_failure))
+'  FieldNames ("motor_failure_TOT") 'Mirror spin motor failure
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (calibrating))
+'  FieldNames ("calibrating_TOT") 'Calibration routine enabled
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (bottom_heater_on))
+'  FieldNames ("bottom_heater_on_TOT") 'Bottom mirror heater on
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (top_heater_on))
+'  FieldNames ("top_heater_on_TOT")  'Top mirror heater on
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (pump_on))
+'  FieldNames ("pump_on_TOT")   'Washer pump activated
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (motor_spinning))
+'  FieldNames ("motor_spinning_TOT") 'Bottom mirror spinning
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (block_tmpr_unregulated))
+'  FieldNames ("block_tmpr_unregulated_TOT") 'Block temp NOT at set point
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (laser_tmpr_unregulated)))
+'  FieldNames ("laser_tmpr_unregulated_TOT") 'Laser temp NOT at set point
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (bad_tmpr))
+'  FieldNames ("bad_tmpr_TOT") 'Bad TC in optical path
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (ref_unlocked))
+'  FieldNames ("ref_unlocked_TOT") 'Reference signal NOT line locked
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (no_signal))
+'  FieldNames ("no_signal_TOT")   'No laser signal detected
+'  Totalize (1,n,IEEE4,checksum_flag IMP NOT (not_ready))
+'  FieldNames ("not_ready_TOT")   'LI-7700 NOT ready
+'EndTable
+BeginProg
+  TCPClose (101)
+ ' n = 1
+  Scan (100,mSec,300,0)
+    SerialInRecord (socket,DATA_string,&h44,0,&h0A,NBR,01)
+    SplitStr (LI7700_time(1),DATA_string,CHR(09),3,4)
+    SplitStr (LI7700(1),DATA_string,CHR(09),22,4)
+    checksum_flag = (DATA_checksum EQV (CheckSum ("D"&DATA_string,7,NBR-2)))
+    checksum_datalogger = CheckSum ("D"&DATA_string,7,NBR-2)
+    'Break up the Diagnostic into 16 separate bits.
+    If ( (NBR <> 0) AND (checksum_flag) ) Then
+      diag_work = Diagnostic
+      box_connected = diag_work AND &h0001
+      bad_aux_tc3 = diag_work AND &h0002
+      bad_aux_tc2 = diag_work AND &h0004
+      bad_aux_tc1 = diag_work AND &h0008
+      motor_failure = diag_work AND &h0010
+      calibrating = diag_work AND &h0020
+      bottom_heater_on = diag_work AND &h0040
+      top_heater_on = diag_work AND &h0080
+      pump_on = diag_work AND &h0100
+      motor_spinning = diag_work AND &h0200
+      block_tmpr_unregulated = diag_work AND &h0400
+      laser_tmpr_unregulated = diag_work AND &h0800
+      bad_tmpr = diag_work AND &h1000
+      ref_unlocked = diag_work AND &h2000
+      no_signal = diag_work AND &h4000
+      not_ready = diag_work AND &h8000
+    Else
+      Move (milliseconds,3,-99999,1)
+      Move (LI7700(1),21,NaN,1)
+      Move (diag_bits(1),16,TRUE,1)
+    EndIf
+    If NBR<>0 Then
+      CallTable Ethernet_data
+    EndIf
+ '  CallTable Diagnostic_flags
+  NextScan
+  SlowSequence
+  Scan (5,Sec,3,0)
+    tcpip_socket_status = SerialInChk (socket)
+    If ( tcp_close ) Then
+      tcp_close = FALSE
+      TCPClose (socket)
+    EndIf
+    If ( (tcpip_socket_status = -1) OR tcp_open) Then
+      tcp_open = FALSE
+      socket = TCPOpen ("172.24.23.61",7700,Buffer_Size)
+    EndIf
+  NextScan
