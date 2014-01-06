@@ -23,7 +23,7 @@ Public Flag(18) As Boolean
 Public licors(9)
 Public t2(3)
 Public p(3)
-Public flow(3)
+Public flow(3),tankPres(2)
 Alias licors(1)=top_co2
 Alias licors(2)=top_h20
 Alias licors(3)=top_t
@@ -42,6 +42,8 @@ Alias t2(3)=bot_t2
 Alias flow(1)=top_flow
 Alias flow(2)=mid_flow
 Alias flow(3)=bot_flow
+Alias tankPres(1) = towerN2
+Alias tankPres(2) = licorN2
 
 Units top_co2 = volts
 Units top_h20 = volts
@@ -61,18 +63,21 @@ Units bot_flow = slpm
 Units top_p = kPa
 Units mid_p = kPa
 Units bot_p = kPa
+Units towerN2 = psi
+Units licorN2 = psi
 
 ' constants for sensors
-' net radiometer CNR4 131286 (calibration date 5 april 2013)
-Const pyran_top_mult= 1000/12.96
-Const pyran_bot_mult=1000/12.68
-Const pyrgeo_top_mult = 1000/6.32
-Const pyrgeo_bot_mult = 1000/6.94
+' net radiometer CNR4 131285 (calibration date 5 april 2013)
+Const pyran_top_mult= 1000/16.12
+Const pyran_bot_mult=1000/12.07
+Const pyrgeo_top_mult = 1000/6.87
+Const pyrgeo_bot_mult = 1000/6.72
 '
-'  need LI190 multipliers, 49840
-'   calibration constant C = 6.57 microamps per 1000 micromoles s-1 m-2
+'  need LI190 multipliers, 
+'     serial number: Q48064
+'   calibration constant C = 6.86 microamps per 1000 micromoles s-1 m-2
 '    PAR_Cal = 1000/(C * 0.604)
-Const PAR_Cal = 251.998
+Const PAR_Cal = 241.35
 ' voltage and temperature variables
 Public batt_volt  ' battery voltage
 Public panel_temp ' panel temperature
@@ -98,11 +103,6 @@ Units airTC = C
 Units RH = %
 Public rain_mm
 Units rain_mm = mm
-Public CS451(2)
-Alias CS451(1) = Level
-Alias CS451(2) = Water_Temp_C
-Units Level = psi
-Units Water_Temp_C = C
 Public PAR_Den
 Units PAR_Den = micro-mol/s/m^2
 '\\\\\\\\\\\\\\\\\\\\\\\\ OUTPUT SECTION ////////////////////////
@@ -112,6 +112,23 @@ DataTable(fastData,True,-1)
   Sample(3, top_t2, FP2)
   Sample(3,top_p, FP2)
   Sample(3, top_flow, FP2)
+EndTable
+DataTable(metvalue,true,-1)
+  DataInterval(0,1,min,0)
+  Average(1,panel_temp, fp2,0)
+  Average(1,batt_volt,fp2,0)
+  Average(4,cnr4,ieee4,0)
+  Average(1,cnr4_T_C,ieee4,0)
+  Average(1,PAR_Den,fp2,0)
+  Average(1,atmpres,fp2,0) ' add 500 to get the correct pressure
+  Average(1,airTC,fp2,0)
+  Average(1,RH, fp2, 0)
+  Totalize(1,rain_mm, fp2, 0)
+EndTable
+DataTable(diagnostics,true,-1)
+  DataInterval(0,60,min,0)
+  Average(3,top_flow,fp2,False)
+  Average(2,towerN2,fp2,false)
 EndTable
 
 '\\\\\\\\\\\\\\\\\\\\\\\\\ SUBROUTINES //////////////////////////
@@ -144,9 +161,16 @@ BeginProg
     VoltSe(top_p, 3, mV5000, 19, False, 0, 250, 0.0267, 0)
 
     ' rain gauge measurement
-
+    ' rain gauge measurement must be in main part of program
+    ' measure rain gauge
+    ' P1 black
+    ' AG white
+    ' G clear
+    PulseCount(rain_mm,1,1,2,0,0.254,0)
     ' OUTPUT DATA
     CallTable fastData
+    CallTable metvalue
+    CallTable diagnostics
 
   NextScan
 
@@ -162,43 +186,42 @@ BeginProg
     ' net radiometer
     ' CNR4 radiation measurements
     ' wiring: Pyranometer upper
-    ' 1H signal red
-    ' 1L signal blue
+    ' 7H signal red
+    ' 7L signal blue
     ' gnd jumper to 1L
     ' Pyranometer lower
-    ' 2H signal white
-    ' 2L singal black (thin wire)
+    ' 8H signal white
+    ' 8L singal black (thin wire)
     ' gnd jumper to 2L
     ' Pyrgeometer upper
-    ' 3H signal grey
-    ' 3L signal yellow
+    ' 9H signal grey
+    ' 9L signal yellow
     ' gnd jumper to 3L
     ' Pyrgeometer lower
-    ' 4H signal brown
-    ' 4L signal green
+    ' 10H signal brown
+    ' 10L signal green
     ' gnd jumper to 4L
     ' black shield to G
-    VoltDiff(cnr4(),4,mv20C,1,true,0,250,cnr4_mult(),0)
+    VoltDiff(cnr4(),4,mv20C,7,true,0,_60Hz,cnr4_mult(),0)
     ' CNR4 temperature PT100
     ' CNR 4 temp sensor wiring
-    ' 8H temp green
-    ' 8L temp yellow
+    ' 11H temp green
+    ' 11L temp yellow
     ' gnd black big wire
     ' IX1 temp grey
     ' IXR temp brown
-    Resistance(cnr4_prt_R,1,mv200,12,Ix1,1,1500,true,true, 0,250,1,0)
+    Resistance(cnr4_prt_R,1,mv200,11,Ix1,1,1500,true,true, 0,_60Hz,1,0)
     Rs_R0 = cnr4_prt_R/100
     PRT(cnr4_T_C,1,Rs_R0,1,0)
-    ' pyranometer
 
     'PAR Sensor
 
     ' li-190
-    ' 9H red
-    ' 9L black
+    ' 12H red
+    ' 12L black
     ' AG jumper from 9L
     ' G clear
-    VoltDiff(PAR_Den,1,mv20,9, true,0,250,1,0)
+    VoltDiff(PAR_Den,1,mv20,12, true,0,_60Hz,1,0)
     If PAR_Den< 0 Then PAR_Den=0
     PAR_Den = PAR_Den * PAR_Cal
     ' atmospheric pressure
@@ -209,16 +232,58 @@ BeginProg
     ' C2 Green
     ' 12V Red
     ' G clear
-    VoltSe(atmpres,1,mV5000,10,False,0,250,.240,0)
-    
+    VoltSe(atmpres,1,mV5000,25,False,0,_60Hz,.240,0)
+    ' cs500 temp/rh sensor
+    VoltSe(airTC,1,mV1000,26,False,0,_60Hz,.1,-40)
+    VoltSe(RH,1,mv1000,27,false,0,_60Hz,.1,0)
     ' measure CS215temperature/humidity sensor, using control port C7
     ' 12V red
     ' White G
     ' black G
     ' green C7
     ' clear G
-    SDI12Recorder(airTC,7,"0","M!",1,0)
+    'SDI12Recorder(airTC,7,"0","M!",1,0)
 
   NextScan
-
+  EndSequence
+  ' slow sequence for diagnostic values, tank pressures, and flow rates for top, mid and bottom
+  ' try measuring once a minute then average to hourly output
+  ' res - c1
+  ' clk - c2
+  ' gnd - G
+  ' 12V - 12V
+  ' COM H1 - SE28
+  ' COM L1 - AG
+  ' shied - G
+  SlowSequence
+  Scan(60,sec,5,0)
+    PortSet(1,1)
+    PulsePort (2 ,10000)
+    ' measure the flow rate top
+    VoltSe(top_flow,1,mV5000,28,True,0,_60Hz,.01,0)
+    PulsePort(2,10000)
+    ' green H1-2
+    ' white L1-2
+    ' Red 12V
+    ' black power common
+    VoltSe(mid_flow,1,mv5000,28,true,0,_60Hz,.01,0)
+    PulsePort(2,10000)
+    ' green H1-3
+    ' white L1-3
+    ' Red 12V
+    ' black power common
+    VoltSe(bot_flow,1,mv5000,28,true,0,_60Hz,.01,0)
+    PulsePort(2,10000)
+    ' white H1-4
+    ' black L1-4
+    ' red 12V
+    VoltSe(towerN2,1,mv5000,28,true,0,_60Hz,0.6,0)
+    PulsePort(2,10000)
+    ' white H1-5
+    ' black L1-5
+    ' red 12V
+    VoltSe(licorN2,1,mv5000,28,true,0,_60Hz,0.6,0)
+    PortSet(1,0)
+  NextScan
+  EndSequence
 EndProg
