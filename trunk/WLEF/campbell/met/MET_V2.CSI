@@ -1,0 +1,209 @@
+;{CR10}
+; WLEF Micromet data
+;
+; Bruce: work on sensor description, wiring, sampling/output info here!!
+; Written by Bruce Cook
+; May 2006
+
+*Table 1 Program
+  01: 1         Execution Interval (seconds)
+
+; PAR SENSOR
+;Calibration info:
+;----------------
+;LICOR calibration (uA/1000 umols m^-2 s^-1) = 1/LICOR multiplier*1000
+;CSI multiplier (umol m^-2 s^-1/mV) = 1000/(LICOR calibration*resistor)
+;
+;Calculation:
+;-----------
+;LICOR calibration=6.86 microamps/1000 micromol s -1 m -2
+;CSI multiplier=1000/(6.86*.604)=-241.35
+;Units: umol m^-2 s^-1
+; postive for incoming
+; serial number: Q48064
+1:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 23       25 mV 60 Hz Rejection Range
+ 3: 1        DIFF Channel
+ 4: 1        Loc [ par       ]
+ 5: 1        Mult
+ 6: 0.0      Offset
+
+2:  If (X<=>F) (P89)
+ 1: 1        X Loc [ par       ]
+ 2: 4        <
+ 3: 0.0      F
+ 4: 30       Then Do
+
+     3:  Z=F x 10^n (P30)
+      1: 0.0      F
+      2: 00       n, Exponent of 10
+      3: 1        Z Loc [ par       ]
+
+4:  End (P95)
+
+5:  Z=X*F (P37)
+ 1: 1        X Loc [ par       ]
+ 2: 241.35   F
+ 3: 1        Z Loc [ par       ]
+
+; PYRANOMETER (shunt resistor tuned to specific output mult)
+; Units: W m^-2
+; positive is incoming units
+; serail number PY79964
+6:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 23       25 mV 60 Hz Rejection Range
+ 3: 2        DIFF Channel
+ 4: 2        Loc [ pyran     ]
+ 5: 1        Mult
+ 6: 0.0      Offset
+
+7:  If (X<=>F) (P89)
+ 1: 2        X Loc [ pyran     ]
+ 2: 4        <
+ 3: 0.0      F
+ 4: 30       Then Do
+
+     8:  Z=F x 10^n (P30)
+      1: 0        F
+      2: 0        n, Exponent of 10
+      3: 2        Z Loc [ pyran     ]
+
+9:  End (P95)
+
+; convert to W/m^2
+10:  Z=X*F (P37)
+ 1: 2        X Loc [ pyran     ]
+ 2: 200      F
+ 3: 2        Z Loc [ pyran     ]
+
+; CS500 T/RH PROBE
+11:  Volt (SE) (P1)
+ 1: 1        Reps
+ 2: 25       2500 mV 60 Hz Rejection Range
+ 3: 5        SE Channel
+ 4: 3        Loc [ air_t     ]
+ 5: .1       Mult
+ 6: -40      Offset
+
+12:  Volt (SE) (P1)
+ 1: 1        Reps
+ 2: 25       2500 mV 60 Hz Rejection Range
+ 3: 6        SE Channel
+ 4: 4        Loc [ rh        ]
+ 5: .1       Mult
+ 6: 0        Offset
+
+;PRECIPITATION GAUGE
+;Calibrate 24 July 2006
+13:  Pulse (P3)
+ 1: 1        Reps
+ 2: 1        Pulse Input Channel
+ 3: 2        Switch Closure, All Counts
+ 4: 5        Loc [ precip    ]
+ 5: .2718    Mult ; mm output
+ 6: 0.0      Offset
+
+14:  Volt (SE) (P1)
+ 1: 1        Reps
+ 2: 15       2500 mV Fast Range
+ 3: 7        SE Channel
+ 4: 6        Loc [ atm_p     ]
+ 5: .2       Mult
+ 6: 600      Offset
+
+15:  Z=X*F (P37)
+ 1: 6        X Loc [ atm_p     ]
+ 2: .1       F
+ 3: 6        Z Loc [ atm_p     ]
+
+; OUTPUT DATA
+16:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 1        Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+17:  Real Time (P77)^21755
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000)
+
+18:  Resolution (P78)
+ 1: 0        Low Resolution
+
+19:  Average (P71)^18882
+ 1: 4        Reps
+ 2: 1        Loc [ par       ]
+
+20:  Totalize (P72)^17044
+ 1: 1        Reps
+ 2: 5        Loc [ precip    ]
+
+21:  Resolution (P78)
+ 1: 1        High Resolution
+
+22:  Average (P71)^21882
+ 1: 1        Reps
+ 2: 6        Loc [ atm_p     ]
+
+*Table 2 Program
+  02: 0.0000    Execution Interval (seconds)
+
+*Table 3 Subroutines
+
+End Program
+
+
+
+
+
+
+
+
+-Input Locations-
+1 par       1 3 3
+2 pyran     1 3 2
+3 air_t     5 1 1
+4 rh        1 1 1
+5 precip    1 1 1
+6 atm_p     1 2 2
+7 _________ 1 0 0
+8 _________ 1 0 0
+9 _________ 1 0 0
+10 _________ 0 0 0
+11 _________ 0 0 0
+12 _________ 0 0 0
+13 _________ 0 0 0
+14 _________ 0 0 0
+15 _________ 0 0 0
+16 _________ 0 0 0
+17 _________ 0 0 0
+18 _________ 0 0 0
+19 _________ 0 0 0
+20 _________ 0 0 0
+21 _________ 0 0 0
+22 _________ 0 0 0
+23 _________ 0 0 0
+24 _________ 0 0 0
+25 _________ 0 0 0
+26 _________ 0 0 0
+27 _________ 0 0 0
+28 _________ 0 0 0
+-Program Security-
+0000
+0000
+0000
+-Mode 4-
+-Final Storage Area 2-
+0
+-DLD File Labels-
+0
+-Final Storage Labels-
+0,Year_RTM,21755
+0,Day_RTM
+0,Hour_Minute_RTM
+1,par_AVG~1,18882
+1,pyran_AVG~2
+1,air_t_AVG~3
+1,rh_AVG~4
+2,precip_TOT~5,17044
+3,atm_p_AVG~6,21882
