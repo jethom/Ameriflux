@@ -126,9 +126,9 @@ DataTable(metvalue,true,-1)
   Totalize(1,rain_mm, fp2, 0)
 EndTable
 DataTable(diagnostics,true,-1)
-  DataInterval(0,60,min,0)
-  Average(3,top_flow,fp2,False)
-  Average(2,towerN2,fp2,false)
+  DataInterval(0,1,min,0)
+  Sample(3,top_flow,fp2)
+  sample(2,towerN2,fp2)
 EndTable
 
 '\\\\\\\\\\\\\\\\\\\\\\\\\ SUBROUTINES //////////////////////////
