@@ -111,7 +111,6 @@ DataTable(fastData,True,-1)
   Sample(9, top_co2, Fp2)
   Sample(3, top_t2, FP2)
   Sample(3,top_p, FP2)
-  Sample(3, top_flow, FP2)
 EndTable
 DataTable(metvalue,true,-1)
   DataInterval(0,1,min,0)
