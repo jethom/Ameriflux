@@ -112,18 +112,18 @@ DataTable(fastData,True,-1)
   Sample(3, top_t2, FP2)
   Sample(3,top_p, FP2)
 EndTable
-DataTable(metvalue,true,-1)
-  DataInterval(0,1,min,0)
-  Average(1,panel_temp, fp2,0)
-  Average(1,batt_volt,fp2,0)
-  Average(4,cnr4,ieee4,0)
-  Average(1,cnr4_T_C,ieee4,0)
-  Average(1,PAR_Den,fp2,0)
-  Average(1,atmpres,fp2,0) ' add 500 to get the correct pressure
-  Average(1,airTC,fp2,0)
-  Average(1,RH, fp2, 0)
-  Totalize(1,rain_mm, fp2, 0)
-EndTable
+'DataTable(metvalue,true,-1)
+'  DataInterval(0,1,min,0)
+'  Average(1,panel_temp, fp2,0)
+'  Average(1,batt_volt,fp2,0)
+'  Average(4,cnr4,ieee4,0)
+'  Average(1,cnr4_T_C,ieee4,0)
+'  Average(1,PAR_Den,fp2,0)
+'  Average(1,atmpres,fp2,0) ' add 500 to get the correct pressure
+'  Average(1,airTC,fp2,0)
+'  Average(1,RH, fp2, 0)
+'  Totalize(1,rain_mm, fp2, 0)
+'EndTable
 DataTable(diagnostics,true,-1)
   DataInterval(0,1,min,0)
   Sample(3,top_flow,fp2)
@@ -139,25 +139,21 @@ BeginProg
 
   Scan(100,mSec, 3, 0)
     ' LICOR MEASUREMENTS
-    VoltSe(top_co2, 9, mV5000, 1, False, 0, 250, 1, 0)
+    VoltSe(top_co2, 9, mV5000, 1, False, 0,250, 1, 0)
     ' convert licor temperature from voltage to degC
     top_t = top_t * 50. / 4096.
     mid_t = mid_t * 50. / 4096.
     bot_t = bot_t * 50. / 4096.
-    '  FLOW METER
-    ' Aalborg GFM371, S/N G10643
-    ' 0..5V = 0..50 SLPM
-    VoltSe(top_flow, 3, mV5000, 10, True, 0, 250, 0.01, 0)
     ' IN-LINE SAMPLE T
     ' Omega TX94-2 used to transmit RTD temperature signal (mA) to logger
     ' NOTE: This is different from top box, which uses TX94-1
     ' 100 ohm precision resister used to convert current to voltage
-    VoltDiff(top_t2, 3, mV5000, 7, True, 0, 250, 0.0694, -45.5555)
+    VoltDiff(top_t2, 3, mV5000, 6, True, 0,250, 0.0694, -45.5555)
     ' IN-LINE SAMPLE P
     ' MKS Baratron type 127
     ' CSI VDIV10.1 voltage divider (b/c 100 kPa = 750 torr = 7.5V)
     ' 0..10V = 0..1000 torr; 1 torr = 0.1333224 kPa
-    VoltSe(top_p, 3, mV5000, 19, False, 0, 250, 0.0267, 0)
+    VoltSe(top_p, 3, mV5000, 17, False, 0,250, 0.0267, 0)
 
     ' rain gauge measurement
     ' rain gauge measurement must be in main part of program
@@ -165,86 +161,86 @@ BeginProg
     ' P1 black
     ' AG white
     ' G clear
-    PulseCount(rain_mm,1,1,2,0,0.254,0)
+'   PulseCount(rain_mm,1,1,2,0,0.254,0)
     ' OUTPUT DATA
     CallTable fastData
-    CallTable metvalue
+  ' CallTable metvalue
     CallTable diagnostics
 
   NextScan
 
-  ' slow sequence for the met data
-  SlowSequence
-  cnr4_mult(1) = pyran_top_mult
-  cnr4_mult(2)= pyran_bot_mult
-  cnr4_mult(3)= pyrgeo_top_mult
-  cnr4_mult(4)= pyrgeo_bot_mult
-  Scan(5,sec,10,0)
-    Battery (batt_volt)        'Measure the battery voltage
-    PanelTemp (panel_temp,250) 'CR3000 panel temperature
-    ' net radiometer
-    ' CNR4 radiation measurements
-    ' wiring: Pyranometer upper
-    ' 7H signal red
-    ' 7L signal blue
-    ' gnd jumper to 1L
-    ' Pyranometer lower
-    ' 8H signal white
-    ' 8L singal black (thin wire)
-    ' gnd jumper to 2L
-    ' Pyrgeometer upper
-    ' 9H signal grey
-    ' 9L signal yellow
-    ' gnd jumper to 3L
-    ' Pyrgeometer lower
-    ' 10H signal brown
-    ' 10L signal green
-    ' gnd jumper to 4L
-    ' black shield to G
-    VoltDiff(cnr4(),4,mv20C,7,true,0,_60Hz,cnr4_mult(),0)
-    ' CNR4 temperature PT100
-    ' CNR 4 temp sensor wiring
-    ' 11H temp green
-    ' 11L temp yellow
-    ' gnd black big wire
-    ' IX1 temp grey
-    ' IXR temp brown
-    Resistance(cnr4_prt_R,1,mv200,11,Ix1,1,1500,true,true, 0,_60Hz,1,0)
-    Rs_R0 = cnr4_prt_R/100
-    PRT(cnr4_T_C,1,Rs_R0,1,0)
+'  ' slow sequence for the met data
+'  SlowSequence
+'  cnr4_mult(1) = pyran_top_mult
+'  cnr4_mult(2)= pyran_bot_mult
+'  cnr4_mult(3)= pyrgeo_top_mult
+'  cnr4_mult(4)= pyrgeo_bot_mult
+'  Scan(5,sec,10,0)
+'    Battery (batt_volt)        'Measure the battery voltage
+'    PanelTemp (panel_temp,250) 'CR3000 panel temperature
+'    ' net radiometer
+'    ' CNR4 radiation measurements
+'    ' wiring: Pyranometer upper
+'    ' 7H signal red
+'    ' 7L signal blue
+'    ' gnd jumper to 1L
+'    ' Pyranometer lower
+'    ' 8H signal white
+'    ' 8L singal black (thin wire)
+'    ' gnd jumper to 2L
+'    ' Pyrgeometer upper
+'    ' 9H signal grey
+'    ' 9L signal yellow
+'    ' gnd jumper to 3L
+'    ' Pyrgeometer lower
+'    ' 10H signal brown
+'    ' 10L signal green
+'    ' gnd jumper to 4L
+'    ' black shield to G
+'    VoltDiff(cnr4(),4,mv20C,7,true,0,_60Hz,cnr4_mult(),0)
+'    ' CNR4 temperature PT100
+'    ' CNR 4 temp sensor wiring
+'    ' 11H temp green
+'    ' 11L temp yellow
+'    ' gnd black big wire
+'    ' IX1 temp grey
+'    ' IXR temp brown
+'    Resistance(cnr4_prt_R,1,mv200,11,Ix1,1,1500,true,true, 0,_60Hz,1,0)
+'    Rs_R0 = cnr4_prt_R/100
+'    PRT(cnr4_T_C,1,Rs_R0,1,0)
+'
+'    'PAR Sensor
+'
+'    ' li-190
+'    ' 12H red
+'    ' 12L black
+'    ' AG jumper from 9L
+'    ' G clear
+'    VoltDiff(PAR_Den,1,mv20,12, true,0,_60Hz,1,0)
+'    If PAR_Den< 0 Then PAR_Den=0
+'    PAR_Den = PAR_Den * PAR_Cal
+'    ' atmospheric pressure
+'    ' measure pressure with PTB110/CS106
+'    ' SE10 blue
+'    ' AG Yellow
+'    ' G black
+'    ' C2 Green
+'    ' 12V Red
+'    ' G clear
+'    VoltSe(atmpres,1,mV5000,25,False,0,_60Hz,.240,0)
+'    ' cs500 temp/rh sensor
+'    VoltSe(airTC,1,mV1000,26,False,0,_60Hz,.1,-40)
+'    VoltSe(RH,1,mv1000,27,false,0,_60Hz,.1,0)
+'    ' measure CS215temperature/humidity sensor, using control port C7
+'    ' 12V red
+'    ' White G
+'    ' black G
+'    ' green C7
+'    ' clear G
+'    'SDI12Recorder(airTC,7,"0","M!",1,0)
 
-    'PAR Sensor
-
-    ' li-190
-    ' 12H red
-    ' 12L black
-    ' AG jumper from 9L
-    ' G clear
-    VoltDiff(PAR_Den,1,mv20,12, true,0,_60Hz,1,0)
-    If PAR_Den< 0 Then PAR_Den=0
-    PAR_Den = PAR_Den * PAR_Cal
-    ' atmospheric pressure
-    ' measure pressure with PTB110/CS106
-    ' SE10 blue
-    ' AG Yellow
-    ' G black
-    ' C2 Green
-    ' 12V Red
-    ' G clear
-    VoltSe(atmpres,1,mV5000,25,False,0,_60Hz,.240,0)
-    ' cs500 temp/rh sensor
-    VoltSe(airTC,1,mV1000,26,False,0,_60Hz,.1,-40)
-    VoltSe(RH,1,mv1000,27,false,0,_60Hz,.1,0)
-    ' measure CS215temperature/humidity sensor, using control port C7
-    ' 12V red
-    ' White G
-    ' black G
-    ' green C7
-    ' clear G
-    'SDI12Recorder(airTC,7,"0","M!",1,0)
-
-  NextScan
-  EndSequence
+'  NextScan
+'  EndSequence
   ' slow sequence for diagnostic values, tank pressures, and flow rates for top, mid and bottom
   ' try measuring once a minute then average to hourly output
   ' res - c1
@@ -256,33 +252,33 @@ BeginProg
   ' shied - G
   SlowSequence
   Scan(60,sec,5,0)
-    PortSet(1,1)
-    PulsePort (2 ,10000)
+ '   PortSet(1,1)
+ '  PulsePort (2 ,10000)
     ' measure the flow rate top
-    VoltSe(top_flow,1,mV5000,28,True,0,_60Hz,.01,0)
-    PulsePort(2,10000)
+    VoltSe(top_flow,1,mV5000,21,True,0,250,.01,0)
+ '   PulsePort(2,10000)
     ' green H1-2
     ' white L1-2
     ' Red 12V
     ' black power common
-    VoltSe(mid_flow,1,mv5000,28,true,0,_60Hz,.01,0)
-    PulsePort(2,10000)
+    VoltSe(mid_flow,1,mv5000,22,true,0,250,.01,0)
+ '   PulsePort(2,10000)
     ' green H1-3
     ' white L1-3
     ' Red 12V
     ' black power common
-    VoltSe(bot_flow,1,mv5000,28,true,0,_60Hz,.01,0)
-    PulsePort(2,10000)
+    VoltSe(bot_flow,1,mv5000,23,true,0,250,.01,0)
+ '   PulsePort(2,10000)
     ' white H1-4
     ' black L1-4
     ' red 12V
-    VoltSe(towerN2,1,mv5000,28,true,0,_60Hz,0.6,0)
-    PulsePort(2,10000)
+    VoltSe(towerN2,1,mv5000,24,true,0,250,0.6,0)
+  '  PulsePort(2,10000)
     ' white H1-5
     ' black L1-5
     ' red 12V
-    VoltSe(licorN2,1,mv5000,28,true,0,_60Hz,0.6,0)
-    PortSet(1,0)
+    VoltSe(licorN2,1,mv5000,25,true,0,250,0.6,0)
+  '  PortSet(1,0)
   NextScan
   EndSequence
 EndProg

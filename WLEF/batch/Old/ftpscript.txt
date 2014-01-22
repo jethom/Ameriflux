@@ -1,0 +1,22 @@
+# This script is used by winscp to upload daily log to eddy
+# Note: make sure windscp is in path
+#
+# Written by Bruce Cook
+# Last modified: May 2006
+#
+# Automatically answer all prompts negatively not to stall the script on errors
+option batch on
+# Disable overwrite confirmations that conflict with the previous
+option confirm off
+# Connect using a password (user:password@host)
+open bcook:61172yang@eddy.met.psu.edu
+# Change remote directory
+cd /eddy/s2/incoming/wlef_new
+# Force binary mode transfer
+option transfer binary
+# Upload the file or directory to current working directory
+put log*.gz
+# Disconnect
+close
+# Exit WinSCP
+exit
