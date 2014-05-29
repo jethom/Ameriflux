@@ -108,9 +108,9 @@ Units PAR_Den = micro-mol/s/m^2
 '\\\\\\\\\\\\\\\\\\\\\\\\ OUTPUT SECTION ////////////////////////
 
 DataTable(fastData,True,-1)
-  Sample(9, top_co2, Fp2)
-  Sample(3, top_t2, FP2)
-  Sample(3,top_p, FP2)
+  Sample(9, top_co2,IEEE4)
+  Sample(3, top_t2,IEEE4)
+  Sample(3,top_p,IEEE4)
 EndTable
 'DataTable(metvalue,true,-1)
 '  DataInterval(0,1,min,0)
@@ -126,8 +126,8 @@ EndTable
 'EndTable
 DataTable(diagnostics,true,-1)
   DataInterval(0,1,min,0)
-  Sample(3,top_flow,fp2)
-  sample(2,towerN2,fp2)
+  Sample(3,top_flow,FP2)
+  Sample(2,towerN2,IEEE4)
 EndTable
 
 '\\\\\\\\\\\\\\\\\\\\\\\\\ SUBROUTINES //////////////////////////
