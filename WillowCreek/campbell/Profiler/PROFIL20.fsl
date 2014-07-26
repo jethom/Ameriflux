@@ -1,0 +1,67 @@
+Final Storage Label File for:  PROFIL20.csi
+Date:  7/26/2014
+Time:  15:38:01
+
+238 Output_Table   3.00 Min
+1 238 L
+2 Year_RTM  L
+3 Day_RTM  L
+4 Hour_Minute_RTM  L
+5 ID  L
+6 Avg_T  H
+7 Avg_P  H
+8 Avg_CO2  H
+
+2 Output_Table  10.00 Min
+1 2 L
+2 Year_RTM  H
+3 Day_RTM  H
+4 Hour_Minute_RTM  H
+5 Battery  H
+6 AirT_200  H
+7 AirT_100  H
+8 AirT_75  H
+9 AirT_50  H
+10 AirT_25  H
+11 SoilT_0  H
+12 SoilT_5  H
+13 SoilT_10  H
+14 SoilT_20  H
+15 SoilT_50  H
+16 SoilT_100  H
+17 TreeT_N  H
+18 TreeT_S  H
+19 Heatflux  H
+20 SoilW_5  H
+21 SoilW_10  H
+22 SoilW_20  H
+23 SoilW_50  H
+24 SoilW_100  H
+25 PAR_60ft_AVG  H
+26 PAR_40ft_AVG  H
+27 PAR_25ft_AVG  H
+28 PAR_2m_AVG  H
+29 WSpd_80ft_S_WVT  H
+30 WDir_80ft_D1_WVT  H
+31 WSpd_40ft_S_WVT  H
+32 WDir_40ft_D1_WVT  H
+33 WSpd_2m_S_WVT  H
+34 WDir_2m_D1_WVT  H
+35 AirT_80ft_AVG  H
+36 AirT_60ft_AVG  H
+37 AirT_40ft_AVG  H
+38 AirT_25ft_AVG  H
+39 AirT_2m_AVG  H
+40 RH_80ft_AVG  H
+41 RH_60ft_AVG  H
+42 RH_40ft_AVG  H
+43 RH_25ft_AVG  H
+44 RH_2m_AVG  H
+45 NRad_Cs_AVG  H
+46 NRad_Cd_AVG  H
+47 xPAR_Glb_AVG  H
+48 xPAR_Dif_AVG  H
+49 Err_flag  H
+
+
+Estimated Total Final Storage Locations used per day 19392
