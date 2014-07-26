@@ -1,0 +1,2208 @@
+;{CR10X}
+;CO2 PROFILER, SOIL MEASUREMENTS, PAR SENSORS, WIND SPEED/DIRECTION
+;Last updated May 2003
+
+*Table 1 Program
+  01: 1         Execution Interval (seconds)
+
+;COLLECT AND AVERAGE LICOR READING (15 SECOND INTERVAL)
+1:  Volt (SE) (P1)
+ 1: 3        Reps
+ 2: 15       2500 mV Fast Range
+ 3: 1        SE Channel
+ 4: 1        Loc [ LICOR_T   ]
+ 5: 1        Mult
+ 6: 0.0      Offset ;
+
+LICOR_T=LICOR_T*2*(50/4096)
+LICOR_P=LICOR_P*2*0.01522+58.738
+
+2:  Running Average (P52)
+ 1: 3        Reps
+ 2: 1        First Source Loc [ LICOR_T   ]
+ 3: 25       First Destination Loc [ Avg_T     ]
+ 4: 60       Number of Values in Avg Window
+
+;SHADOWBAND PAR MEASUREMENT
+3:  Volt (Diff) (P2)
+ 1: 1        Reps
+ 2: 1        2.5 mV Slow Range
+ 3: 6        DIFF Channel
+ 4: 107      Loc [ xPAR_Glb  ]
+ 5: -2356    Mult ;If negative, set to 1
+ 6: 0.0      Offset
+
+4:  If (X<=>F) (P89)
+ 1: 107      X Loc [ xPAR_Glb  ]
+ 2: 4        <
+ 3: 0.0      F
+ 4: 30       Then Do
+
+5:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 107      Z Loc [ xPAR_Glb  ]
+
+6:  End (P95)
+
+;CANOPY PARs AND ATMOSPHERIC METEOROLOGY
+7:  If time is (P92)
+ 1: 0     -- Minutes (Seconds --) into a
+ 2: 5        Interval (same units as above)
+ 3: 30       Then Do
+
+;AM25T MEASUREMENTS
+     8:  Set Port(s) (P20)
+      1: 3399     C8..C5 = 1ms/1ms/nc/nc
+      2: 9999     C4..C1 = nc/nc/nc/nc
+
+     9:  Do (P86) ; ENABLE AM25T
+      1: 47       Set Port 7 High
+
+     10:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     11:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+;  sn (49839)
+; licor cal 6.44 microamps/1000 micromol s-1 m-2
+;   calibration multiplier 1000/(6.44 * .604)
+;  mult = 257.08 (flux density)
+     12:  Volt (Diff) (P2) ; LI-COR QUANTUM (PAR) SENSOR (SN 49839)
+      1: 1        Reps
+      2: 3        25 mV Slow Range
+      3: 5        DIFF Channel
+      4: 70       Loc [ PAR_60ft  ]
+      5: 257.08   Mult
+      6: 0.0      Offset
+
+     13:  If (X<=>F) (P89)
+      1: 70       X Loc [ PAR_60ft  ]
+      2: 4        <
+      3: 0.0      F
+      4: 30       Then Do
+
+          14:  Z=F x 10^n (P30)
+           1: 0        F
+           2: 0        n, Exponent of 10
+           3: 70       Z Loc [ PAR_60ft  ]
+
+     15:  End (P95)
+
+     16:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     17:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+;  sn (49838)
+; licor cal 6.51 microamps/1000 micromol s-1 m-2
+;   calibration multiplier 1000/(6.51 * .604)
+;   mult = 254.32 (flux density)
+
+     18:  Volt (Diff) (P2) ; LI-COR QUANTUM (PAR) SENSOR (SN 49838)
+      1: 1        Reps
+      2: 3        25 mV Slow Range
+      3: 5        DIFF Channel
+      4: 71       Loc [ PAR_40ft  ]
+      5: 254.32   Mult
+      6: 0.0      Offset
+
+     19:  If (X<=>F) (P89)
+      1: 71       X Loc [ PAR_40ft  ]
+      2: 4        <
+      3: 0.0      F
+      4: 30       Then Do
+
+          20:  Z=F x 10^n (P30)
+           1: 0        F
+           2: 0        n, Exponent of 10
+           3: 71       Z Loc [ PAR_40ft  ]
+
+     21:  End (P95)
+
+     22:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     23:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+;  sn (49836)
+; licor cal 6.83 microamps/1000 micromol s-1 m-2
+;   calibration multiplier 1000/(6.83 * .604)
+;  mult = 242.40 (flux density)
+
+     24:  Volt (Diff) (P2) ; LI-COR QUANTUM (PAR) SENSOR (SN 49836)
+      1: 1        Reps
+      2: 3        25 mV Slow Range
+      3: 5        DIFF Channel
+      4: 72       Loc [ PAR_25ft  ]
+      5: 242.4    Mult
+      6: 0.0      Offset
+
+     25:  If (X<=>F) (P89)
+      1: 72       X Loc [ PAR_25ft  ]
+      2: 4        <
+      3: 0.0      F
+      4: 30       Then Do
+
+          26:  Z=F x 10^n (P30)
+           1: 0.0      F
+           2: 00       n, Exponent of 10
+           3: 72       Z Loc [ PAR_25ft  ]
+
+     27:  End (P95)
+
+     28:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     29:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+;
+;  sn (49835)
+; licor cal 6.55 microamps/1000 micromol s-1 m-2
+;   calibration multiplier 1000/(6.55 * .604)
+;  multi = 252.77 (flux density)
+
+     30:  Volt (Diff) (P2) ; LI-COR QUANTUM (PAR) SENSOR (SN 49835)
+      1: 1        Reps
+      2: 3        25 mV Slow Range
+      3: 5        DIFF Channel
+      4: 73       Loc [ PAR_2m    ]
+      5: 252.77   Mult
+      6: 0.0      Offset
+
+     31:  If (X<=>F) (P89)
+      1: 73       X Loc [ PAR_2m    ]
+      2: 4        <
+      3: 0.0      F
+      4: 30       Then Do
+
+          32:  Z=F x 10^n (P30)
+           1: 0.0      F
+           2: 00       n, Exponent of 10
+           3: 73       Z Loc [ PAR_2m    ]
+
+     33:  End (P95)
+
+     34:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     35:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     36:  Volt (Diff) (P2) ; REBS NET RADIOMETER (2 m)
+      1: 1        Reps
+      2: 4        250 mV Slow Range
+      3: 5        DIFF Channel
+      4: 96       Loc [ NRad_sign ]
+      5: 1.0      Mult
+      6: 0.0      Offset
+
+     37:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     38:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     39:  Volt (Diff) (P2) ; RM YOUNG 03002 WIND SENTRY (WIND SPEED)
+      1: 1        Reps
+      2: 4        250 mV Slow Range
+      3: 5        DIFF Channel
+      4: 74       Loc [ WSpd_80ft ]
+      5: .045     Mult
+      6: .2       Offset
+
+     40:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     41:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     42:  Volt (Diff) (P2) ; RM YOUNG 03002 WIND SENTRY (WIND SPEED)
+      1: 1        Reps
+      2: 4        250 mV Slow Range
+      3: 5        DIFF Channel
+      4: 75       Loc [ WSpd_40ft ]
+      5: .045     Mult
+      6: .2       Offset
+
+     43:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     44:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     45:  Volt (Diff) (P2) ; RM YOUNG 03002 WIND SENTRY (WIND SPEED)
+      1: 1        Reps
+      2: 4        250 mV Slow Range
+      3: 5        DIFF Channel
+      4: 76       Loc [ WSpd_2m   ]
+      5: .045     Mult
+      6: .2       Offset
+
+     46:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     47:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     48:  Excite-Delay (SE) (P4) ; RM YOUNG 03002 WIND SENTRY (WIND DIRECTION)
+      1: 1        Reps
+      2: 5        2500 mV Slow Range
+      3: 9        SE Channel
+      4: 2        Excite all reps w/Exchan 2
+      5: 2        Delay (units 0.01 sec)
+      6: 2500     mV Excitation
+      7: 77       Loc [ WDir_80ft ]
+      8: .142     Mult
+      9: 0.0      Offset
+
+     49:  Excite-Delay (SE) (P4) ; RM YOUNG 03002 WIND SENTRY (WIND DIRECTION)
+      1: 1        Reps
+      2: 5        2500 mV Slow Range
+      3: 10       SE Channel
+      4: 2        Excite all reps w/Exchan 2
+      5: 2        Delay (units 0.01 sec)
+      6: 2500     mV Excitation
+      7: 78       Loc [ WDir_40ft ]
+      8: .142     Mult
+      9: 0.0      Offset
+
+     50:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     51:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     52:  Excite-Delay (SE) (P4) ; RM YOUNG 03002 WIND SENTRY (WIND DIRECTION)
+      1: 1        Reps
+      2: 5        2500 mV Slow Range
+      3: 9        SE Channel
+      4: 2        Excite all reps w/Exchan 2
+      5: 2        Delay (units 0.01 sec)
+      6: 2500     mV Excitation
+      7: 79       Loc [ WDir_2m   ]
+      8: .142     Mult
+      9: 0.0      Offset
+
+     53:  Do (P86) ; ENABLE CS500 T/RH PROBES
+      1: 41       Set Port 1 High
+
+     54:  Excitation with Delay (P22)
+      1: 1        Ex Channel
+      2: 0000     Delay W/Ex (units = 0.01 sec)
+      3: 10       Delay After Ex (units = 0.01 sec)
+      4: 0000     mV Excitation
+
+     55:  Volt (SE) (P1) ; CS500 AIR T/RH PROBE (TEMP)
+      1: 1        Reps
+      2: 5        2500 mV Slow Range
+      3: 10       SE Channel
+      4: 80       Loc [ AirT_80ft ]
+      5: .1       Mult
+      6: -40      Offset
+
+     56:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     57:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     58:  Volt (SE) (P1) ; CS500 AIR T/RH PROBE (TEMP)
+      1: 2        Reps
+      2: 5        2500 mV Slow Range
+      3: 9        SE Channel
+      4: 81       Loc [ AirT_60ft ]
+      5: .1       Mult
+      6: -40      Offset
+
+     59:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     60:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     61:  Volt (SE) (P1) ; CS500 AIR T/RH PROBE (TEMP)
+      1: 2        Reps
+      2: 5        2500 mV Slow Range
+      3: 9        SE Channel
+      4: 83       Loc [ AirT_25ft ]
+      5: .1       Mult
+      6: -40      Offset
+
+     62:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     63:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     64:  Volt (SE) (P1) ; CS500 AIR T/RH PROBE (RH)
+      1: 2        Reps
+      2: 5        2500 mV Slow Range
+      3: 9        SE Channel
+      4: 85       Loc [ RH_80ft   ]
+      5: .1       Mult
+      6: 0        Offset
+
+     65:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     66:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     67:  Volt (SE) (P1) ; CS500 AIR T/RH PROBE (RH)
+      1: 2        Reps
+      2: 5        2500 mV Slow Range
+      3: 9        SE Channel
+      4: 87       Loc [ RH_40ft   ]
+      5: .1       Mult
+      6: 0        Offset
+
+     68:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     69:  Do (P86) ; CLOCK AM25T
+      1: 78       Pulse Port 8
+
+     70:  Volt (SE) (P1) ; CS500 AIR T/RH PROBE (RH)
+      1: 1        Reps
+      2: 5        2500 mV Slow Range
+      3: 9        SE Channel
+      4: 89       Loc [ RH_2m     ]
+      5: .1       Mult
+      6: 0        Offset
+
+     71:  Do (P86)
+      1: 51       Set Port 1 Low ; DISABLE CS500 T/RH PROBES
+
+     72:  Do (P86)
+      1: 57       Set Port 7 Low
+
+     73:  Beginning of Loop (P87) ; MINIMUM WIND SPEED LOOP
+      1: 0000     Delay
+      2: 3        Loop Count
+
+          74:  If (X<=>F) (P89) ; MINIMUM WIND SPEED
+           1: 74    -- X Loc [ WSpd_80ft ]
+           2: 4        <
+           3: .21      F
+           4: 30       Then Do
+
+               75:  Z=F (P30)
+                1: 0.0      F
+                2: 00       Exponent of 10
+                3: 74    -- Z Loc [ WSpd_80ft ]
+
+          76:  End (P95) ; END MINIMUM WIND SPEED CORRECTION
+
+     77:  End (P95) ; END MINIMUM WIND SPEED LOOP
+
+;STATIC WIND CORRECTION (NETRAD)
+     78:  If (X<=>F) (P89)
+      1: 96       X Loc [ NRad_sign ]
+      2: 3        >=
+      3: 0.0      F
+      4: 30       Then Do
+
+          79:  Z=X*F (P37)
+           1: 96       X Loc [ NRad_sign ]
+           2: 9.29     F
+           3: 90       Z Loc [ NRad_Cs   ]
+
+          80:  Z=X*F (P37)
+           1: 90       X Loc [ NRad_Cs   ]
+           2: 1.045    F
+           3: 90       Z Loc [ NRad_Cs   ]
+
+     81:  Else (P94)
+
+          82:  Z=X*F (P37)
+           1: 96       X Loc [ NRad_sign ]
+           2: 11.5     F
+           3: 90       Z Loc [ NRad_Cs   ]
+
+     83:  End (P95)
+
+;DYNAMIC WIND CORRECTION (NETRAD)
+     84:  If (X<=>F) (P89)
+      1: 96       X Loc [ NRad_sign ]
+      2: 3        >=
+      3: 0        F
+      4: 30       Then Do
+
+          85:  Z=X*F (P37)
+           1: 76       X Loc [ WSpd_2m   ]
+           2: .2       F
+           3: 92       Z Loc [ Rn_C      ]
+
+          86:  Z=X*F (P37)
+           1: 92       X Loc [ Rn_C      ]
+           2: .066     F
+           3: 93       Z Loc [ Rn_A      ]
+
+          87:  Z=X+F (P34)
+           1: 92       X Loc [ Rn_C      ]
+           2: .066     F
+           3: 94       Z Loc [ Rn_B      ]
+
+          88:  Z=X/Y (P38)
+           1: 93       X Loc [ Rn_A      ]
+           2: 94       Y Loc [ Rn_B      ]
+           3: 95       Z Loc [ Rn_CrtnFc ]
+
+          89:  Z=Z+1 (P32)
+           1: 95       Z Loc [ Rn_CrtnFc ]
+
+          90:  Z=X*F (P37)
+           1: 96       X Loc [ NRad_sign ]
+           2: 9.29     F
+           3: 91       Z Loc [ NRad_Cd   ]
+
+          91:  Z=X*Y (P36)
+           1: 91       X Loc [ NRad_Cd   ]
+           2: 95       Y Loc [ Rn_CrtnFc ]
+           3: 91       Z Loc [ NRad_Cd   ]
+
+     92:  Else (P94)
+
+          93:  Z=X*F (P37)
+           1: 76       X Loc [ WSpd_2m   ]
+           2: .00174   F
+           3: 93       Z Loc [ Rn_A      ]
+
+          94:  Z=X+F (P34)
+           1: 93       X Loc [ Rn_A      ]
+           2: .99755   F
+           3: 95       Z Loc [ Rn_CrtnFc ]
+
+          95:  Z=X*F (P37)
+           1: 96       X Loc [ NRad_sign ]
+           2: 11.5     F
+           3: 91       Z Loc [ NRad_Cd   ]
+
+          96:  Z=X*Y (P36)
+           1: 91       X Loc [ NRad_Cd   ]
+           2: 95       Y Loc [ Rn_CrtnFc ]
+           3: 91       Z Loc [ NRad_Cd   ]
+
+     97:  End (P95) ; END DYNAMIC WIND CORRECTION
+
+98:  End (P95) ; END PAR AND ATMSPHERIC METEOROLOGY MEASUREMENTS
+
+;BATTERY VOLTAGE, SOIL/TREE TEMPERATURE, AND SOIL MOISTURE MEASUREMENTS
+99:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 10       Interval (same units as above)
+ 3: 30       Then Do
+
+;BATTERY VOLTAGE
+     100:  Volt (SE) (P1)
+      1: 1        Reps
+      2: 15       2500 mV Fast Range
+      3: 8        SE Channel
+      4: 30       Loc [ Battery   ]
+      5: .01112   Mult
+      6: 0.0      Offset
+
+;CR10X PANEL TEMPERATURE (TC REFERENCE)
+     101:  Internal Temperature (P17)
+      1: 31       Loc [ Ref_T     ]
+
+     102:  Do (P86)
+      1: 44       Set Port 4 High ; ENABLE AM416
+
+     103:  Do (P86)
+      1: 46       Set Port 6 High ; ENABLE CS615s
+
+     104:  Beginning of Loop (P87) ; BEGIN THERMOCOUPLE AND TDR MEASUREMENTS
+      1: 0000     Delay
+      2: 13       Loop Count
+
+          105:  Do (P86)
+           1: 75       Pulse Port 5 ; PULSE CLOCK
+
+          106:  Excitation with Delay (P22)
+           1: 3        Ex Channel
+           2: 0        Delay W/Ex (units = 0.01 sec)
+           3: 10       Delay After Ex (units = 0.01 sec)
+           4: 0        mV Excitation
+
+          107:  Thermocouple Temp (DIFF) (P14) ; AIR AND SOIL THERMOCOUPLES
+           1: 1        Reps
+           2: 1        2.5 mV Slow Range
+           3: 3        DIFF Channel
+           4: 1        Type T (Copper-Constantan)
+           5: 31       Ref Temp (Deg. C) Loc [ Ref_T     ]
+           6: 32    -- Loc [ AirT_200  ]
+           7: 1.0      Mult
+           8: 0.0      Offset ;
+
+          108:  Period Average (SE) (P27) ; CS615 SOIL WATER CONTENT REFLECTOMETER PROBES
+           1: 1        Reps
+           2: 4        200 kHz Max Freq @ 2 V Peak to Peak, Period Output
+           3: 7        SE Channel
+           4: 10       No. of Cycles
+           5: 5        Timeout (units = 0.01 seconds)
+           6: 48    -- Loc [ TDR1_Per  ]
+           7: .001     Mult
+           8: 0.0      Offset
+
+     109:  End (P95) ; END THERMOCOUPLE AND TDR MEASUREMENTS
+
+     110:  Do (P86)
+      1: 56       Set Port 6 Low ;; DISABLE CS615s
+
+     111:  Beginning of Loop (P87) ; BEGIN HEAT FLUX MEASUREMENT
+      1: 0000     Delay
+      2: 1        Loop Count
+
+          112:  Do (P86)
+           1: 75       Pulse Port 5
+
+          113:  Excitation with Delay (P22)
+           1: 1        Ex Channel
+           2: 0000     Delay W/Ex (units = 0.01 sec)
+           3: 10       Delay After Ex (units = 0.01 sec)
+           4: 0000     mV Excitation
+
+          114:  Volt (Diff) (P2) ; HFT-3 SOIL HEAT FLUX PLATE
+           1: 1        Reps
+           2: 3        25 mV Slow Range
+           3: 3        DIFF Channel
+           4: 45       Loc [ Heatflux  ]
+           5: 37.6     Mult ; W m^-2 mV^-1
+           6: 0.0      Offset
+
+     115:  End (P95) ; END HEAT FLUX MEASUREMENT
+
+     116:  Do (P86)
+      1: 54       Set Port 4 Low ; DISABLE AM416
+
+;CS615 CALCULATIONS
+     117:  Polynomial (P55) ; 5 cm (WC1)
+      1: 1        Reps
+      2: 54       X Loc [ TDR7_Per  ]
+      3: 64       F(X) Loc [ SoilW_5   ]
+      4: -.5699   C0
+      5: .9725    C1
+      6: -.1893   C2
+      7: 0        C3
+      8: 0.0      C4
+      9: 0.0      C5
+
+     118:  Polynomial (P55) ; 10 cm (WC2)
+      1: 1        Reps
+      2: 55       X Loc [ TDR8_Per  ]
+      3: 65       F(X) Loc [ SoilW_10  ] ;
+      4: -.7428   C0
+      5: 1.28     C1
+      6: -.3284   C2
+      7: 0        C3
+      8: 0.0      C4
+      9: 0.0      C5 ;
+
+     119:  Polynomial (P55) ; 20 cm (WC3)
+      1: 1        Reps
+      2: 56       X Loc [ TDR9_Per  ]
+      3: 66       F(X) Loc [ SoilW_20  ]
+      4: -.9288   C0
+      5: 1.7187   C1
+      6: -.5797   C2
+      7: 0        C3
+      8: 0.0      C4
+      9: 0.0      C5
+
+     120:  Polynomial (P55) ; 50 cm (WC4)
+      1: 1        Reps
+      2: 57       X Loc [ TDR10_Per ]
+      3: 67       F(X) Loc [ SoilW_50  ]
+      4: -.9028   C0
+      5: 1.5488   C1
+      6: -.4178   C2
+      7: 0        C3
+      8: 0.0      C4
+      9: 0.0      C5
+
+     121:  Polynomial (P55) ; 100 cm (WC5)
+      1: 1        Reps
+      2: 58       X Loc [ TDR11_Per ]
+      3: 68       F(X) Loc [ SoilW_100 ]
+      4: -.187    C0
+      5: .037     C1
+      6: .335     C2
+      7: 0        C3
+      8: 0.0      C4
+      9: 0.0      C5
+
+122:  End (P95) ; END BATTERY, THERMOCOUPLE, TDR, AND HEAT FLUX MEASUREMENTS
+
+;3 MINUTE LICOR OUTPUT
+123:  If time is (P92)
+ 1: 0        Minutes (Seconds --) into a
+ 2: 3        Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+124:  Real Time (P77)^26227
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000) ;
+
+125:  Sample (P70)^25415
+ 1: 1        Reps
+ 2: 24       Loc [ ID        ]
+
+126:  Resolution (P78)
+ 1: 1        High Resolution
+
+127:  Sample (P70)^10476
+ 1: 3        Reps
+ 2: 25       Loc [ Avg_T     ] ;
+
+128:  Do (P86)
+ 1: 20       Set Output Flag Low (Flag 0)
+
+;10 MINUTE SOIL/MET SENSOR OUTPUT
+129:  If time is (P92)
+ 1: 0        Minutes (Seconds --) into a
+ 2: 10       Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+130:  Set Active Storage Area (P80)^26693
+ 1: 02       Final Storage Area 2
+ 2: 2        Array ID
+
+131:  Real Time (P77)^20440
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000) ;
+
+132:  Sample (P70)^21976
+ 1: 1        Reps
+ 2: 30       Loc [ Battery   ]
+
+133:  Sample (P70)^10529
+ 1: 14       Reps
+ 2: 32       Loc [ AirT_200  ]
+
+134:  Sample (P70)^20829
+ 1: 5        Reps
+ 2: 64       Loc [ SoilW_5   ]
+
+135:  Average (P71)^21667
+ 1: 4        Reps
+ 2: 70       Loc [ PAR_60ft  ]
+
+136:  Wind Vector (P69)^1712
+ 1: 3        Reps
+ 2: 0000     Samples per Sub-Interval
+ 3: 1        S, é1 Polar
+ 4: 74    -- Wind Speed/East Loc [ WSpd_80ft ]
+ 5: 77    -- Wind Direction/North Loc [ WDir_80ft ]
+
+137:  Average (P71)^17686
+ 1: 12       Reps
+ 2: 80       Loc [ AirT_80ft ]
+
+138:  Average (P71)^31938
+ 1: 2        Reps
+ 2: 107      Loc [ xPAR_Glb  ]
+
+139:  Resolution (P78)
+ 1: 1        High Resolution
+
+140:  Sample (P70)^2060
+ 1: 1        Reps
+ 2: 112      Loc [ Err_flag  ]
+
+141:  Resolution (P78)
+ 1: 0        Low Resolution
+
+142:  Do (P86)
+ 1: 20       Set Output Flag Low (Flag 0)
+
+
+*Table 2 Program ; 3 MINUTE SAMPLE/STANDARD SWITCHING
+  02: 180       Execution Interval (seconds)
+
+;RESET COUNTER AFTER 3 HOUR CYCLING IS COMPLETED
+1:  If (X<=>F) (P89)
+ 1: 20       X Loc [ Counter   ]
+ 2: 1        =
+ 3: 92       F
+ 4: 30       Then Do
+
+     2:  Z=F (P30)
+      1: 0.0      F
+      2: 00       Exponent of 10
+      3: 20       Z Loc [ Counter   ]
+
+3:  End (P95)
+
+;ADVANCE COUNTER
+4:  Z=Z+1 (P32)
+ 1: 20       Z Loc [ Counter   ]
+
+; ASSIGN COUNT TO SAMPLE/STANDARD
+5:  CASE (P93)
+ 1: 20       Case Loc [ Counter   ]
+
+;1st AIR SAMPLING
+     6:  If Case Location < F (P83)
+      1: 8        F
+      2: 1        Call Subroutine 1
+
+;2nd AIR SAMPLING
+     7:  If Case Location < F (P83)
+      1: 9        F
+      2: 2        Call Subroutine 2
+
+     8:  If Case Location < F (P83)
+      1: 15       F
+      2: 1        Call Subroutine 1
+
+;1st ZERO WITH REFERENCE GAS
+     9:  If Case Location < F (P83)
+      1: 16       F
+      2: 3        Call Subroutine 3
+
+;3rd AIR SAMPLING
+     10:  If Case Location < F (P83)
+      1: 23       F
+      2: 1        Call Subroutine 1
+
+;4th AIR SAMPLING
+     11:  If Case Location < F (P83)
+      1: 24       F
+      2: 2        Call Subroutine 2
+
+     12:  If Case Location < F (P83)
+      1: 30       F
+      2: 1        Call Subroutine 1
+
+;2nd ZERO WITH REFERENCE GAS
+     13:  If Case Location < F (P83)
+      1: 31       F
+      2: 3        Call Subroutine 3
+
+;5th AIR SAMPLING
+     14:  If Case Location < F (P83)
+      1: 38       F
+      2: 1        Call Subroutine 1
+
+;6th AIR SAMPLING
+     15:  If Case Location < F (P83)
+      1: 39       F
+      2: 2        Call Subroutine 2
+
+     16:  If Case Location < F (P83)
+      1: 45       F
+      2: 1        Call Subroutine 1
+
+;3rd ZERO WITH REFERENCE GAS
+     17:  If Case Location < F (P83)
+      1: 46       F
+      2: 3        Call Subroutine 3
+
+;7th AIR SAMPLING
+     18:  If Case Location < F (P83)
+      1: 53       F
+      2: 1        Call Subroutine 1
+
+;8th AIR SAMPLING
+     19:  If Case Location < F (P83)
+      1: 54       F
+      2: 2        Call Subroutine 2
+
+     20:  If Case Location < F (P83)
+      1: 60       F
+      2: 1        Call Subroutine 1
+
+;4th ZERO WITH REFERENCE GAS
+     21:  If Case Location < F (P83)
+      1: 61       F
+      2: 3        Call Subroutine 3
+
+;9th AIR SAMPLING
+     22:  If Case Location < F (P83)
+      1: 68       F
+      2: 1        Call Subroutine 1
+
+;10th AIR SAMPLING
+     23:  If Case Location < F (P83)
+      1: 69       F
+      2: 2        Call Subroutine 2
+
+     24:  If Case Location < F (P83)
+      1: 75       F
+      2: 1        Call Subroutine 1
+
+;5th ZERO WITH REFERENCE GAS
+     25:  If Case Location < F (P83)
+      1: 76       F
+      2: 3        Call Subroutine 3
+
+;11th AIR SAMPLING
+     26:  If Case Location < F (P83)
+      1: 83       F
+      2: 1        Call Subroutine 1
+
+;12th AIR SAMPLING
+     27:  If Case Location < F (P83)
+      1: 84       F
+      2: 2        Call Subroutine 2
+
+     28:  If Case Location < F (P83)
+      1: 90       F
+      2: 1        Call Subroutine 1
+
+;6th ZERO WITH REFERENCE GAS
+     29:  If Case Location < F (P83)
+      1: 91       F
+      2: 3        Call Subroutine 3
+
+;HIGH AND LOW CO2 STANDARDS
+     30:  If Case Location < F (P83)
+      1: 93       F
+      2: 4        Call Subroutine 4
+
+31:  End (P95) ;  Case end
+
+;SET ALL RELAY LOCATIONS TO "0"
+32:  Do (P86)
+ 1: 6        Call Subroutine 6
+
+;CLEAR LOOP COUNTER
+33:  Z=F (P30)
+ 1: 0.0      F
+ 2: 00       Exponent of 10
+ 3: 23       Z Loc [ Loop      ]
+
+;SET RELAY LOCATIONS (AIR SAMPLES)
+34:  If (X<=>F) (P89)
+ 1: 21       X Loc [ Level     ]
+ 2: 2        <>
+ 3: 0.0      F
+ 4: 30       Then Do
+
+     35:  Z=X (P31)
+      1: 21       X Loc [ Level     ]
+      2: 24       Z Loc [ ID        ]
+
+     36:  Beginning of Loop (P87)
+      1: 0000     Delay
+      2: 7        Loop Count
+
+          37:  Z=Z+1 (P32)
+           1: 23       Z Loc [ Loop      ]
+
+          38:  If (X<=>Y) (P88)
+           1: 21       X Loc [ Level     ]
+           2: 1        =
+           3: 23       Y Loc [ Loop      ]
+           4: 30       Then Do
+
+               39:  Z=F (P30)
+                1: 1        F
+                2: 00       Exponent of 10
+                3: 9     -- Z Loc [ 2ft       ]
+
+          40:  End (P95)
+
+     41:  End (P95)
+
+42:  End (P95)
+
+;SET RELAY LOCATIONS (STANDARDS)
+43:  If (X<=>F) (P89)
+ 1: 22       X Loc [ Std       ]
+ 2: 2        <>
+ 3: 0.0      F
+ 4: 30       Then Do
+
+     44:  Z=F (P30)
+      1: 1        F
+      2: 00       Exponent of 10
+      3: 8        Z Loc [ Tnk_Swtch ]
+
+     45:  Beginning of Loop (P87) ; OPEN LOWER 4 LEVELS TO SAMPLE SIDE OF PUMP
+      1: 0000     Delay
+      2: 4        Loop Count
+
+          46:  Z=F (P30)
+           1: 1        F
+           2: 00       Exponent of 10
+           3: 9     -- Z Loc [ 2ft       ]
+
+     47:  End (P95)
+
+     ID=Std+7
+
+     48:  Beginning of Loop (P87)
+      1: 0000     Delay
+      2: 3        Loop Count
+
+          49:  Z=Z+1 (P32)
+           1: 23       Z Loc [ Loop      ]
+
+          50:  If (X<=>Y) (P88)
+           1: 22       X Loc [ Std       ]
+           2: 1        =
+           3: 23       Y Loc [ Loop      ]
+           4: 30       Then Do
+
+               51:  Z=F (P30)
+                1: 1        F
+                2: 00       Exponent of 10
+                3: 16    -- Z Loc [ Ref_gas   ]
+
+          52:  End (P95)
+
+     53:  End (P95)
+
+54:  End (P95)
+
+;SET RELAY LOCATIONS (POWER)
+55:  CASE (P93)
+ 1: 24       Case Loc [ ID        ]
+
+     56:  If Case Location < F (P83)
+      1: 2        F
+      2: 5        Call Subroutine 5 ;
+
+     57:  If Case Location < F (P83)
+      1: 8        F
+      2: 30       Then Do
+
+          58:  Z=F (P30)
+           1: 1        F
+           2: 00       Exponent of 10
+           3: 19       Z Loc [ Air_Pwr_2 ]
+
+     59:  End (P95)
+
+     60:  If Case Location < F (P83)
+      1: 9        F
+      2: 5        Call Subroutine 5
+
+     61:  If Case Location < F (P83)
+      1: 12       F
+      2: 30       Then Do
+
+          62:  Z=F (P30)
+           1: 1        F
+           2: 00       Exponent of 10
+           3: 7        Z Loc [ Std_Pwr   ]
+
+     63:  End (P95)
+
+64:  End (P95)
+
+;TRIGGER SDM-CD16AC AND POWER DOWN
+65:  SDM-CD16 / SDM-CD16AC (P104)
+ 1: 1        Reps
+ 2: 0        Address
+ 3: 4        Loc [ Unused1   ]
+
+66:  Excitation with Delay (P22)
+ 1: 1        Ex Channel
+ 2: 10       Delay W/Ex (units = 0.01 sec)
+ 3: 0000     Delay After Ex (units = 0.01 sec)
+ 4: 0000     mV Excitation
+
+67:  Do (P86)
+ 1: 6        Call Subroutine 6
+
+68:  SDM-CD16 / SDM-CD16AC (P104)
+ 1: 1        Reps
+ 2: 00       Address
+ 3: 4        Loc [ Unused1   ]
+
+*Table 3 Subroutines
+
+1:  Beginning of Subroutine (P85)
+ 1: 1        Subroutine 1
+
+     2:  Z=F (P30)
+      1: 0.0      F
+      2: 00       Exponent of 10
+      3: 22       Z Loc [ Std       ]
+
+     3:  Z=Z+1 (P32)
+      1: 21       Z Loc [ Level     ]
+
+4:  End (P95)
+
+5:  Beginning of Subroutine (P85)
+ 1: 2        Subroutine 2
+
+     6:  Z=F (P30)
+      1: 1        F
+      2: 00       Exponent of 10
+      3: 21       Z Loc [ Level     ]
+
+7:  End (P95)
+
+8:  Beginning of Subroutine (P85)
+ 1: 3        Subroutine 3
+
+     9:  Z=F (P30)
+      1: 0.0      F
+      2: 00       Exponent of 10
+      3: 21       Z Loc [ Level     ]
+
+     10:  Z=F (P30)
+      1: 1        F
+      2: 00       Exponent of 10
+      3: 22       Z Loc [ Std       ]
+
+11:  End (P95)
+
+12:  Beginning of Subroutine (P85)
+ 1: 4        Subroutine 4
+
+     13:  Z=Z+1 (P32)
+      1: 22       Z Loc [ Std       ]
+
+14:  End (P95)
+
+15:  Beginning of Subroutine (P85)
+ 1: 5        Subroutine 5
+
+     16:  Beginning of Loop (P87)
+      1: 0000     Delay
+      2: 3        Loop Count
+
+          17:  Z=F (P30)
+           1: 1        F
+           2: 00       Exponent of 10
+           3: 5     -- Z Loc [ Tank_Pwr  ]
+
+     18:  End (P95)
+
+          19:  Z=F (P30)
+           1: 1        F
+           2: 00       Exponent of 10
+           3: 19       Z Loc [ Air_Pwr_2 ]
+
+
+20:  End (P95)
+
+21:  Beginning of Subroutine (P85)
+ 1: 6        Subroutine 6
+
+     22:  Beginning of Loop (P87)
+      1: 0000     Delay
+      2: 16       Loop Count
+
+          23:  Z=F (P30)
+           1: 0.0      F
+           2: 00       Exponent of 10
+           3: 4     -- Z Loc [ Unused1   ]
+
+     24:  End (P95) ;
+
+25:  End (P95)
+
+End Program
+
+
+
+
+-Input Locations-
+1 LICOR_T   1 1 1
+2 LICOR_P   1 1 1
+3 CO2       1 1 1
+4 Unused1   1 2 1
+5 Tank_Pwr  1 2 1
+6 Air_Pwr   1 2 0
+7 Std_Pwr   1 2 1
+8 Tnk_Swtch 1 2 4
+9 2ft       1 2 2
+10 5ft       1 2 0
+11 10ft      1 2 0
+12 25ft      1 2 0
+13 45ft      1 2 0
+14 70ft      1 2 0
+15 97ft      1 2 1
+16 Ref_gas   1 2 2
+17 Low_std   1 2 1
+18 Hi_std    1 2 1
+19 Air_Pwr_2 1 2 2
+20 Counter   1 2 2
+21 Level     1 3 2
+22 Std       1 2 3
+23 Loop      1 2 3
+24 ID        1 2 6
+25 Avg_T     1 1 1
+26 Avg_P     1 1 1
+27 Avg_CO2   1 1 1
+28 CSI_R     0 0 0
+29 CSI_1     0 0 0
+30 Battery   1 1 1
+31 Ref_T     1 1 1
+32 AirT_200  5 1 1
+33 AirT_100  9 1 0
+34 AirT_75   9 1 0
+35 AirT_50   9 1 0
+36 AirT_25   9 1 0
+37 SoilT_0   9 1 0
+38 SoilT_5   9 1 0
+39 SoilT_10  9 1 0
+40 SoilT_20  9 1 0
+41 SoilT_50  9 1 0
+42 SoilT_100 9 1 0
+43 TreeT_N   9 1 0
+44 TreeT_S   9 1 0
+45 Heatflux  17 1 1
+46 _________ 1 0 0
+47 _________ 0 0 0
+48 TDR1_Per  1 0 1
+49 TDR2_Per  0 0 0
+50 TDR3_Per  1 0 0
+51 TDR4_Per  0 0 0
+52 TDR5_Per  1 0 0
+53 TDR6_Per  1 0 0
+54 TDR7_Per  1 0 0
+55 TDR8_Per  1 0 0
+56 TDR9_Per  1 0 0
+57 TDR10_Per 1 0 0
+58 TDR11_Per 1 0 0
+59 TDR12_Per 1 0 0
+60 TDR13_Per 1 0 0
+61 TDR14_Per 1 0 0
+62 _________ 1 0 0
+63 _________ 0 0 0
+64 SoilW_5   5 1 1
+65 SoilW_10  9 1 1
+66 SoilW_20  9 1 1
+67 SoilW_50  1 1 1
+68 SoilW_100 17 1 1
+69 _________ 1 0 0
+70 PAR_60ft  5 2 2
+71 PAR_40ft  9 2 2
+72 PAR_25ft  9 2 2
+73 PAR_2m    17 2 2
+74 WSpd_80ft 1 1 2
+75 WSpd_40ft 1 1 1
+76 WSpd_2m   1 2 1
+77 WDir_80ft 1 1 1
+78 WDir_40ft 1 1 1
+79 WDir_2m   1 1 1
+80 AirT_80ft 5 1 1
+81 AirT_60ft 13 1 1
+82 AirT_40ft 25 1 1
+83 AirT_25ft 13 1 1
+84 AirT_2m   25 1 1
+85 RH_80ft   13 1 1
+86 RH_60ft   25 1 1
+87 RH_40ft   13 1 1
+88 RH_25ft   25 1 1
+89 RH_2m     9 1 1
+90 NRad_Cs   9 1 3
+91 NRad_Cd   17 2 4
+92 Rn_C      1 2 1
+93 Rn_A      1 2 2
+94 Rn_B      1 1 1
+95 Rn_CrtnFc 1 2 3
+96 NRad_sign 1 6 1
+97 _________ 0 0 0
+98 _________ 0 0 0
+99 _________ 0 0 0
+100 Noise     1 0 0
+101 PAR_Calib 1 0 0
+102 vPAR_Glb  1 0 0
+103 PAR_Glb   1 0 0
+104 vPAR_Dif  1 1 0
+105 PAR_Dif   1 0 0
+106 vPAR_Rot  1 0 0
+107 xPAR_Glb  1 2 2
+108 xPAR_Dif  1 1 0
+109 Err_on    1 0 0
+110 Err_off   1 0 0
+111 Err_bd    1 3 0
+112 Err_flag  1 3 0
+113 _pulses   1 0 0
+114 Well_wdth 1 0 0
+115 x1__val   1 1 0
+116 x1__ind   1 0 0
+117 x2__val   1 0 0
+118 x2__ind   1 0 0
+119 min_val   1 1 0
+120 min_ind   1 0 0
+121 cen_val   1 0 0
+122 cen_ind   1 0 0
+123 s1__val   1 0 0
+124 s2__val   1 0 0
+125 t0        1 0 0
+126 t1        1 1 0
+127 t2        1 1 0
+128 t3        1 0 0
+129 _________ 0 0 0
+130 _________ 0 0 0
+131 _________ 0 0 0
+132 _________ 0 0 0
+133 _________ 0 0 0
+134 _________ 0 0 0
+135 _________ 0 0 0
+136 _________ 0 0 0
+137 _________ 0 0 0
+138 _________ 0 0 0
+139 _________ 0 0 0
+140 _________ 0 0 0
+141 _________ 0 0 0
+142 _________ 0 0 0
+143 _________ 0 0 0
+144 _________ 0 0 0
+145 _________ 0 0 0
+146 _________ 0 0 0
+147 _________ 0 0 0
+148 _________ 0 0 0
+149 _________ 0 0 0
+150 _________ 0 0 0
+151 _________ 0 0 0
+152 _________ 0 0 0
+153 _________ 0 0 0
+154 _________ 0 0 0
+155 _________ 0 0 0
+156 _________ 0 0 0
+157 _________ 0 0 0
+158 _________ 0 0 0
+159 _________ 0 0 0
+160 _________ 0 0 0
+161 _________ 0 0 0
+162 _________ 0 0 0
+163 _________ 0 0 0
+164 _________ 0 0 0
+165 _________ 0 0 0
+166 _________ 1 2 0
+167 _________ 0 0 0
+168 _________ 0 0 0
+169 _________ 0 0 0
+170 _________ 0 0 0
+171 _________ 0 0 0
+172 _________ 0 0 0
+173 _________ 0 0 0
+174 _________ 0 0 0
+175 _________ 0 0 0
+176 _________ 0 0 0
+177 _________ 0 0 0
+200 Well_Arr  1 0 0
+201 _________ 1 0 0
+202 _________ 0 0 0
+203 _________ 0 0 0
+204 _________ 0 0 0
+205 _________ 0 0 0
+206 _________ 0 0 0
+207 _________ 0 0 0
+208 _________ 0 0 0
+209 _________ 0 0 0
+210 _________ 0 0 0
+211 _________ 0 0 0
+212 _________ 0 0 0
+213 _________ 0 0 0
+214 _________ 0 0 0
+215 _________ 0 0 0
+216 _________ 0 0 0
+217 _________ 0 0 0
+218 _________ 0 0 0
+219 _________ 0 0 0
+220 _________ 0 0 0
+221 _________ 0 0 0
+222 _________ 0 0 0
+223 _________ 0 0 0
+224 _________ 0 0 0
+225 Well_Min  0 0 0
+226 _________ 0 0 0
+227 _________ 0 0 0
+228 _________ 0 0 0
+229 _________ 0 0 0
+230 _________ 0 0 0
+231 _________ 0 0 0
+232 _________ 0 0 0
+233 _________ 0 0 0
+234 _________ 0 0 0
+235 _________ 0 0 0
+236 _________ 0 0 0
+237 _________ 0 0 0
+238 _________ 0 0 0
+239 _________ 0 0 0
+240 _________ 0 0 0
+241 _________ 0 0 0
+242 _________ 0 0 0
+243 _________ 0 0 0
+244 _________ 0 0 0
+245 _________ 0 0 0
+246 _________ 0 0 0
+247 _________ 0 0 0
+248 _________ 0 0 0
+249 _________ 0 0 0
+250 Delta_Arr 1 0 0
+251 _________ 0 0 0
+252 _________ 0 0 0
+253 _________ 0 0 0
+254 _________ 0 0 0
+255 _________ 0 0 0
+256 _________ 0 0 0
+257 _________ 0 0 0
+258 _________ 0 0 0
+259 _________ 0 0 0
+260 _________ 0 0 0
+261 _________ 0 0 0
+262 _________ 0 0 0
+263 _________ 0 0 0
+264 _________ 0 0 0
+265 _________ 0 0 0
+266 _________ 0 0 0
+267 _________ 0 0 0
+268 _________ 0 0 0
+269 _________ 0 0 0
+270 _________ 0 0 0
+271 _________ 0 0 0
+272 _________ 0 0 0
+273 _________ 0 0 0
+274 _________ 0 0 0
+275 _________ 0 0 0
+276 _________ 0 0 0
+277 _________ 0 0 0
+278 _________ 0 0 0
+279 _________ 0 0 0
+280 _________ 0 0 0
+281 _________ 0 0 0
+282 _________ 0 0 0
+283 _________ 0 0 0
+284 _________ 0 0 0
+285 _________ 0 0 0
+286 _________ 0 0 0
+287 _________ 0 0 0
+288 _________ 0 0 0
+289 _________ 0 0 0
+290 _________ 0 0 0
+291 _________ 0 0 0
+292 _________ 0 0 0
+293 _________ 0 0 0
+294 _________ 0 0 0
+295 _________ 0 0 0
+296 _________ 0 0 0
+297 _________ 0 0 0
+298 _________ 0 0 0
+299 _________ 0 0 0
+300 _________ 0 0 0
+301 _________ 0 0 0
+302 _________ 0 0 0
+303 _________ 0 0 0
+304 _________ 0 0 0
+305 _________ 0 0 0
+306 _________ 0 0 0
+307 _________ 0 0 0
+308 _________ 0 0 0
+309 _________ 0 0 0
+310 _________ 0 0 0
+311 _________ 0 0 0
+312 _________ 0 0 0
+313 _________ 0 0 0
+314 _________ 0 0 0
+315 _________ 0 0 0
+316 _________ 0 0 0
+317 _________ 0 0 0
+318 _________ 0 0 0
+319 _________ 0 0 0
+320 _________ 0 0 0
+321 _________ 0 0 0
+322 _________ 0 0 0
+323 _________ 0 0 0
+324 _________ 0 0 0
+325 _________ 0 0 0
+326 _________ 0 0 0
+327 _________ 0 0 0
+328 _________ 0 0 0
+329 _________ 0 0 0
+330 _________ 0 0 0
+331 _________ 0 0 0
+332 _________ 0 0 0
+333 _________ 0 0 0
+334 _________ 0 0 0
+335 _________ 0 0 0
+336 _________ 0 0 0
+337 _________ 0 0 0
+338 _________ 0 0 0
+339 _________ 0 0 0
+340 _________ 0 0 0
+341 _________ 0 0 0
+342 _________ 0 0 0
+343 _________ 0 0 0
+344 _________ 0 0 0
+345 _________ 0 0 0
+346 _________ 0 0 0
+347 _________ 0 0 0
+348 _________ 0 0 0
+349 _________ 0 0 0
+350 Burst_Dat 1 1 0
+351 _________ 1 0 0
+352 _________ 1 0 0
+353 _________ 1 0 0
+354 _________ 1 0 0
+355 _________ 1 0 0
+356 _________ 1 0 0
+357 _________ 1 0 0
+358 _________ 1 0 0
+359 _________ 1 0 0
+360 _________ 1 0 0
+361 _________ 1 0 0
+362 _________ 1 0 0
+363 _________ 1 0 0
+364 _________ 1 0 0
+365 _________ 1 0 0
+366 _________ 1 0 0
+367 _________ 1 0 0
+368 _________ 1 0 0
+369 _________ 1 0 0
+370 _________ 1 0 0
+371 _________ 1 0 0
+372 _________ 1 0 0
+373 _________ 1 0 0
+374 _________ 1 0 0
+375 Curve_Dat 1 1 0
+376 _________ 0 0 0
+377 _________ 0 0 0
+378 _________ 0 0 0
+379 _________ 0 0 0
+380 _________ 0 0 0
+381 _________ 0 0 0
+382 _________ 0 0 0
+383 _________ 0 0 0
+384 _________ 0 0 0
+385 _________ 0 0 0
+386 _________ 0 0 0
+387 _________ 0 0 0
+388 _________ 0 0 0
+389 _________ 0 0 0
+390 _________ 0 0 0
+391 _________ 0 0 0
+392 _________ 0 0 0
+393 _________ 0 0 0
+394 _________ 0 0 0
+395 _________ 0 0 0
+396 _________ 0 0 0
+397 _________ 0 0 0
+398 _________ 0 0 0
+399 _________ 0 0 0
+400 _________ 0 0 0
+401 _________ 0 0 0
+402 _________ 0 0 0
+403 _________ 0 0 0
+404 _________ 0 0 0
+405 _________ 0 0 0
+406 _________ 0 0 0
+407 _________ 0 0 0
+408 _________ 0 0 0
+409 _________ 0 0 0
+410 _________ 0 0 0
+411 _________ 0 0 0
+412 _________ 0 0 0
+413 _________ 0 0 0
+414 _________ 0 0 0
+415 _________ 0 0 0
+416 _________ 0 0 0
+417 _________ 0 0 0
+418 _________ 0 0 0
+419 _________ 0 0 0
+420 _________ 0 0 0
+421 _________ 0 0 0
+422 _________ 0 0 0
+423 _________ 0 0 0
+424 _________ 0 0 0
+425 _________ 0 0 0
+426 _________ 0 0 0
+427 _________ 0 0 0
+428 _________ 0 0 0
+429 _________ 0 0 0
+430 _________ 0 0 0
+431 _________ 0 0 0
+432 _________ 0 0 0
+433 _________ 0 0 0
+434 _________ 0 0 0
+435 _________ 0 0 0
+436 _________ 0 0 0
+437 _________ 0 0 0
+438 _________ 0 0 0
+439 _________ 0 0 0
+440 _________ 0 0 0
+441 _________ 0 0 0
+442 _________ 0 0 0
+443 _________ 0 0 0
+444 _________ 0 0 0
+445 _________ 0 0 0
+446 _________ 0 0 0
+447 _________ 0 0 0
+448 _________ 0 0 0
+449 _________ 0 0 0
+450 _________ 0 0 0
+451 _________ 0 0 0
+452 _________ 0 0 0
+453 _________ 0 0 0
+454 _________ 0 0 0
+455 _________ 0 0 0
+456 _________ 0 0 0
+457 _________ 0 0 0
+458 _________ 0 0 0
+459 _________ 0 0 0
+460 _________ 0 0 0
+461 _________ 0 0 0
+462 _________ 0 0 0
+463 _________ 0 0 0
+464 _________ 0 0 0
+465 _________ 0 0 0
+466 _________ 0 0 0
+467 _________ 0 0 0
+468 _________ 0 0 0
+469 _________ 0 0 0
+470 _________ 0 0 0
+471 _________ 0 0 0
+472 _________ 0 0 0
+473 _________ 0 0 0
+474 _________ 0 0 0
+475 _________ 0 0 0
+476 _________ 0 0 0
+477 _________ 0 0 0
+478 _________ 0 0 0
+479 _________ 0 0 0
+480 _________ 0 0 0
+481 _________ 0 0 0
+482 _________ 0 0 0
+483 _________ 0 0 0
+484 _________ 0 0 0
+485 _________ 0 0 0
+486 _________ 0 0 0
+487 _________ 0 0 0
+488 _________ 0 0 0
+489 _________ 0 0 0
+490 _________ 0 0 0
+491 _________ 0 0 0
+492 _________ 0 0 0
+493 _________ 0 0 0
+494 _________ 0 0 0
+495 _________ 0 0 0
+496 _________ 0 0 0
+497 _________ 0 0 0
+498 _________ 0 0 0
+499 _________ 0 0 0
+500 _________ 0 0 0
+501 _________ 0 0 0
+502 _________ 0 0 0
+503 _________ 0 0 0
+504 _________ 0 0 0
+505 _________ 0 0 0
+506 _________ 0 0 0
+507 _________ 0 0 0
+508 _________ 0 0 0
+509 _________ 0 0 0
+510 _________ 0 0 0
+511 _________ 0 0 0
+512 _________ 0 0 0
+513 _________ 0 0 0
+514 _________ 0 0 0
+515 _________ 0 0 0
+516 _________ 0 0 0
+517 _________ 0 0 0
+518 _________ 0 0 0
+519 _________ 0 0 0
+520 _________ 0 0 0
+521 _________ 0 0 0
+522 _________ 0 0 0
+523 _________ 0 0 0
+524 _________ 0 0 0
+525 _________ 0 0 0
+526 _________ 0 0 0
+527 _________ 0 0 0
+528 _________ 0 0 0
+529 _________ 0 0 0
+530 _________ 0 0 0
+531 _________ 0 0 0
+532 _________ 0 0 0
+533 _________ 0 0 0
+534 _________ 0 0 0
+535 _________ 0 0 0
+536 _________ 0 0 0
+537 _________ 0 0 0
+538 _________ 0 0 0
+539 _________ 0 0 0
+540 _________ 0 0 0
+541 _________ 0 0 0
+542 _________ 0 0 0
+543 _________ 0 0 0
+544 _________ 0 0 0
+545 _________ 0 0 0
+546 _________ 0 0 0
+547 _________ 0 0 0
+548 _________ 0 0 0
+549 _________ 0 0 0
+550 _________ 0 0 0
+551 _________ 0 0 0
+552 _________ 0 0 0
+553 _________ 0 0 0
+554 _________ 0 0 0
+555 _________ 0 0 0
+556 _________ 0 0 0
+557 _________ 0 0 0
+558 _________ 0 0 0
+559 _________ 0 0 0
+560 _________ 0 0 0
+561 _________ 0 0 0
+562 _________ 0 0 0
+563 _________ 0 0 0
+564 _________ 0 0 0
+565 _________ 0 0 0
+566 _________ 0 0 0
+567 _________ 0 0 0
+568 _________ 0 0 0
+569 _________ 0 0 0
+570 _________ 0 0 0
+571 _________ 0 0 0
+572 _________ 0 0 0
+573 _________ 0 0 0
+574 _________ 0 0 0
+575 _________ 0 0 0
+576 _________ 0 0 0
+577 _________ 0 0 0
+578 _________ 0 0 0
+579 _________ 0 0 0
+580 _________ 0 0 0
+581 _________ 0 0 0
+582 _________ 0 0 0
+583 _________ 0 0 0
+584 _________ 0 0 0
+585 _________ 0 0 0
+586 _________ 0 0 0
+587 _________ 0 0 0
+588 _________ 0 0 0
+589 _________ 0 0 0
+590 _________ 0 0 0
+591 _________ 0 0 0
+592 _________ 0 0 0
+593 _________ 0 0 0
+594 _________ 0 0 0
+595 _________ 0 0 0
+596 _________ 0 0 0
+597 _________ 0 0 0
+598 _________ 0 0 0
+599 _________ 0 0 0
+600 _________ 0 0 0
+601 _________ 0 0 0
+602 _________ 0 0 0
+603 _________ 0 0 0
+604 _________ 0 0 0
+605 _________ 0 0 0
+606 _________ 0 0 0
+607 _________ 0 0 0
+608 _________ 0 0 0
+609 _________ 0 0 0
+610 _________ 0 0 0
+611 _________ 0 0 0
+612 _________ 0 0 0
+613 _________ 0 0 0
+614 _________ 0 0 0
+615 _________ 0 0 0
+616 _________ 0 0 0
+617 _________ 0 0 0
+618 _________ 0 0 0
+619 _________ 0 0 0
+620 _________ 0 0 0
+621 _________ 0 0 0
+622 _________ 0 0 0
+623 _________ 0 0 0
+624 _________ 0 0 0
+625 _________ 0 0 0
+626 _________ 0 0 0
+627 _________ 0 0 0
+628 _________ 0 0 0
+629 _________ 0 0 0
+630 _________ 0 0 0
+631 _________ 0 0 0
+632 _________ 0 0 0
+633 _________ 0 0 0
+634 _________ 0 0 0
+635 _________ 0 0 0
+636 _________ 0 0 0
+637 _________ 0 0 0
+638 _________ 0 0 0
+639 _________ 0 0 0
+640 _________ 0 0 0
+641 _________ 0 0 0
+642 _________ 0 0 0
+643 _________ 0 0 0
+644 _________ 0 0 0
+645 _________ 0 0 0
+646 _________ 0 0 0
+647 _________ 0 0 0
+648 _________ 0 0 0
+649 _________ 0 0 0
+650 _________ 0 0 0
+651 _________ 0 0 0
+652 _________ 0 0 0
+653 _________ 0 0 0
+654 _________ 0 0 0
+655 _________ 0 0 0
+656 _________ 0 0 0
+657 _________ 0 0 0
+658 _________ 0 0 0
+659 _________ 0 0 0
+660 _________ 0 0 0
+661 _________ 0 0 0
+662 _________ 0 0 0
+663 _________ 0 0 0
+664 _________ 0 0 0
+665 _________ 0 0 0
+666 _________ 0 0 0
+667 _________ 0 0 0
+668 _________ 0 0 0
+669 _________ 0 0 0
+670 _________ 0 0 0
+671 _________ 0 0 0
+672 _________ 0 0 0
+673 _________ 0 0 0
+674 _________ 0 0 0
+675 _________ 0 0 0
+676 _________ 0 0 0
+677 _________ 0 0 0
+678 _________ 0 0 0
+679 _________ 0 0 0
+680 _________ 0 0 0
+681 _________ 0 0 0
+682 _________ 0 0 0
+683 _________ 0 0 0
+684 _________ 0 0 0
+685 _________ 0 0 0
+686 _________ 0 0 0
+687 _________ 0 0 0
+688 _________ 0 0 0
+689 _________ 0 0 0
+690 _________ 0 0 0
+691 _________ 0 0 0
+692 _________ 0 0 0
+693 _________ 0 0 0
+694 _________ 0 0 0
+695 _________ 0 0 0
+696 _________ 0 0 0
+697 _________ 0 0 0
+698 _________ 0 0 0
+699 _________ 0 0 0
+700 _________ 0 0 0
+701 _________ 0 0 0
+702 _________ 0 0 0
+703 _________ 0 0 0
+704 _________ 0 0 0
+705 _________ 0 0 0
+706 _________ 0 0 0
+707 _________ 0 0 0
+708 _________ 0 0 0
+709 _________ 0 0 0
+710 _________ 0 0 0
+711 _________ 0 0 0
+712 _________ 0 0 0
+713 _________ 0 0 0
+714 _________ 0 0 0
+715 _________ 0 0 0
+716 _________ 0 0 0
+717 _________ 0 0 0
+718 _________ 0 0 0
+719 _________ 0 0 0
+720 _________ 0 0 0
+721 _________ 0 0 0
+722 _________ 0 0 0
+723 _________ 0 0 0
+724 _________ 0 0 0
+725 _________ 0 0 0
+726 _________ 0 0 0
+727 _________ 0 0 0
+728 _________ 0 0 0
+729 _________ 0 0 0
+730 _________ 0 0 0
+731 _________ 0 0 0
+732 _________ 0 0 0
+733 _________ 0 0 0
+734 _________ 0 0 0
+735 _________ 0 0 0
+736 _________ 0 0 0
+737 _________ 0 0 0
+738 _________ 0 0 0
+739 _________ 0 0 0
+740 _________ 0 0 0
+741 _________ 0 0 0
+742 _________ 0 0 0
+743 _________ 0 0 0
+744 _________ 0 0 0
+745 _________ 0 0 0
+746 _________ 0 0 0
+747 _________ 0 0 0
+748 _________ 0 0 0
+749 _________ 0 0 0
+750 _________ 0 0 0
+751 _________ 0 0 0
+752 _________ 0 0 0
+753 _________ 0 0 0
+754 _________ 0 0 0
+755 _________ 0 0 0
+756 _________ 0 0 0
+757 _________ 0 0 0
+758 _________ 0 0 0
+759 _________ 0 0 0
+760 _________ 0 0 0
+761 _________ 0 0 0
+762 _________ 0 0 0
+763 _________ 0 0 0
+764 _________ 0 0 0
+765 _________ 0 0 0
+766 _________ 0 0 0
+767 _________ 0 0 0
+768 _________ 0 0 0
+769 _________ 0 0 0
+770 _________ 0 0 0
+771 _________ 0 0 0
+772 _________ 0 0 0
+773 _________ 0 0 0
+774 _________ 0 0 0
+775 _________ 0 0 0
+776 _________ 0 0 0
+777 _________ 0 0 0
+778 _________ 0 0 0
+779 _________ 0 0 0
+780 _________ 0 0 0
+781 _________ 0 0 0
+782 _________ 0 0 0
+783 _________ 0 0 0
+784 _________ 0 0 0
+785 _________ 0 0 0
+786 _________ 0 0 0
+787 _________ 0 0 0
+788 _________ 0 0 0
+789 _________ 0 0 0
+790 _________ 0 0 0
+791 _________ 0 0 0
+792 _________ 0 0 0
+793 _________ 0 0 0
+794 _________ 0 0 0
+795 _________ 0 0 0
+796 _________ 0 0 0
+797 _________ 0 0 0
+798 _________ 0 0 0
+799 _________ 0 0 0
+800 _________ 0 0 0
+801 _________ 0 0 0
+802 _________ 0 0 0
+803 _________ 0 0 0
+804 _________ 0 0 0
+805 _________ 0 0 0
+806 _________ 0 0 0
+807 _________ 0 0 0
+808 _________ 0 0 0
+809 _________ 0 0 0
+810 _________ 0 0 0
+811 _________ 0 0 0
+812 _________ 0 0 0
+813 _________ 0 0 0
+814 _________ 0 0 0
+815 _________ 0 0 0
+816 _________ 0 0 0
+817 _________ 0 0 0
+818 _________ 0 0 0
+819 _________ 0 0 0
+820 _________ 0 0 0
+821 _________ 0 0 0
+822 _________ 0 0 0
+823 _________ 0 0 0
+824 _________ 0 0 0
+825 _________ 0 0 0
+826 _________ 0 0 0
+827 _________ 0 0 0
+828 _________ 0 0 0
+829 _________ 0 0 0
+830 _________ 0 0 0
+831 _________ 0 0 0
+832 _________ 0 0 0
+833 _________ 0 0 0
+834 _________ 0 0 0
+835 _________ 0 0 0
+836 _________ 0 0 0
+837 _________ 0 0 0
+838 _________ 0 0 0
+839 _________ 0 0 0
+840 _________ 0 0 0
+841 _________ 0 0 0
+842 _________ 0 0 0
+843 _________ 0 0 0
+844 _________ 0 0 0
+845 _________ 0 0 0
+846 _________ 0 0 0
+847 _________ 0 0 0
+848 _________ 0 0 0
+849 _________ 0 0 0
+850 _________ 0 0 0
+851 _________ 0 0 0
+852 _________ 0 0 0
+853 _________ 0 0 0
+854 _________ 0 0 0
+855 _________ 0 0 0
+856 _________ 0 0 0
+857 _________ 0 0 0
+858 _________ 0 0 0
+859 _________ 0 0 0
+860 _________ 0 0 0
+861 _________ 0 0 0
+862 _________ 0 0 0
+863 _________ 0 0 0
+864 _________ 0 0 0
+865 _________ 0 0 0
+866 _________ 0 0 0
+867 _________ 0 0 0
+868 _________ 0 0 0
+869 _________ 0 0 0
+870 _________ 0 0 0
+871 _________ 0 0 0
+872 _________ 0 0 0
+873 _________ 0 0 0
+874 _________ 0 0 0
+875 _________ 0 0 0
+876 _________ 0 0 0
+877 _________ 0 0 0
+878 _________ 0 0 0
+879 _________ 0 0 0
+880 _________ 0 0 0
+881 _________ 0 0 0
+882 _________ 0 0 0
+883 _________ 0 0 0
+884 _________ 0 0 0
+885 _________ 0 0 0
+886 _________ 0 0 0
+887 _________ 0 0 0
+888 _________ 0 0 0
+889 _________ 0 0 0
+890 _________ 0 0 0
+891 _________ 0 0 0
+892 _________ 0 0 0
+893 _________ 0 0 0
+894 _________ 0 0 0
+895 _________ 0 0 0
+896 _________ 0 0 0
+897 _________ 0 0 0
+898 _________ 0 0 0
+899 _________ 0 0 0
+900 _________ 0 0 0
+901 _________ 0 0 0
+902 _________ 0 0 0
+903 _________ 0 0 0
+904 _________ 0 0 0
+905 _________ 0 0 0
+906 _________ 0 0 0
+907 _________ 0 0 0
+908 _________ 0 0 0
+909 _________ 0 0 0
+910 _________ 0 0 0
+911 _________ 0 0 0
+912 _________ 0 0 0
+913 _________ 0 0 0
+914 _________ 0 0 0
+915 _________ 0 0 0
+916 _________ 0 0 0
+917 _________ 0 0 0
+918 _________ 0 0 0
+919 _________ 0 0 0
+920 _________ 0 0 0
+921 _________ 0 0 0
+922 _________ 0 0 0
+923 _________ 0 0 0
+924 _________ 0 0 0
+925 _________ 0 0 0
+926 _________ 0 0 0
+927 _________ 0 0 0
+928 _________ 0 0 0
+929 _________ 0 0 0
+930 _________ 0 0 0
+931 _________ 0 0 0
+932 _________ 0 0 0
+933 _________ 0 0 0
+934 _________ 0 0 0
+935 _________ 0 0 0
+936 _________ 0 0 0
+937 _________ 0 0 0
+938 _________ 0 0 0
+939 _________ 0 0 0
+940 _________ 0 0 0
+941 _________ 0 0 0
+942 _________ 0 0 0
+943 _________ 0 0 0
+944 _________ 0 0 0
+945 _________ 0 0 0
+946 _________ 0 0 0
+947 _________ 0 0 0
+948 _________ 0 0 0
+949 _________ 0 0 0
+950 _________ 0 0 0
+951 _________ 0 0 0
+952 _________ 0 0 0
+953 _________ 0 0 0
+954 _________ 0 0 0
+955 _________ 0 0 0
+956 _________ 0 0 0
+957 _________ 0 0 0
+958 _________ 0 0 0
+959 _________ 0 0 0
+960 _________ 0 0 0
+961 _________ 0 0 0
+962 _________ 0 0 0
+963 _________ 0 0 0
+964 _________ 0 0 0
+965 _________ 0 0 0
+966 _________ 0 0 0
+967 _________ 0 0 0
+968 _________ 0 0 0
+969 _________ 0 0 0
+970 _________ 0 0 0
+971 _________ 0 0 0
+972 _________ 0 0 0
+973 _________ 0 0 0
+974 _________ 0 0 0
+975 _________ 0 0 0
+976 _________ 0 0 0
+977 _________ 0 0 0
+978 _________ 0 0 0
+979 _________ 0 0 0
+980 _________ 0 0 0
+981 _________ 0 0 0
+982 _________ 0 0 0
+983 _________ 0 0 0
+984 _________ 0 0 0
+985 _________ 0 0 0
+986 _________ 0 0 0
+987 _________ 0 0 0
+988 _________ 0 0 0
+989 _________ 0 0 0
+990 _________ 0 0 0
+991 _________ 0 0 0
+992 _________ 0 0 0
+993 _________ 0 0 0
+994 _________ 0 0 0
+995 _________ 0 0 0
+996 _________ 0 0 0
+997 _________ 0 0 0
+998 _________ 0 0 0
+999 _________ 0 0 0
+1000 _________ 0 0 0
+1001 _________ 0 0 0
+1002 _________ 0 0 0
+1003 _________ 0 0 0
+1004 _________ 0 0 0
+1005 _________ 0 0 0
+1006 _________ 0 0 0
+1007 _________ 0 0 0
+1008 _________ 0 0 0
+1009 _________ 0 0 0
+1010 _________ 0 0 0
+1011 _________ 0 0 0
+1012 _________ 0 0 0
+1013 _________ 0 0 0
+1014 _________ 0 0 0
+1015 _________ 0 0 0
+1016 _________ 0 0 0
+1017 _________ 0 0 0
+1018 _________ 0 0 0
+1019 _________ 0 0 0
+1020 _________ 0 0 0
+1021 _________ 0 0 0
+1022 _________ 0 0 0
+1023 _________ 0 0 0
+1024 _________ 0 0 0
+1025 GHII      1 1 0
+1026 CSI_2     0 0 0
+1027 re        1 0 0
+1028 wd_g0     1 0 0
+1029 ws_g0     0 0 0
+1030 diag_g0   0 0 0
+1031 wd_g1     1 0 0
+1032 ws_g1     0 0 0
+1033 diag_g1   0 0 0
+1034 _________ 0 0 0
+1035 _________ 0 0 0
+1036 _________ 0 0 0
+1037 _________ 0 0 0
+1038 _________ 0 0 0
+1039 _________ 0 0 0
+1040 _________ 0 0 0
+1041 _________ 0 0 0
+1042 _________ 0 0 0
+1043 _________ 0 0 0
+1044 _________ 0 0 0
+1045 _________ 0 0 0
+1046 _________ 0 0 0
+1047 _________ 0 0 0
+1048 _________ 0 0 0
+1049 _________ 0 0 0
+1050 _________ 0 0 0
+-Program Security-
+0000
+0000
+0000
+-Mode 4-
+-Final Storage Area 2-
+300000
+-CR10X ID-
+0
+-CR10X Power Up-
+3
+-CR10X Compile Setting-
+3
+-CR10X RS-232 Setting-
+-1
+-DLD File Labels-
+0
+-Final Storage Labels-
+0,Year_RTM,26227
+0,Day_RTM
+0,Hour_Minute_RTM
+1,ID~24,25415
+2,Avg_T~25,10476
+2,Avg_P~26
+2,Avg_CO2~27
+3,2,26693
+4,Year_RTM,20440
+4,Day_RTM
+4,Hour_Minute_RTM
+5,Battery~30,21976
+6,AirT_200~32,10529
+6,AirT_100~33
+6,AirT_75~34
+6,AirT_50~35
+6,AirT_25~36
+6,SoilT_0~37
+6,SoilT_5~38
+6,SoilT_10~39
+6,SoilT_20~40
+6,SoilT_50~41
+6,SoilT_100~42
+6,TreeT_N~43
+6,TreeT_S~44
+6,Heatflux~45
+7,SoilW_5~64,20829
+7,SoilW_10~65
+7,SoilW_20~66
+7,SoilW_50~67
+7,SoilW_100~68
+8,PAR_60ft_AVG~70,21667
+8,PAR_40ft_AVG~71
+8,PAR_25ft_AVG~72
+8,PAR_2m_AVG~73
+9,WSpd_80ft_S_WVT~74,1712
+9,WDir_80ft_D1_WVT~77
+9,WSpd_40ft_S_WVT~75
+9,WDir_40ft_D1_WVT~78
+9,WSpd_2m_S_WVT~76
+9,WDir_2m_D1_WVT~79
+10,AirT_80ft_AVG~80,17686
+10,AirT_60ft_AVG~81
+10,AirT_40ft_AVG~82
+10,AirT_25ft_AVG~83
+10,AirT_2m_AVG~84
+10,RH_80ft_AVG~85
+10,RH_60ft_AVG~86
+10,RH_40ft_AVG~87
+10,RH_25ft_AVG~88
+10,RH_2m_AVG~89
+10,NRad_Cs_AVG~90
+10,NRad_Cd_AVG~91
+11,xPAR_Glb_AVG~107,31938
+11,xPAR_Dif_AVG~108
+12,Err_flag~112,2060
