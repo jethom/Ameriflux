@@ -16,9 +16,9 @@ set dtF=%date:~-4%_%date:~4,2%\%date:~7,2%\%time:~0,2%30
 )
 cd c:\Campbellsci\Loggernet
 
-mkdir C:\Users\Flux\Documents\WLEF\ArchiveData\FluxData\%dtF%\bot
+mkdir C:\Users\Flux\Documents\WLEF\ArchiveData\Data\%dtF%
 
-move bot*.dat C:\Users\Flux\Documents\WLEF\ArchiveData\FluxData\%dtF%\bot
+move bot*.dat C:\Users\Flux\Documents\WLEF\ArchiveData\Data\%dtF%
  
 
 rem cd C:\Users\Flux\Documents\WLEF\ArchiveData\FluxData\%dtF%\bot\.

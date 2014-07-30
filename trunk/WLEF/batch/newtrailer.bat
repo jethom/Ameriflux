@@ -17,12 +17,12 @@ set dtF=%date:~-4%_%date:~4,2%\%date:~7,2%\%time:~0,2%30
 )
 )
 
-mkdir C:\Users\Flux\Documents\WLEF\ArchiveData\Data\%dtF%\newtrailer
+mkdir C:\Users\Flux\Documents\WLEF\ArchiveData\Data\%dtF%
 dir
 
 ::rename trailer_final_storage_1.dat trailer_final_storage_%dtF%.dat
 
-move newtrailer_*.dat C:\Users\Flux\Documents\WLEF\ArchiveData\Data\%dtF%\newtrailer
+move newtrailer_*.dat C:\Users\Flux\Documents\WLEF\ArchiveData\Data\%dtF%
 
 
 ::cd C:\Users\Flux\Documents\WLEF\ArchiveData\FluxData\%dtF%\trailer
