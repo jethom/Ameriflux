@@ -14,10 +14,10 @@ set dtF1=%date:~-4%_%date:~4,2%_%date:~7,2%_0%time:~1,1%30
 ) else (
 if %time:~3,2% lss 30 (
 set dtF=%date:~-4%_%date:~4,2%\%date:~7,2%\%time:~0,2%00
-set dtF=%date:~-4%_%date:~4,2%_%date:~7,2%_%time:~0,2%00
+set dtF1=%date:~-4%_%date:~4,2%_%date:~7,2%_%time:~0,2%00
 ) else (
 set dtF=%date:~-4%_%date:~4,2%\%date:~7,2%\%time:~0,2%30
-set dtF=%date:~-4%_%date:~4,2%_%date:~7,2%_%time:~0,2%30
+set dtF1=%date:~-4%_%date:~4,2%_%date:~7,2%_%time:~0,2%30
 )
 )
 
@@ -26,7 +26,7 @@ mkdir C:\Users\Flux\Documents\WLEF\ArchiveData\Data\%dtF%
 
 move surface_final_storage_1.dat C:\Users\Flux\Documents\WLEF\ArchiveData\Data\%dtF%\surface_final_storage_%dtF1%.dat
 
-cd C:\Users\Flux\Documents\WLEF\ArchiveData\FluxData\%dtF%\surface
+rem cd C:\Users\Flux\Documents\WLEF\ArchiveData\FluxData\%dtF%\surface
 
 :: start /wait 7z a -tgzip surface_final_storage_%dtF%.dat.gz surface_final_storage_%dtF%.dat
 
