@@ -1,0 +1,378 @@
+'CR3000 Series Datalogger
+'To create a different opening program template, type in new
+'instructions and select Template | Save as Default Template
+'date:
+'program author:
+
+'Declare Public Variables
+'Example:
+Public i, j, k, l
+Public PTemp, batt_volt, refT, battery_direct
+' LICOR variables
+Public licor(3), avglicor(3)
+Alias licor(1) = LICOR_T : Units LICOR_T = degC
+Alias licor(2) = LICOR_P : Units LICOR_P = kPa
+Alias licor(3) = CO2 : Units CO2 = volts
+Alias avglicor(1) = avg_T : Units avg_T = degC
+Alias avglicor(2) = avg_P : Units avg_P = kPa
+Alias avglicor(3) = avg_CO2 : Units avg_CO2 = volts
+Public ID, level
+' met and radiation variables
+Public PAR_60ft, PAR_40ft, PAR_25ft, PAR_2m
+Units PAR_60ft = micro-mol/s/m^2
+Units PAR_40ft = micro-mol/s/m^2
+Units PAR_25ft = micro-mol/s/m^2
+Units PAR_2m = micro-mol/s/m^2
+Public NRad_sign, NRad_Cs, NRad_Cd
+Units NRad_sign = Wm-2
+Units NRad_Cs = Wm-2
+Units NRad_Cd = Wm-2
+Public WSpd_80ft, WDir_80ft
+Public wind_60ft(3), dis_flag_60ft As Boolean
+Alias wind_60ft(1)=WDir_60ft : Units WDir_60ft = deg
+Alias wind_60ft(2)= WSpd_60ft : Units WSpd_60ft = ms-1
+Alias wind_60ft(3)= Diag_60ft : Units Diag_60ft = unitless
+Public WSpd_40ft, WDir_40ft
+Public wind_25ft(3), dis_flag_25ft As Boolean
+Alias wind_25ft(1) = WDir_25ft : Units WDir_25ft = deg
+Alias wind_25ft(2) = WSpd_25ft : Units WSpd_25ft = ms-1
+Alias wind_25ft(3) = Diag_25ft : Units Diag_25ft = unitless
+Public WSpd_2m, WDir_2m
+Public TRHData_80ft(2)
+Public TRHData_60ft(2)
+Public TRHData_40ft(2)
+Public TRHData_25ft(2)
+Public TRHData_2m(2)
+
+' near surface variables (air, soil, tree)
+Public SurfT(13)
+Alias SurfT(1)=AirT_200
+Alias SurfT(2)=AirT_100
+Alias SurfT(3)=AirT_75
+Alias SurfT(4)=AirT_50
+Alias SurfT(5)=AirT_25
+Alias SurfT(6)=SoilT_0
+Alias SurfT(7)=SoilT_5
+Alias SurfT(8)=SoilT_10
+Alias SurfT(9)=SoilT_20
+Alias SurfT(10)=SoilT_50
+Alias SurfT(11)=SoilT_100
+Alias SurfT(12)=TreeT_N
+Alias SurfT(13)=TreeT_S
+' assuming volumetric water content (m^3/m^3)
+Public SoilW(5)
+Alias SoilW(1)=SoilW_5 : Units SoilW_5 = m^3/m^3
+Alias SoilW(2)=SoilW_10 : Units SoilW_10 = m^3/m^3
+Alias SoilW(3)=SoilW_20 : Units SoilW_20 = m^3/m^3
+Alias SoilW(4)=SoilW_50 : Units SoilW_50 = m^3/m^3
+Alias SoilW(5)= SoilW_100 : Units SoilW_100 = m^3/m^3
+' electrical conductivity (ds/m)
+Public TDR_Per(5)
+Alias TDR_Per(1)=TDR7_Per : Units TDR7_Per = ds/m
+Alias TDR_Per(2)=TDR8_Per : Units TDR7_Per = ds/m
+Alias TDR_Per(3)=TDR9_Per : Units TDR7_Per = ds/m
+Alias TDR_Per(4)=TDR10_Per : Units TDR7_Per = ds/m
+Alias TDR_Per(5)=TDR11_Per : Units TDR7_Per = ds/m
+Public Heatflux
+Units Heatflux = W/m^2
+'
+' define each sample line
+' can define one long array or multiple long variables ? not sure what will be best
+' define bits
+' bit 15 = unused
+' bit 14 = tank power
+' bit 13 = air power
+' bit 12 = standard power
+' bit 11 = tank switch
+' bit 10 = 2 ft
+' bit 09 = 5 ft
+' bit 08 = 10 ft
+' bit 07 = 25 ft
+' bit 06 = 45 ft
+' bit 05 = 70 ft
+' bit 04 = 97 ft
+' bit 03 = reference
+' bit 02 = low
+' bit 01 = high
+' bit 00 = air power 2
+'
+Public level01 As Long
+Public level02 As Long
+Public level03 As Long
+Public level04 As Long
+Public level05 As Long
+Public level06 As Long
+Public level07 As Long
+Public lowCal As Long
+Public refCal As Long
+Public highCal As Long
+Public reset As Long
+Public valveset As Long
+
+
+Alias TRHData_80ft(1)=AirT_80ft : Units AirT_80ft = degC
+Alias TRHData_80ft(2)=RH_80ft : Units RH_80ft = %
+Alias TRHData_60ft(1)=AirT_60ft : Units AirT_60ft = degC
+Alias TRHData_60ft(2)=RH_60ft : Units RH_60ft = %
+Alias TRHData_40ft(1)=AirT_40ft : Units AirT_40ft = degC
+Alias TRHData_40ft(2)=RH_40ft : Units RH_40ft = %
+Alias TRHData_25ft(1)=AirT_25ft : Units AirT_25ft = degC
+Alias TRHData_25ft(2)=RH_25ft : Units RH_25ft = %
+Alias TRHData_2m(1)=AirT_2m : Units AirT_2m = degC
+Alias TRHData_2m(2)=RH_2m : Units RH_2m = %
+
+'Define Data Tables
+DataTable(licordata,1,-1)
+  DataInterval(0,180,sec,10)
+  Sample(1,ID,UINT2)
+  Sample(1,level,uint2)
+  Sample(3,avglicor(),IEEE4)
+EndTable
+DataTable(metdata,1,-1)
+  DataInterval(0,10,min,10)
+  Average(1,batt_volt,fp2,false)
+  Average(1,PTemp, fp2,false)
+  Sample(1,battery_direct,FP2)
+  Sample(13,SurfT(),fp2)
+  Sample(5,SoilW(),fp2)
+  Average(1,PAR_60ft,fp2,False)
+  Average(1,PAR_40ft,fp2,false)
+  Average(1,PAR_25ft,fp2,false)
+  Average(1,PAR_2m,fp2,false)
+  WindVector (1,WSpd_80ft,WDir_80ft,FP2,False,0,0,1)
+  WindVector(1,WSpd_60ft,WDir_60ft,fp2,dis_flag_60ft,0,0,1)
+  WindVector(1,WSpd_40ft,WDir_40ft,fp2,false,0,0,1)
+  WindVector(1,WSpd_25ft,WDir_25ft,fp2,dis_flag_25ft,0,0,1)
+  WindVector(1,WSpd_2m,WDir_2m,fp2,false,0,0,1)
+  Average(1,AirT_80ft,fp2,false)
+  Average(1,AirT_60ft,fp2,false)
+  Average(1,AirT_40ft,fp2,false)
+  Average(1,AirT_25ft,fp2,false)
+  Average(1,AirT_2m,fp2,false)
+  Average(1,RH_80ft,fp2,false)
+  Average(1,RH_60ft,fp2,false)
+  Average(1,RH_40ft,fp2,false)
+  Average(1,RH_25ft,fp2,false)
+  Average(1,RH_2m,fp2,false)
+  Average(1,NRad_Cs,fp2,false)
+  Average(1,NRad_Cd,fp2,false)
+EndTable
+
+'Define Subroutines
+'Sub
+'EnterSub instructions here
+'EndSub
+Sub sWC_REBS
+  If NRad_sign >= 0 Then
+    NRad_Cs = NRad_sign *9.29 * 1.045 * 11.5
+  EndIf
+EndSub
+Sub dWC_REBS
+  If NRad_sign >= 0 Then
+    NRad_Cd = (NRad_sign *9.29) * ((WSpd_2m * 0.2 * 0.066)/(WSpd_2m * 0.2 + 0.066) + 1)
+  Else
+    NRad_Cd = (NRad_sign * 11.5) * (WSpd_2m * .00174 + .99755)
+  EndIf
+EndSub
+Sub valveselect
+  level =  l MOD 15
+  If l<91 Then
+    If level = 1 OR level = 8
+      valveset=level01
+      ID=1
+    ElseIf level = 2 OR level = 9
+      valveset=level02
+      ID=2
+    ElseIf level = 3 OR level = 10
+      valveset=level03
+      ID=3
+    ElseIf level = 4 OR level = 11
+      valveset=level04
+      ID=4
+    ElseIf level = 5 OR level = 12
+      valveset=level05
+      ID=5
+    ElseIf level = 6 OR level = 13
+      valveset=level06
+      ID=6
+    ElseIf level = 7 OR level = 14
+      valveset=level07
+      ID=7
+    ElseIf level = 15
+      valveset=refCal
+      ID=8
+    EndIf
+  ElseIf l=91
+    valveset=lowCal
+    ID=9
+  ElseIf l=92
+    valveset=highCal
+    ID=10
+  EndIf
+EndSub
+' bit mapping for 
+
+'Main Program
+BeginProg
+  level01=32814  ' 1000000000101110 - &h802E
+  level02=32846  ' 1000000001001110 - &h804E
+  level03=32910  ' 1000000010001110 - &h808E
+  level04=33038  ' 1000000100001110 - &h810E
+  level05=33294  ' 1000001000001110 - &h820E
+  level06=33806  ' 1000010000001110 - &h840E
+  level07=34830  ' 1000100000001110 - &h880E
+  refCal=37118   ' 1001000011111110 - &h90FE
+  lowCal=41214   ' 1010000011111110 - &hA0FE
+  highCal=49406  ' 1100000011111110 - &hC0FE
+  reset=0
+  l=0
+  ' set the relays to level 01 on startup
+  SDMCD16AC(level01,1,0)
+  Delay(0,90,mSec)
+  SDMCD16AC(reset,1,0)
+  Scan (1,Sec,0,0)
+    PanelTemp (PTemp,250)
+    Battery (batt_volt)
+    VoltSe (licor,3,mV5000,1,1,0,_60Hz,1.0,0)
+    LICOR_T = LICOR_T * (50./4096.)
+    LICOR_P = LICOR_P * 0.1522 + 58.738
+    AvgRun(avglicor,3,licor,60)
+    ' change the valves for each level and calibration tank
+    If TimeIntoInterval(0,180,sec) Then
+      If l>92 Then l=0
+      l=l+1
+      Call valveselect
+      SDMCD16AC(valveset,1,0)
+      Delay (0,90,mSec)
+      SDMCD16AC(reset,1,0)
+    EndIf
+    ' call datatables
+    CallTable licordata
+    CallTable metdata
+  NextScan
+  SlowSequence
+  ' measure canopy pars and atmospheric meteorolgy
+  Scan(5, sec,0,0)
+    PortSet(7,1)   ' turn on the AM25T
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    ' measure PAR 60 ft (SN49839)
+    'licor cal 6.44 microamps/1000 micromol s-1 m-2
+    ' mult 257.08 (flux density)
+    VoltDiff(PAR_60ft,1,mV20,5,false,0,_60Hz,257.08,0)
+    If PAR_60ft <0 Then PAR_60ft=0
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    ' measure PAR 40 ft (SN49838)
+    'licor cal 6.51 microamps/1000 micromol s-1 m-2
+    ' mult 254.32 (flux density)
+    VoltDiff(PAR_40ft,1,mV20,5,false,0,_60Hz,254.32,0)
+    If PAR_40ft < 0 Then PAR_40ft = 0
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    ' measure PAR 25 ft (SN49836)
+    'licor cal 6.83 microamps/1000 micromol s-1 m-2
+    ' mult 242.40 (flux density)
+    VoltDiff(PAR_25ft,1,mV20,5,false,0,_60Hz,242.40,0)
+    If PAR_25ft < 0 Then PAR_25ft = 0
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    ' measure PAR 60 ft (SN49835)
+    'licor cal 6.55 microamps/1000 micromol s-1 m-2
+    ' mult 252.77 (flux density)
+    VoltDiff(PAR_2m,1,mV20,5,false,0,_60Hz,252.77,0)
+    If PAR_2m < 0 Then PAR_2m = 0
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    ' REBS net radiometer (2m)
+    VoltDiff(NRad_sign,1,mV200,5,false,0,_60hz,1.0,0)
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    ' rm young 03002 wind sentry (wind speed 80ft)
+    VoltDiff(WSpd_80ft,1,mv200,5,false,0,_60hz,.045,.2)
+    If WSpd_80ft < .21 Then WSpd_80ft = 0
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    VoltDiff(WSpd_40ft,1,mv200,5,false,0,_60hz,.045,.2)
+    If WSpd_40ft < .21 Then WSpd_40ft = 0
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    VoltDiff(WSpd_2m, 1, mv200, 5,false,0,_60Hz,.045,.2)
+    If WSpd_2m < .21 Then WSpd_2m=0
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    BrHalf (WDir_80ft,1,mv5000,9,Vx2,1,5000,false,0,_60Hz,352,0)
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    BrHalf(WDir_40ft,1,mv5000,9,vx2,1,5000,false,0,_60Hz,352,0)
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    BrHalf(WDir_2m,1,mv5000,9,vx2,1,5000,false,0,_60hz,352,0)
+    PortSet(7,0) ' turn off am25t
+    Call sWC_REBS
+    Call dWC_REBS
+    'measure the temperature and humidity profile
+    SDI12Recorder (TRHData_80ft(),3,4,"M!",1.0,0)
+    SDI12Recorder (TRHData_60ft(),3,3,"M!",1.0,0)
+    SDI12Recorder (TRHData_40ft(),3,2,"M!",1.0,0)
+    SDI12Recorder(TRHData_25ft(),3,1,"M!",1.0,0)
+    SDI12Recorder(TRHData_2m(),3,0,"M!",1.0,0)
+    SDI12Recorder(wind_60ft(),5,1,"R0!",1.0,0)
+    If (WDir_60ft = NAN) Then
+      WSpd_60ft=NAN
+      Diag_60ft=NAN
+    EndIf
+    dis_flag_60ft = (WDir_60ft=NAN) OR (Diag_60ft<>0)
+    SDI12Recorder(wind_25ft(),5,0,"R0!",1.0,0)
+    If (WDir_25ft = NAN) Then
+      WSpd_25ft=NAN
+      Diag_25ft=NAN
+    EndIf
+    dis_flag_25ft = (WDir_25ft=NAN) OR (Diag_25ft<>0)
+  NextScan
+  EndSequence
+  SlowSequence
+  Scan(10,min,0,0)
+    PanelTemp(refT,_60Hz)
+    VoltSe(battery_direct,1,mV5000,8,False,0,_60Hz,.01112,0)
+    PortSet(1,1) ' enable am416
+    PortSet(6,1) ' enable cs615s
+    For i = 1 To 6
+      PulsePort(2,30000) ' pulse clock for am416 (channel 1)
+      TCDiff (SurfT(i),1,mV20c,3,TypeT,refT,True ,0,_60Hz,1.0,0)
+    Next
+    For i = 7 To 11
+      PulsePort(2,30000)
+      j=i-6
+      TCDiff(SurfT(i),1,mv20c,3,typeT,refT,true,0,_60Hz,1.0,0)
+      PeriodAvg (TDR_Per(j),1,mv5000,7,0,0,10,50,.001,0)
+    Next
+    For i=12 To 13
+      PulsePort(2,30000)
+      TCDiff (SurfT(i),1,mV20c,3,TypeT,refT,True ,0,_60Hz,1.0,0)
+    Next
+    PortSet(6,0)  ' disable cs615s
+    PulsePort(2,30000)
+    VoltDiff(Heatflux,1,mv20c,3,0,0,_60Hz,37.6,0)
+    PortSet(1,0)  ' disable am416
+    ' calculate the water content from the CS615 measurements
+    ' 5cm water content
+    SoilW(1)=-0.5699 + 0.9725 * TDR_Per(1) - 0.1893 * TDR_Per(1)^2
+    ' 10 cm water content
+    SoilW(2)=-0.7428 + 1.28 * TDR_Per(2) - 0.3284 * TDR_Per(2)^2
+    ' 20 cm water content
+    SoilW(3)=-0.9288 + 1.7187 * TDR_Per(3) - 0.5797 * TDR_Per(3)^2
+    ' 50 cm water content
+    SoilW(4)=-0.9028 + 1.5488 * TDR_Per(4) - 0.4178 * TDR_Per(4)^2
+    ' 100 cm water content
+    SoilW(5)=-0.187 + 0.037 * TDR_Per(5) + 0.335 * TDR_Per(5)^2
+  NextScan
+  EndSequence
+  SlowSequence
+  l=0
+  Scan(180,sec,0,0)
+
+  NextScan
+  EndSequence
+EndProg
+
