@@ -1,0 +1,57 @@
+'CR3000 Series Datalogger
+'To create a different opening program template, type in new
+'instructions and select Template | Save as Default Template
+'date:
+'program author:
+
+'Declare Public Variables
+'Example:
+Public PTemp, batt_volt
+Public TRH02(2), TRH08(2), TRH12(2),TRH18(2),TRH24(2)
+Public windsonic0(3),windsonic1(3)
+'Declare Other Variables
+'Example:
+'Dim Counter
+
+'Declare Constants
+'Example:
+'CONST PI = 3.141592654
+
+'Define Data Tables
+DataTable (Test,1,1000)
+  DataInterval (0,10,Sec,10)
+  Minimum (1,batt_volt,FP2,0,False)
+  Sample (1,PTemp,FP2)
+  Sample(2,TRH02(),fp2)
+  Sample(2,TRH08(),fp2)
+  Sample(2,TRH12(),fp2)
+  Sample(2,TRH18(),fp2)
+  Sample(2,TRH24(),fp2)
+  Sample(3,windsonic0(),fp2)
+  Sample(3,windsonic1(),fp2)
+EndTable
+
+'Define Subroutines
+'Sub
+'EnterSub instructions here
+'EndSub
+
+'Main Program
+BeginProg
+  Scan (10,Sec,0,0)
+    PanelTemp (PTemp,250)
+    Battery (batt_volt)
+    SDI12Recorder(TRH02,1,"0","M!",1,0)
+    SDI12Recorder(TRH08,1,"1","M!",1,0)
+    SDI12Recorder(TRH12,1,"2","M!",1,0)
+    SDI12Recorder(TRH18,1,"3","M!",1,0)
+    SDI12Recorder(TRH24,1,"4","M!",1,0)
+    SDI12Recorder(windsonic0,3,"0","R0!",1,0)
+    SDI12Recorder(windsonic1,3,"1","R0!",1,0)
+    'Enter other measurement instructions
+    'Call Output Tables
+    'Example:
+    CallTable Test
+  NextScan
+EndProg
+

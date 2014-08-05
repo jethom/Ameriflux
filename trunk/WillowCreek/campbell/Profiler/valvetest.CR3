@@ -1,0 +1,118 @@
+'CR3000 Series Datalogger
+'To create a different opening program template, type in new
+'instructions and select Template | Save as Default Template
+'date:
+'program author:
+
+'Declare Public Variables
+'Example:
+Public PTemp, batt_volt
+Public powervalves As Long
+Public level01 As Long
+Public level02 As Long
+Public level03 As Long
+Public level04 As Long
+Public level05 As Long
+Public level06 As Long
+Public level07 As Long
+Public lowCal As Long
+Public refCal As Long
+Public highCal As Long
+Public reset As Long
+Public valveset As Long
+Public l, level, ID
+
+'Declare Other Variables
+'Example:
+'Dim Counter
+
+'Declare Constants
+'Example:
+'CONST PI = 3.141592654	
+
+'Define Data Tables
+DataTable (licordata,1,-1)
+	DataInterval (0,10,Sec,10)
+	Minimum (1,batt_volt,FP2,0,False)
+	Sample (1,PTemp,FP2)
+	Sample(1,valveset,Long)
+EndTable
+
+'Define Subroutines
+'Sub
+	'EnterSub instructions here
+'EndSub
+Sub valveselect
+  level =  l MOD 15
+  If l<91 Then
+    If level = 1 OR level = 8
+      valveset=level01
+      ID=1
+    ElseIf level = 2 OR level = 9
+      valveset=level02
+      ID=2
+    ElseIf level = 3 OR level = 10
+      valveset=level03
+      ID=3
+    ElseIf level = 4 OR level = 11
+      valveset=level04
+      ID=4
+    ElseIf level = 5 OR level = 12
+      valveset=level05
+      ID=5
+    ElseIf level = 6 OR level = 13
+      valveset=level06
+      ID=6
+    ElseIf level = 7 OR level = 14
+      valveset=level07
+      ID=7
+    ElseIf level = 15
+      valveset=refCal
+      ID=8
+    EndIf
+  ElseIf l=91
+    valveset=lowCal
+    ID=9
+  ElseIf l=92
+    valveset=highCal
+    ID=10
+  EndIf
+EndSub
+'Main Program
+BeginProg
+  level01=32814  ' 1000000000100000 - &h802E
+  level02=32846  ' 1000000001000000 - &h804E
+  level03=32910  ' 1000000010000000 - &h808E
+  level04=33038  ' 1000000100000000 - &h810E
+  level05=33294  ' 1000001000000000 - &h820E
+  level06=33806  ' 1000010000000000 - &h840E
+  level07=34830  ' 1000100000000000 - &h880E
+  refCal=37118   ' 1001000011110000 - &h90FE
+  lowCal=41214   ' 1010000011110000 - &hA0FE
+  highCal=49406  ' 1100000011110000 - &hC0FE
+  reset=0
+  l=0
+'  SDMCD16AC(powervalves,1,0)
+'  Delay(2,1,sec)
+'  SDMCD16AC(reset,1,0)
+  Scan (10,Sec,0,0)
+    PanelTemp (PTemp,250)
+    Battery (batt_volt)
+    ' change the valves for each level
+'    If TimeIntoInterval(0,30,sec) Then
+'      SDMCD16AC(reset,1,0)
+      'Delay(2,1,msec)
+      If l>92 Then l=0
+      l=l+1
+      Call valveselect
+      SDMCD16AC(valveset,1,0)
+  '    Delay (2,1,Sec)
+ '     SDMCD16AC(powervalves,1,0)
+      Delay(0,90,mSec)
+      SDMCD16AC(reset,1,0)
+ '   EndIf
+    ' call datatables
+    CallTable licordata
+  NextScan
+EndProg
+
