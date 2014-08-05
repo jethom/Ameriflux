@@ -8,6 +8,17 @@
 'Example:
 Public i, j, k, l
 Public PTemp, batt_volt, refT, battery_direct
+Units PTemp=degC
+Units batt_volt = volts
+Units refT = degC
+Units battery_direct=volts
+Public tankpres(5)
+Alias tankpres(1) = hightank : Units hightank = psi
+Alias tankpres(2) = reftank : Units reftank = psi
+Alias tankpres(3) = lowtank : Units lowtank = psi
+Alias tankpres(4) = nafion : Units nafion = psi
+Alias tankpres(5) = flux : Units flux = psi
+
 ' LICOR variables
 Public licor(3), avglicor(3)
 Alias licor(1) = LICOR_T : Units LICOR_T = degC
@@ -17,6 +28,8 @@ Alias avglicor(1) = avg_T : Units avg_T = degC
 Alias avglicor(2) = avg_P : Units avg_P = kPa
 Alias avglicor(3) = avg_CO2 : Units avg_CO2 = volts
 Public ID, level
+Units ID = unitless
+Units level=unitless
 ' met and radiation variables
 Public PAR_60ft, PAR_40ft, PAR_25ft, PAR_2m
 Units PAR_60ft = micro-mol/s/m^2
@@ -28,37 +41,53 @@ Units NRad_sign = Wm-2
 Units NRad_Cs = Wm-2
 Units NRad_Cd = Wm-2
 Public WSpd_80ft, WDir_80ft
+Units WSpd_80ft = ms-1
+Units WDir_80ft = degrees
 Public wind_60ft(3), dis_flag_60ft As Boolean
-Alias wind_60ft(1)=WDir_60ft : Units WDir_60ft = deg
+Alias wind_60ft(1)=WDir_60ft : Units WDir_60ft = degrees
 Alias wind_60ft(2)= WSpd_60ft : Units WSpd_60ft = ms-1
 Alias wind_60ft(3)= Diag_60ft : Units Diag_60ft = unitless
 Public WSpd_40ft, WDir_40ft
+Units WSpd_40ft = ms-1
+Units WDir_40ft= degrees
 Public wind_25ft(3), dis_flag_25ft As Boolean
-Alias wind_25ft(1) = WDir_25ft : Units WDir_25ft = deg
+Alias wind_25ft(1) = WDir_25ft : Units WDir_25ft = degrees
 Alias wind_25ft(2) = WSpd_25ft : Units WSpd_25ft = ms-1
 Alias wind_25ft(3) = Diag_25ft : Units Diag_25ft = unitless
 Public WSpd_2m, WDir_2m
+Units WSpd_2m = ms-1
+Units WDir_2m = degrees
 Public TRHData_80ft(2)
 Public TRHData_60ft(2)
 Public TRHData_40ft(2)
 Public TRHData_25ft(2)
 Public TRHData_2m(2)
+Alias TRHData_80ft(1)=AirT_80ft : Units AirT_80ft = degC
+Alias TRHData_80ft(2)=RH_80ft : Units RH_80ft = %
+Alias TRHData_60ft(1)=AirT_60ft : Units AirT_60ft = degC
+Alias TRHData_60ft(2)=RH_60ft : Units RH_60ft = %
+Alias TRHData_40ft(1)=AirT_40ft : Units AirT_40ft = degC
+Alias TRHData_40ft(2)=RH_40ft : Units RH_40ft = %
+Alias TRHData_25ft(1)=AirT_25ft : Units AirT_25ft = degC
+Alias TRHData_25ft(2)=RH_25ft : Units RH_25ft = %
+Alias TRHData_2m(1)=AirT_2m : Units AirT_2m = degC
+Alias TRHData_2m(2)=RH_2m : Units RH_2m = %
 
 ' near surface variables (air, soil, tree)
 Public SurfT(13)
-Alias SurfT(1)=AirT_200
-Alias SurfT(2)=AirT_100
-Alias SurfT(3)=AirT_75
-Alias SurfT(4)=AirT_50
-Alias SurfT(5)=AirT_25
-Alias SurfT(6)=SoilT_0
-Alias SurfT(7)=SoilT_5
-Alias SurfT(8)=SoilT_10
-Alias SurfT(9)=SoilT_20
-Alias SurfT(10)=SoilT_50
-Alias SurfT(11)=SoilT_100
-Alias SurfT(12)=TreeT_N
-Alias SurfT(13)=TreeT_S
+Alias SurfT(1)=AirT_200 : Units AirT_200 = degC
+Alias SurfT(2)=AirT_100 : Units AirT_100 = degC
+Alias SurfT(3)=AirT_75 : Units AirT_75 = degC
+Alias SurfT(4)=AirT_50 : Units AirT_50 = degC
+Alias SurfT(5)=AirT_25 : Units AirT_25 = degC
+Alias SurfT(6)=SoilT_0 : Units SoilT_0 = degC
+Alias SurfT(7)=SoilT_5 : Units SoilT_5 = degC
+Alias SurfT(8)=SoilT_10 : Units SoilT_10 = degC
+Alias SurfT(9)=SoilT_20 : Units SoilT_20 = degC
+Alias SurfT(10)=SoilT_50 : Units SoilT_50 = degC
+Alias SurfT(11)=SoilT_100 : Units SoilT_100 = degC
+Alias SurfT(12)=TreeT_N : Units TreeT_N = degC
+Alias SurfT(13)=TreeT_S : Units TreeT_S = degC
 ' assuming volumetric water content (m^3/m^3)
 Public SoilW(5)
 Alias SoilW(1)=SoilW_5 : Units SoilW_5 = m^3/m^3
@@ -109,18 +138,6 @@ Public highCal As Long
 Public reset As Long
 Public valveset As Long
 
-
-Alias TRHData_80ft(1)=AirT_80ft : Units AirT_80ft = degC
-Alias TRHData_80ft(2)=RH_80ft : Units RH_80ft = %
-Alias TRHData_60ft(1)=AirT_60ft : Units AirT_60ft = degC
-Alias TRHData_60ft(2)=RH_60ft : Units RH_60ft = %
-Alias TRHData_40ft(1)=AirT_40ft : Units AirT_40ft = degC
-Alias TRHData_40ft(2)=RH_40ft : Units RH_40ft = %
-Alias TRHData_25ft(1)=AirT_25ft : Units AirT_25ft = degC
-Alias TRHData_25ft(2)=RH_25ft : Units RH_25ft = %
-Alias TRHData_2m(1)=AirT_2m : Units AirT_2m = degC
-Alias TRHData_2m(2)=RH_2m : Units RH_2m = %
-
 'Define Data Tables
 DataTable(licordata,1,-1)
   DataInterval(0,180,sec,10)
@@ -130,9 +147,7 @@ DataTable(licordata,1,-1)
 EndTable
 DataTable(metdata,1,-1)
   DataInterval(0,10,min,10)
-  Average(1,batt_volt,fp2,false)
-  Average(1,PTemp, fp2,false)
-  Sample(1,battery_direct,FP2)
+  Average(1,PTemp,fp2,false)
   Sample(13,SurfT(),fp2)
   Sample(5,SoilW(),fp2)
   Average(1,PAR_60ft,fp2,False)
@@ -157,7 +172,13 @@ DataTable(metdata,1,-1)
   Average(1,NRad_Cs,fp2,false)
   Average(1,NRad_Cd,fp2,false)
 EndTable
-
+DataTable (profileDiag,1,-1)
+  DataInterval(0,10,min,10)
+  Sample(1,batt_volt,fp2)
+  Sample(1,PTemp, fp2)
+  Sample(1,battery_direct,FP2)
+  Sample(5,hightank,ieee4)
+EndTable
 'Define Subroutines
 'Sub
 'EnterSub instructions here
@@ -249,6 +270,7 @@ BeginProg
     ' call datatables
     CallTable licordata
     CallTable metdata
+    CallTable profileDiag
   NextScan
   SlowSequence
   ' measure canopy pars and atmospheric meteorolgy
@@ -338,21 +360,29 @@ BeginProg
     PortSet(1,1) ' enable am416
     PortSet(6,1) ' enable cs615s
     For i = 1 To 6
-      PulsePort(2,30000) ' pulse clock for am416 (channel 1)
+      PulsePort(2,10000) ' pulse clock for am416 (channel 1)
       TCDiff (SurfT(i),1,mV20c,3,TypeT,refT,True ,0,_60Hz,1.0,0)
     Next
     For i = 7 To 11
-      PulsePort(2,30000)
+      PulsePort(2,10000)
       j=i-6
       TCDiff(SurfT(i),1,mv20c,3,typeT,refT,true,0,_60Hz,1.0,0)
       PeriodAvg (TDR_Per(j),1,mv5000,7,0,0,10,50,.001,0)
     Next
+    j=0
     For i=12 To 13
-      PulsePort(2,30000)
+      PulsePort(2,10000)
+      j=j+1
       TCDiff (SurfT(i),1,mV20c,3,TypeT,refT,True ,0,_60Hz,1.0,0)
+      VoltSe(tankpres(j),1,mv5000,7,false,0,_60Hz,0.6,0)
+    Next
+    For i=14 To 16
+      PulsePort(2,10000)
+      j=j+1
+      VoltSe(tankpres(j),1,mv5000,7,false,0,_60Hz,0.6,0)
     Next
     PortSet(6,0)  ' disable cs615s
-    PulsePort(2,30000)
+    PulsePort(2,10000)
     VoltDiff(Heatflux,1,mv20c,3,0,0,_60Hz,37.6,0)
     PortSet(1,0)  ' disable am416
     ' calculate the water content from the CS615 measurements
@@ -366,12 +396,6 @@ BeginProg
     SoilW(4)=-0.9028 + 1.5488 * TDR_Per(4) - 0.4178 * TDR_Per(4)^2
     ' 100 cm water content
     SoilW(5)=-0.187 + 0.037 * TDR_Per(5) + 0.335 * TDR_Per(5)^2
-  NextScan
-  EndSequence
-  SlowSequence
-  l=0
-  Scan(180,sec,0,0)
-
   NextScan
   EndSequence
 EndProg
