@@ -1,0 +1,3 @@
+connect localhost;
+set-lgrnet-setting 1 0;
+exit;

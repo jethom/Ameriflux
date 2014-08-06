@@ -1,0 +1,4 @@
+55 * * * * $HOME/scripts/LimnoCopy.bash &> /dev/null
+35 * * * * $HOME/scripts/LostCreekCopy.bash &> /dev/null
+25 0,4,8,12,16,20 * * * $HOME/scripts/makequicklooks.bash &> /dev/null
+45 0,4,8,12,16,20 * * * $HOME/scripts/makequicklookswlef.bash &> /dev/null

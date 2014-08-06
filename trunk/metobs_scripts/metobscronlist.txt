@@ -1,0 +1,4 @@
+0 0 3 * * $HOME/limnoclean.bash &> /dev/null
+40 23 * * * /mnt/data/ingest/programs/LostCreek/timestampdiag.bash &> /dev/null
+1 0 * * * /mnt/data/ingest/programs/buoy/buoytimestamp.bash &> /home/jthom/dailybuoy.log
+0 0 4 * * $HOME/lostcreekclean.bash &> /dev/null
