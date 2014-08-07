@@ -334,7 +334,7 @@ ax.plot_date(slowtimelist,slowarray[slowkeys.index('SoilW_50')],'k.',
 ax.plot_date(slowtimelist,slowarray[slowkeys.index('SoilW_100')],'m.',
              xdate=True,ydate=False,label='SoilW 100')
 ax.set_xlabel('Time')
-ax.set_ylabel('? some sort of water units')
+ax.set_ylabel('Volumetric Water Content (m^3/m^3)')
 plt.title('SoilW_5 - SoilW_100 ' + figdate)
 ax.xaxis.set_major_locator(hrs3)
 ax.xaxis.set_major_formatter(hrsfmt)
