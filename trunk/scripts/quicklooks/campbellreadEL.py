@@ -30,6 +30,10 @@ def wcflux(filepth):
             data_only_var_name = ['Ux', 'Uy', 'Uz', 'Ts', 'diag_csat', 
                                   'co2', 'h2o', 'LI_P', 'LI_T']    
             data_list = line.split(',')[5:]
+            # if line is short fill it in with "nan"
+            data_list=filter(None,data_list)
+            while len(data_list) < len(data_only_var_name):
+                data_list.append('nan')
         elif file_id=='2': 
             time_list = line.split(',')[1:4]
             hour = int(time_list[2])/100
@@ -42,6 +46,10 @@ def wcflux(filepth):
                                   'KZ_T_AVG', 'Battery', 
                                   'Leaf_Wet', 'Solar_In_STD']    
             data_list = line.split(',')[4:]
+            # if line is short fill it in with "nan"
+            data_list=filter(None,data_list)
+            while len(data_list) < len(data_only_var_name):
+                data_list.append('nan')
         my_date = time_list[0] + ':' + time_list[1] + ':' '{:02d}'.format(hour) + ':' \
                   '{:02d}'.format(minute) + ':' + '{:02d}'.format(int(seconds)) + ':'  \
                   + microsecs
@@ -103,6 +111,10 @@ def wcprofile(filepth):
                   + microsecs
         stamp = datetime.strptime(my_date, '%Y:%j:%H:%M:%S:%f')
         data_list = line.split(',')[4:]
+        # if line is short fill it in with "nan"
+        data_list=filter(None,data_list)
+        while len(data_list) < len(data_only_var_name):
+            data_list.append('nan')
         # print line
         LOG.info("break data into a list")
 
@@ -136,6 +148,10 @@ def wlefsurf(filepth):
                   + microsecs
         stamp = datetime.strptime(my_date, '%Y:%j:%H:%M:%S:%f')
         data_list = line.split(',')[4:]
+        # if line is short fill it in with "nan"
+        data_list=filter(None,data_list)
+        while len(data_list) < len(data_only_var_name):
+            data_list.append('nan')
         # print line
         LOG.info("break data into a list")
 
