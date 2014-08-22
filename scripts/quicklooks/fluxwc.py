@@ -17,8 +17,8 @@ import collections
 from time import mktime
 from datetime import datetime, timedelta
 from glob import glob
-from campbellread import campbellread
-from campbellreadEL import wcflux
+from campbellread import toa5head
+from campbellread import wcflux
 import os
 import numpy as np
 import matplotlib.pyplot as plt
