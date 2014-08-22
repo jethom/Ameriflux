@@ -15,7 +15,7 @@ import collections
 from time import mktime
 from datetime import datetime, timedelta
 from glob import glob
-from campbellread import campbellread
+from campbellread import toa5head
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -84,10 +84,10 @@ fasttimelist = []
 slowtimelist = []
 # loop through the files and read in the data
 for filein in fastfiles:
-   filedata = campbellread(filein)   
+   filedata = toa5head(filein)   
    fast.extend(filedata)
 for filein in slowfiles:
-   filedata = campbellread(filein)   
+   filedata = toa5head(filein)   
    slow.extend(filedata)
 # get the keys for the data stored in the dictionaries
 fastkeys = fast[0][1].keys()

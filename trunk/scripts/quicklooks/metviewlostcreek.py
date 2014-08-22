@@ -9,7 +9,7 @@ import collections
 from time import mktime
 from datetime import datetime, timedelta
 from glob import glob
-from campbellread import campbellread
+from campbellread import toa5head
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -58,7 +58,7 @@ todaydir = datadir + currenttime.strftime('%Y%m%d')
 metfiles.extend(glob(yesterdaydir + '/*met*'))
 metfiles.extend(glob(todaydir + '/*met*'))
 for filein in metfiles:
-   filedata = campbellread(filein)   
+   filedata = toa5head(filein)   
    met.extend(filedata)
 metkeys = met[0][1].keys()
 metlist = [[] for i in range(len(metkeys))]

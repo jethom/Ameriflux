@@ -11,7 +11,7 @@ import collections
 from time import mktime
 from datetime import datetime, timedelta
 from glob import glob
-from campbellread import campbellread
+from campbellread import toa5head
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -59,7 +59,7 @@ tsfiles.extend(glob(yesterdaydir + '/*ts*'))
 tsfiles.extend(glob(todaydir + '/*ts*'))
 # loop through the files and read in the data
 for filein in tsfiles:
-   filedata = campbellread(filein)   
+   filedata = toa5head(filein)   
    ts.extend(filedata)
 # get the keys for the data stored in the dictionaries
 tskeys = ts[0][1].keys()

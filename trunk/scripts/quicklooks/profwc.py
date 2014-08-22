@@ -16,8 +16,8 @@ import collections
 from time import mktime
 from datetime import datetime, timedelta
 from glob import glob
-from campbellread import campbellread
-from campbellreadEL import wcprofile
+from campbellread import toa5head
+from campbellread import wcprofile
 import os
 import numpy as np
 import matplotlib.pyplot as plt
