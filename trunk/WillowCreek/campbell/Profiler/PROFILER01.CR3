@@ -104,6 +104,19 @@ Alias TDR_Per(4)=TDR10_Per : Units TDR7_Per = ds/m
 Alias TDR_Per(5)=TDR11_Per : Units TDR7_Per = ds/m
 Public Heatflux
 Units Heatflux = W/m^2
+
+Public oldAirT80, oldAirT60, oldAirT40, oldAirT25, oldAirT2
+Public oldRH80, oldRH60, oldRH40, oldRH25, oldRH2
+Units oldAirT80 = degC
+Units oldAirT60 = degC
+Units oldAirT40 = degC
+Units oldAirT25 = degC
+Units oldAirT2 = degC
+Units oldRH80 = %
+Units oldRH60 = %
+Units oldRH40 = %
+Units oldRH25 = %
+Units oldRH2 = %
 '
 ' define each sample line
 ' can define one long array or multiple long variables ? not sure what will be best
@@ -178,6 +191,19 @@ DataTable (profileDiag,1,-1)
   Sample(1,PTemp, fp2)
   Sample(1,battery_direct,FP2)
   Sample(5,hightank,ieee4)
+EndTable
+DataTable (oldsensors, 1,-1)
+  DataInterval(0,10,min,10)
+  Average(1,oldAirT80,fp2,false)
+  Average(1,oldAirT60,fp2,false)
+  Average(1,oldAirT40,fp2,false)
+  Average(1,oldAirT25,fp2,false)
+  Average(1,oldAirT2,fp2,false)
+  Average(1,oldRH80,fp2,false)
+  Average(1,oldRH60,fp2,false)
+  Average(1,oldRH40,fp2,false)
+  Average(1,oldRH25,fp2,false)
+  Average(1,oldRH2,fp2,false)
 EndTable
 'Define Subroutines
 'Sub
@@ -271,10 +297,12 @@ BeginProg
     CallTable licordata
     CallTable metdata
     CallTable profileDiag
+    CallTable oldsensors
   NextScan
   SlowSequence
   ' measure canopy pars and atmospheric meteorolgy
   Scan(5, sec,0,0)
+    SW12 (1,1 )
     PortSet(7,1)   ' turn on the AM25T
     PulsePort(8,1000)
     PulsePort(8,1000)
@@ -328,6 +356,27 @@ BeginProg
     PulsePort(8,1000)
     PulsePort(8,1000)
     BrHalf(WDir_2m,1,mv5000,9,vx2,1,5000,false,0,_60hz,352,0)
+    VoltSe(oldAirT80,1,mV1000,10,False,0,_60Hz,.1,-40)
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    VoltSe(oldAirT60,1,mv1000,9,false,0,_60hz,.1,-40)
+    VoltSe(oldAirT40,1,mv1000,10,false,0,_60hz,.1,-40)
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    VoltSe(oldAirT25,1,mv1000,9,false,0,_60hz,.1,-40)
+    VoltSe(oldAirT2, 1,mv1000,10,false,0,_60hz,.1,-40)
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    VoltSe(oldRH80,1,mv1000,9,false,0,_60hz,.1,0)
+    VoltSe(oldRH60,1,mv1000,10,false,0,_60hz,.1,0)
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    VoltSe(oldRH40,1,mv1000,9,false,0,_60hz,.1,0)
+    VoltSe(oldRH25,1,mv1000,10,false,0,_60hz,.1,0)
+    PulsePort(8,1000)
+    PulsePort(8,1000)
+    VoltSe(oldRH2,1,mv1000,9,false,0,_60hz,.1,0)
+    SW12(1,0)
     PortSet(7,0) ' turn off am25t
     Call sWC_REBS
     Call dWC_REBS
