@@ -163,6 +163,7 @@ DataTable(metdata,1,-1)
   Average(1,PTemp,fp2,false)
   Sample(13,SurfT(),fp2)
   Sample(5,SoilW(),fp2)
+  sample(1,heatflux,fp2)
   Average(1,PAR_60ft,fp2,False)
   Average(1,PAR_40ft,fp2,false)
   Average(1,PAR_25ft,fp2,false)
@@ -245,7 +246,7 @@ Sub valveselect
     ElseIf level = 7 OR level = 14
       valveset=level07
       ID=7
-    ElseIf level = 15
+    ElseIf level = 0
       valveset=refCal
       ID=8
     EndIf
