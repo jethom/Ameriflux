@@ -30,8 +30,8 @@ currenttime = datetime.now()
 #----------------------------------------------------------------
 # will use this for testing
 #----------------------------------------------------------------
-datestr = '20140828'
-currenttime = datetime.strptime(datestr,'%Y%m%d')
+#datestr = '20140828'
+#currenttime = datetime.strptime(datestr,'%Y%m%d')
 #----------------------------------------------------------------
 yesterday = currenttime + timedelta(days=-1)
 #----------------------------------------------------------------
@@ -41,10 +41,10 @@ yesterday = currenttime + timedelta(days=-1)
 #-----------------------------------------------------------
 # test directories
 #-----------------------------------------------------------
-datadir = os.path.expanduser("~") + "/Documents/dev/dailyView/data/"
+#datadir = os.path.expanduser("~") + "/Documents/dev/dailyView/data/"
 #figdir = os.path.expanduser("~") + "/Documents/amerifluxdata/willowcreek/images/profiler"
 #-----------------------------------------------------------
-#datadir = "/air/incoming/WillowCreek/profiler/"
+datadir = "/air/incoming/WillowCreek/profiler/"
 figdir = os.path.expanduser("~") + "/public_html/images/willowcreek/profiler"
 
 
