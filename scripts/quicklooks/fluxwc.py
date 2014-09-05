@@ -43,7 +43,7 @@ yesterday = currenttime + timedelta(days=-1)
 #datadir = os.path.expanduser("~") + "/Documents/amerifluxdata/willowcreek/flux/"
 #figdir = os.path.expanduser("~") + "/Documents/amerifluxdata/willowcreek/images/flux"
 #-----------------------------------------------------------
-datadir = "/air/incoming/WillowCreek/flux/"
+datadir = "/air/incoming/WillowCreek/"
 figdir = os.path.expanduser("~") + "/public_html/images/willowcreek/flux"
 
 # clean up the existing figures in the directory
@@ -90,10 +90,10 @@ slowtimelist = []
 #create directories to look in and make a list of files to read
 yesterdaydir = datadir + yesterday.strftime('%Y%m%d')
 todaydir = datadir + currenttime.strftime('%Y%m%d')
-fastfiles.extend(glob(yesterdaydir + '*/*1.dat'))
-fastfiles.extend(glob(todaydir + '*/*1.dat'))
-slowfiles.extend(glob(yesterdaydir + '*/*2.dat'))
-slowfiles.extend(glob(todaydir + '*/*2.dat'))
+fastfiles.extend(glob(yesterdaydir + '/*/*1.dat'))
+fastfiles.extend(glob(todaydir + '/*/*1.dat'))
+slowfiles.extend(glob(yesterdaydir + '/*/*2.dat'))
+slowfiles.extend(glob(todaydir + '/*/*2.dat'))
 # loop through the files and read in the data
 for filein in fastfiles:
    filedata = wcflux(filein)   
