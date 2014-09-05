@@ -120,23 +120,23 @@ Units oldRH2 = %
 '
 ' define each sample line
 ' can define one long array or multiple long variables ? not sure what will be best
-' define bits
-' bit 15 = unused
-' bit 14 = tank power
-' bit 13 = air power
-' bit 12 = standard power
-' bit 11 = tank switch
-' bit 10 = 2 ft
-' bit 09 = 5 ft
-' bit 08 = 10 ft
-' bit 07 = 25 ft
-' bit 06 = 45 ft
-' bit 05 = 70 ft
-' bit 04 = 97 ft
-' bit 03 = reference
-' bit 02 = low
-' bit 01 = high
-' bit 00 = air power 2
+' define bits               Relay number
+' bit 00 = unused                1   
+' bit 01 = tank power            2
+' bit 02 = air power             3
+' bit 03 = standard power        4   
+' bit 04 = tank switch           5 
+' bit 05 = 2 ft                  6
+' bit 06 = 5 ft                  7
+' bit 07 = 10 ft                 8
+' bit 08 = 25 ft                 9
+' bit 09 = 45 ft                10
+' bit 10 = 70 ft                11 
+' bit 11 = 97 ft                12
+' bit 12 = reference            13
+' bit 13 = low                  14
+' bit 14 = high                 15
+' bit 15 = air power 2          16
 '
 Public level01 As Long
 Public level02 As Long
@@ -155,6 +155,7 @@ Public valveset As Long
 DataTable(licordata,1,-1)
   DataInterval(0,180,sec,10)
   Sample(1,ID,UINT2)
+  Sample(1,l,UINT2)
   Sample(1,level,uint2)
   Sample(3,avglicor(),IEEE4)
 EndTable
@@ -163,7 +164,7 @@ DataTable(metdata,1,-1)
   Average(1,PTemp,fp2,false)
   Sample(13,SurfT(),fp2)
   Sample(5,SoilW(),fp2)
-  sample(1,heatflux,fp2)
+  Sample(1,Heatflux,fp2)
   Average(1,PAR_60ft,fp2,False)
   Average(1,PAR_40ft,fp2,false)
   Average(1,PAR_25ft,fp2,false)
@@ -223,8 +224,10 @@ Sub dWC_REBS
   EndIf
 EndSub
 Sub valveselect
-  level =  l MOD 15
+  l=l+1
+  If l>92 Then l=1
   If l<91 Then
+    level =  l MOD 15
     If level = 1 OR level = 8
       valveset=level01
       ID=1
@@ -261,7 +264,7 @@ EndSub
 ' bit mapping for 
 
 'Main Program
-BeginProg
+BeginProg        ' bit15 - - - - -  bit00
   level01=32814  ' 1000000000101110 - &h802E
   level02=32846  ' 1000000001001110 - &h804E
   level03=32910  ' 1000000010001110 - &h808E
@@ -274,8 +277,9 @@ BeginProg
   highCal=49406  ' 1100000011111110 - &hC0FE
   reset=0
   l=0
-  ' set the relays to level 01 on startup
-  SDMCD16AC(level01,1,0)
+  ID=0
+  Call valveselect
+  SDMCD16AC(valveset,1,0)
   Delay(0,90,mSec)
   SDMCD16AC(reset,1,0)
   Scan (1,Sec,0,0)
@@ -287,8 +291,6 @@ BeginProg
     AvgRun(avglicor,3,licor,60)
     ' change the valves for each level and calibration tank
     If TimeIntoInterval(0,180,sec) Then
-      If l>92 Then l=0
-      l=l+1
       Call valveselect
       SDMCD16AC(valveset,1,0)
       Delay (0,90,mSec)
