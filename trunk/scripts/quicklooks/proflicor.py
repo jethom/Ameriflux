@@ -107,6 +107,8 @@ qclim['avg_P'] = [0, 110]
 qclim['avg_CO2'] = [-2500, 2500]
 qclim['RECORD'] = [0, "inf"]
 qclim['level'] = [1, 92]
+qclim['l'] = [1,100]
+qclim['valveset'] = [1,10000]
 # Diag data qc limits
 qclim['batt_volt'] = [0, 20]
 qclim['battery_direct'] = [0, 20]
