@@ -156,7 +156,8 @@ DataTable(licordata,1,-1)
   DataInterval(0,180,sec,10)
   Sample(1,ID,UINT2)
   Sample(1,l,UINT2)
-  Sample(1,level,uint2)
+  Sample(1,level,UINT2)
+  Sample(1,valveset,Long)
   Sample(3,avglicor(),IEEE4)
 EndTable
 DataTable(metdata,1,-1)
@@ -289,6 +290,8 @@ BeginProg        ' bit15 - - - - -  bit00
     LICOR_T = LICOR_T * (50./4096.)
     LICOR_P = LICOR_P * 0.1522 + 58.738
     AvgRun(avglicor,3,licor,60)
+   ' need to call licordata datatable before changing valves
+    CallTable licordata
     ' change the valves for each level and calibration tank
     If TimeIntoInterval(0,180,sec) Then
       Call valveselect
@@ -297,7 +300,6 @@ BeginProg        ' bit15 - - - - -  bit00
       SDMCD16AC(reset,1,0)
     EndIf
     ' call datatables
-    CallTable licordata
     CallTable metdata
     CallTable profileDiag
     CallTable oldsensors
