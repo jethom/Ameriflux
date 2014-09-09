@@ -386,7 +386,7 @@ BeginProg        ' bit15 - - - - -  bit00
     Call sWC_REBS
     Call dWC_REBS
     'measure the temperature and humidity profile
-    SDI12Recorder (TRHData_80ft(),3,4,"M!",1.0,0)
+    SDI12Recorder (TRHData_80ft(),3,4,"MC!",1.0,0)
     SDI12Recorder (TRHData_60ft(),3,3,"M!",1.0,0)
     SDI12Recorder (TRHData_40ft(),3,2,"M!",1.0,0)
     SDI12Recorder(TRHData_25ft(),3,1,"M!",1.0,0)
