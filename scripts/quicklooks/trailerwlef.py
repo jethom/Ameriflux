@@ -302,7 +302,7 @@ ax.grid(True)
 plt.savefig(figdir + '/psi.png', dpi=100)
 
 # mail the tank PSI levels on Monday mornings
-if currenttime.ctday() == 0 and currenttime.hour == 4:
+if currenttime.weekday() == 0 and currenttime.hour == 4:
     licorN2psi = slowarray[slowkeys.index('licorN2')]
     towerN2psi = slowarray[slowkeys.index('licorN2')]
     fm = open('mailNumbers.txt','wt')
