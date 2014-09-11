@@ -12,6 +12,7 @@ import sys
 import re
 import logging
 import collections
+from subprocess import call
 from time import mktime
 from datetime import datetime, timedelta
 from glob import glob
@@ -299,3 +300,14 @@ ax.xaxis.set_major_formatter(hrsfmt)
 ax.autoscale_view()
 ax.grid(True)
 plt.savefig(figdir + '/psi.png', dpi=100)
+
+# mail the tank PSI levels on Monday mornings
+if currenttime.ctday() == 0 and currenttime.hour == 4:
+    licorN2psi = slowarray[slowkeys.index('licorN2')]
+    towerN2psi = slowarray[slowkeys.index('licorN2')]
+    fm = open('mailNumbers.txt','wt')
+    fm.write('Minimum N2 tank psi for Licors {:.1f}'.format(licorN2psi.min()))
+    fm.write('Minimum N2 tank psi for Tower {:.1f}'.format(towerN2psi.min()))
+    fm.close()
+    call("mailx -s 'WLEF N2 tank psi' jthom@ssec.wisc.edu < mailwlefNumbers.txt", shell=True)
+    call(["rm", "mailNumbers.txt"])
