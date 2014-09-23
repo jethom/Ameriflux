@@ -7,7 +7,7 @@
 #
 SCRN=$(screen -list | grep ArchiveData | awk '{print $1}')
 workdir=$(eval echo ~)
-pyscriptname="${workdir}/Documents/scripts/loop2.py"
+pyscriptname="${workdir}/Documents/WillowCreek/scripts/loop2.py"
 if [ -n "$SCRN" ]; then
 echo Screen already running: $SCRN
 else

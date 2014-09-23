@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 def archivedata(filepth):
     dirpath = os.path.expanduser("~") + '/Documents/data/'
-    datepath = datetime.strftime(datetime.now(),'%Y_%m/%d/%H00')
+    datepath = datetime.strftime(datetime.now(),'%Y%m%d/%H00')
 
     if not os.path.exists(dirpath + datepath):
         os.makedirs(dirpath + datepath)
