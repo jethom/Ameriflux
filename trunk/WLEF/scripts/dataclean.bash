@@ -1,23 +1,24 @@
 #!/usr/bin/env bash
+. /home/jthom/.bashrc
 
 WORKINGDIR=/home/flux/Documents/data
 ARCHIVEDIR=/home/flux/Documents/archive
-DATE=$(date -d '-1 month' +%Y%m)
-echo "DATE = $DATE"
+DATE=$(/bin/date -d '-1 month' +%Y%m)
+/bin/echo "DATE = $DATE"
 
-echo $DATE
+/bin/echo $DATE
 cd $WORKINGDIR
 # Create tar gzip file
 ARCH="${ARCHIVEDIR}/${DATE}.tar.gz"
-echo "$ARCH"
+/bin/echo "$ARCH"
 if [ -e $ARCH ]; then
-	echo "$PWD/$ARCH already exits!!"
+	/bin/echo "$PWD/$ARCH already exits!!"
 	exit 1
 fi
-tar -zcvf ${ARCH} ${DATE}*
+/bin/tar -zcvf ${ARCH} ${DATE}*
 
 # Delete files that are listed in the tar gzip we just created
-for fn in $(tar -tvf $ARCH | grep drw | awk '{print $6}'); do 
-	echo "removing $fn"
+for fn in $(/bin/tar -tvf $ARCH | /bin/grep drw | /usr/bin/awk '{print $6}'); do 
+	/bin/echo "removing $fn"
 	rm -rf $fn
 done
