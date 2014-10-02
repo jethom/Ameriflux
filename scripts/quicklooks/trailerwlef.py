@@ -302,12 +302,12 @@ ax.grid(True)
 plt.savefig(figdir + '/psi.png', dpi=100)
 
 # mail the tank PSI levels on Monday mornings
-if currenttime.weekday() == 0 and currenttime.hour == 4:
+if currenttime.weekday() == 3 and currenttime.hour == 4:
     licorN2psi = slowarray[slowkeys.index('licorN2')]
-    towerN2psi = slowarray[slowkeys.index('licorN2')]
+    towerN2psi = slowarray[slowkeys.index('towerN2')]
     fm = open('mailNumbers.txt','wt')
-    fm.write('Minimum N2 tank psi for Licors {:.1f}'.format(licorN2psi.min()))
-    fm.write('Minimum N2 tank psi for Tower {:.1f}'.format(towerN2psi.min()))
+    fm.write('Minimum N2 tank pressure for Licors {:.1f} psi.\n'.format(licorN2psi.min()))
+    fm.write('Minimum N2 tank pressure for Tower {:.1f} psi.\n'.format(towerN2psi.min()))
     fm.close()
-    call("mailx -s 'WLEF N2 tank psi' jthom@ssec.wisc.edu < mailwlefNumbers.txt", shell=True)
-    call(["rm", "mailNumbers.txt"])
+    call("/bin/mailx -s 'WLEF N2 tank psi' jthom@ssec.wisc.edu < mailNumbers.txt", shell=True)
+    call(["/bin/rm", "mailNumbers.txt"])
