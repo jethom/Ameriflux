@@ -1,0 +1,37 @@
+Program Trace Information File for:  testsdi.csi
+Date: 10/6/2014
+Time: 12:07:04
+
+T = Program Table Number
+N = Sequential Program Instruction Location Number
+Instruction = Instruction Number and Name
+
+Inst ExTm = Individual Instruction Execution Time
+Block ExTm = Cumulative Execution Time for program block,
+             i.e., subroutine
+Prog ExTm = Cumulative Total Program Execution Time
+
+                                                          Output Flag High
+                                   Inst  Block   Prog     Inst  Block   Prog
+                                   ExTm   ExTm   ExTm     ExTm   ExTm   ExTm
+T|N|Instruction                   (msec) (msec) (msec)   (msec) (msec) (msec)
+---------------                   ------ ------ ------   ------ ------ ------
+1|1|105 SDI-12 Recorder               *    0.0    0.0        *    0.0    0.0
+1|2|92 If time is                   0.4    0.4    0.4      0.4    0.4    0.4
+ Output Flag Set @ 12 for Array 102
+1|3|77 Real Time                    0.1    0.5    0.5      2.2    2.6    2.6
+ Output Data 3 Values
+1|4|71 Average                      1.2    1.7    1.7      4.8    7.4    7.4
+ Output Data 2 Values
+
+Program Table 1 Execution Interval    1.000 Seconds
+
+Table 1 Estimated Total Program Execution Time in msec    1.7 w/Output    7.4
+
+Table 1 Estimated Total Final Storage Locations used per day 8640
+
+
+
+Estimated Total Final Storage Locations used per day 8640
+
+*Execution time is unknown.
