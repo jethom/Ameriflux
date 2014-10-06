@@ -1,0 +1,88 @@
+;{CR23X}
+;
+*Table 1 Program
+  01: 1         Execution Interval (seconds)
+
+
+1:  SDI-12 Recorder (P105)
+ 1: 4        SDI-12 Address
+ 2: 0        Start Measurement (aM!)
+ 3: 7        Port
+ 4: 1        Loc [ T215      ]
+ 5: 1.0      Multiplier
+ 6: 0.0      Offset
+
+
+2:  If time is (P92)
+ 1: 0        Minutes (Seconds --) into a
+ 2: 1        Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+
+3:  Real Time (P77)^12791
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000)
+
+
+4:  Average (P71)^23371
+ 1: 2        Reps
+ 2: 1        Loc [ T215      ]
+
+*Table 2 Program
+  02: 0.0000    Execution Interval (seconds)
+
+*Table 3 Subroutines
+
+End Program
+
+-Input Locations-
+1 T215      1 1 1
+2 RH        1 1 0
+3 _________ 0 0 0
+4 _________ 0 0 0
+5 _________ 0 0 0
+6 _________ 0 0 0
+7 _________ 0 0 0
+8 _________ 0 0 0
+9 _________ 0 0 0
+10 _________ 0 0 0
+11 _________ 0 0 0
+12 _________ 0 0 0
+13 _________ 0 0 0
+14 _________ 0 0 0
+15 _________ 0 0 0
+16 _________ 0 0 0
+17 _________ 0 0 0
+18 _________ 0 0 0
+19 _________ 0 0 0
+20 _________ 0 0 0
+21 _________ 0 0 0
+22 _________ 0 0 0
+23 _________ 0 0 0
+24 _________ 0 0 0
+25 _________ 0 0 0
+26 _________ 0 0 0
+27 _________ 0 0 0
+28 _________ 0 0 0
+-Program Security-
+0000
+0000
+0000
+-Mode 4-
+-Final Storage Area 2-
+0
+-CR10X ID-
+0
+-CR10X Power Up-
+3
+-CR10X Compile Setting-
+3
+-CR10X RS-232 Setting-
+-1
+-DLD File Labels-
+0
+-Final Storage Labels-
+0,Year_RTM,12791
+0,Day_RTM
+0,Hour_Minute_RTM
+1,T215_AVG~1,23371
+1,RH_AVG~2

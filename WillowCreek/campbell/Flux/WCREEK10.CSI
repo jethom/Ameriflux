@@ -1,0 +1,400 @@
+;{CR23X}
+;WILLOW CREEK
+;Last Modified:  28 June 1999
+;
+;10 Hz SAMPLING
+*Table 1 Program
+  01: .1        Execution Interval (seconds) ;
+;
+; sonic 1
+; white   12V
+; black   G
+; gray    G
+;
+; sonic 2
+; Green  C1
+; White  C2
+; Brown  C3
+; Black  G
+; Gray   G
+;
+;CSAT 3D SONIC ANEMOMETER
+1:  SDM-CSAT3 (P107)
+ 1: 1        Reps
+ 2: 3        SDM Address
+ 3: 91       Trigger and Get wind & Ts data
+ 4: 1        Ux Input Location [ Ux        ]
+
+2:  If (X<=>F) (P89)
+ 1: 5        X Loc [ CSAT_Diag ]
+ 2: 1        =
+ 3: 61440    F
+ 4: 21       Set Flag 1 Low
+
+3:  If Flag/Port (P91)
+ 1: 21       Do if Flag 1 is Low
+ 2: 30       Then Do
+
+4:  If (X<=>F) (P89)
+ 1: 5        X Loc [ CSAT_Diag ]
+ 2: 3        >=
+ 3: 0        F
+ 4: 30       Then Do
+
+5:  If (X<=>F) (P89)
+ 1: 5        X Loc [ CSAT_Diag ]
+ 2: 2        <>
+ 3: 61503    F
+ 4: 30       Then Do
+
+6:  Do (P86)
+ 1: 11       Set Flag 1 High
+
+7:  SDM-CSAT3 (P107)
+ 1: 1        Reps
+ 2: 3        SDM Address
+ 3: 10       Set Execution Parameter
+ 4: 1        Ux Input Location [ Ux        ]
+
+8:  End (P95)
+
+9:  End (P95)
+
+10:  End (P95)
+;
+; red SE9 (CO2)
+; blue SE10 (H20)
+; yellow SE11  (pressure)
+; purple SE12   (temp)
+;
+;
+;
+;LI-COR 6262
+11:  Volt (SE) (P1)
+ 1: 4        Reps
+ 2: 15       5000 mV, Fast Range
+ 3: 9        SE Channel
+ 4: 6        Loc [ CO2       ]
+ 5: 1.0      Mult
+ 6: 0.0      Offset ;
+
+12:  Z=X*F (P37)
+ 1: 9        X Loc [ LI_T      ]
+ 2: .012207  F
+ 3: 9        Z Loc [ LI_T      ]
+
+13:  Polynomial (P55)
+ 1: 1        Reps
+ 2: 8        X Loc [ LI_P      ]
+ 3: 8        F(X) Loc [ LI_P      ]
+ 4: 58.718   C0
+ 5: 0.01526  C1
+ 6: 0.0      C2
+ 7: 0.0      C3
+ 8: 0.0      C4
+ 9: 0.0      C5
+
+14:  Do (P86)
+ 1: 10       Set Output Flag High (Flag 0)
+
+15:  Real Time (P77)^15328
+ 1: 1111     Year,Day,Hour/Minute,Seconds (midnight = 0000)
+
+16:  Resolution (P78)
+ 1: 1        High Resolution
+
+17:  Sample (P70)^1350
+ 1: 9        Reps
+ 2: 1        Loc [ Ux        ]
+
+18:  If time is (P92)
+ 1: 0000     Minutes (Seconds --) into a
+ 2: 1        Interval (same units as above)
+ 3: 10       Set Output Flag High (Flag 0)
+
+19:  Set Active Storage Area (P80)^15547
+ 1: 02       Final Storage Area 2
+ 2: 2        Array ID
+
+20:  Real Time (P77)^18255
+ 1: 1110     Year,Day,Hour/Minute (midnight = 0000)
+
+21:  Average (P71)^7917
+ 1: 1        Reps
+ 2: 10       Loc [ RTD_T     ]
+
+22:  Sample (P70)^23702
+ 1: 1        Reps
+ 2: 11       Loc [ Atm_P     ]
+
+
+23:  Average (P71)^24568
+ 1: 1        Reps
+ 2: 21       Loc [ RH        ]
+
+24:  Average (P71)^27655
+ 1: 5        Reps
+ 2: 13       Loc [ Solar_In  ]
+
+25:  Sample (P70)^10795
+ 1: 2        Reps
+ 2: 18       Loc [ Battery   ]
+
+26:  Standard Deviation (P82)^26891
+ 1: 1        Reps
+ 2: 13       Sample Loc [ Solar_In  ]
+
+27:  Average (P71)^24446
+ 1: 1        Reps
+ 2: 20       Loc [ T215      ]
+
+*Table 2 Program
+  01: 1         Execution Interval (seconds)
+;
+; red    7H
+; blue   7L
+; white  8H
+; black  8L
+;
+;KIPP & ZONEN
+1:  Volt (Diff) (P2)
+ 1: 2        Reps
+ 2: 12       50 mV, Fast Range
+ 3: 7        DIFF Channel
+ 4: 13       Loc [ Solar_In  ]
+ 5: 75.873   Mult
+ 6: 0.0      Offset
+;
+; orange   9H
+; yellow   9L
+; brown   10H
+; green   10L
+; gray    G
+;
+2:  Volt (Diff) (P2)
+ 1: 2        Reps
+ 2: 11       10 mV, Fast Range
+ 3: 9        DIFF Channel
+ 4: 15       Loc [ IR_In     ]
+ 5: 75.873   Multiplier
+ 6: 0.0      Offset
+;
+;
+; black from 4WPB100 EX1
+; red L on 4WPB100
+; blue G on 4WPB100
+; Yellow 12H
+; Green  12L
+;
+
+3:  Full Bridge w/mv Excit (P9)
+ 1: 1        Reps
+ 2: 22       50 mV, 60 Hz Reject, Slow, Ex Range
+ 3: 22       50 mV, 60 Hz Reject, Slow, Br Range
+ 4: 11       DIFF Channel
+ 5: 3        Excite all reps w/Exchan 3
+ 6: 4200     mV Excitation
+ 7: 17       Loc [ KZ_T      ]
+ 8: 1        Mult
+ 9: 0.0      Offset
+
+4:  Temperature RTD (P16)
+ 1: 1        Reps
+ 2: 17       R/R0 Loc [ KZ_T      ]
+ 3: 17       Loc [ KZ_T      ]
+ 4: 1.0      Mult
+ 5: 0.0      Offset
+
+5:  If time is (P92)
+ 1: 59    -- Minutes (Seconds --) into a
+ 2: 60       Interval (same units as above)
+ 3: 30       Then Do
+;
+;
+; green C7
+; red 12V
+; black, clear, white G
+;
+     6:  SDI-12 Recorder (P105)
+      1: 4        SDI-12 Address
+      2: 0        Start Measurement (aM!)
+      3: 7        Port
+      4: 20       Loc [ T215      ]
+      5: 1.0      Multiplier
+      6: 0.0      Offset
+;
+; yellow   NC
+; blue     4H
+; purple   4L
+; orange   5V
+; red      12V
+; black    G
+; gray     G
+;HMP45C TEMPERATURE/RH PROBE
+;6:  Volt (Diff) (P2)
+; 1: 1        Reps
+; 2: 14       1000 mV, Fast Range
+; 3: 4        DIFF Channel
+; 4: 0        Loc [ _________ ]
+; 5: .1       Mult
+; 6: 0        Offset
+;
+;
+; clear  G
+; Red    E1
+; White  2H
+; Green  2L
+; Black  1H
+; Orange 1L
+; Purple AG
+;
+;
+;RTD AIR TEMPERATURE PROBE
+7:  Full Bridge w/mv Excit (P9)
+ 1: 1        Reps
+ 2: 13       200 mV, Fast, Ex Range
+ 3: 13       200 mV, Fast, Br Range
+ 4: 1        DIFF Channel
+ 5: 1        Excite all reps w/Exchan 1
+ 6: 2000     mV Excitation
+ 7: 10       Loc [ RTD_T     ]
+ 8: 1.0      Mult
+ 9: 0.0      Offset
+
+8:  Temperature RTD (P16)
+ 1: 1        Reps
+ 2: 10       R/R0 Loc [ RTD_T     ]
+ 3: 10       Loc [ RTD_T     ]
+ 4: 1.0267   Multiplier
+ 5: 0.0      Offset
+;
+; pressure sensor is set to be on continuously
+;
+; blue se5
+; yellow AG
+; red 12VDC
+; Black G
+; Green NC
+; clear G
+;
+;CS105 BAROMETRIC PRESSURE SENSOR
+9:  Volt (SE) (P1)
+ 1: 1        Reps
+ 2: 15       5000 mV, Fast Range
+ 3: 5        SE Channel
+ 4: 11       Loc [ Atm_P     ]
+ 5: .184     Mult
+ 6: 661.065  Offset
+
+; red     SE6
+; black   EX2
+; purple  signal G
+; clear   G
+;
+
+;237 LEAF WETNESS SENSOR
+10:  AC Half Bridge (P5)
+ 1: 1        Reps
+ 2: 13       200 mV, Fast Range
+ 3: 6        SE Channel
+ 4: 2        Excite all reps w/Exchan 2
+ 5: 2500     mV Excitation
+ 6: 19       Loc [ Leaf_Wet  ]
+ 7: 1.0      Mult
+ 8: 0.0      Offset
+
+11:  Batt Voltage (P10)
+ 1: 18       Loc [ Battery   ]
+
+12:  End (P95)
+
+*Table 3 Subroutines
+
+End Program
+
+
+
+
+
+
+-Input Locations-
+1 Ux        5 1 2
+2 Uy        9 1 1
+3 Uz        9 1 2
+4 Ts        9 1 2
+5 CSAT_Diag 25 4 2
+6 CO2       13 0 1
+7 H20       9 0 1
+8 LI_P      17 1 2
+9 LI_T      1 1 2
+10 RTD_T     1 1 2
+11 Atm_P     5 1 1
+12 _________ 0 0 0
+13 Solar_In  5 2 1
+14 Solar_Out 17 1 1
+15 IR_In     1 1 1
+16 IR_Out    1 1 1
+17 KZ_T      9 2 4
+18 Battery   9 1 3
+19 Leaf_Wet  9 1 3
+20 T215      1 1 1
+21 RH        1 1 0
+22 _________ 0 0 0
+23 _________ 9 0 1
+24 _________ 9 0 1
+25 _________ 9 0 1
+26 _________ 9 0 1
+27 _________ 9 0 1
+28 _________ 9 0 1
+29 _________ 9 0 1
+30 _________ 9 0 1
+31 _________ 17 0 1
+32 _________ 0 0 0
+33 _________ 1 0 0
+-Program Security-
+0
+0
+0
+-Mode 4-
+-Final Storage Area 2-
+10001
+-CR10X ID-
+0
+-CR10X Power Up-
+3
+-CR10X Compile Setting-
+3
+-CR10X RS-232 Setting-
+6--
+-DLD File Labels-
+0
+-Final Storage Labels-
+0,Year_RTM,15328
+0,Day_RTM
+0,Hour_Minute_RTM
+0,Seconds_RTM
+1,Ux~1,1350
+1,Uy~2
+1,Uz~3
+1,Ts~4
+1,CSAT_Diag~5
+1,CO2~6
+1,H20~7
+1,LI_P~8
+1,LI_T~9
+2,2,15547
+3,Year_RTM,18255
+3,Day_RTM
+3,Hour_Minute_RTM
+4,RTD_T_AVG~10,7917
+5,Atm_P~11,23702
+6,Solar_In_AVG~13,27655
+6,Solar_Out_AVG~14
+6,IR_In_AVG~15
+6,IR_Out_AVG~16
+6,KZ_T_AVG~17
+7,Battery~18,10795
+7,Leaf_Wet~19
+8,Solar_In_STD~13,26891
+9,RH_AVG~21,24568
+10,T215_AVG~20,24446
