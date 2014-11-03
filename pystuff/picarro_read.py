@@ -36,7 +36,7 @@ def picarro_read(filepth):
 # how do I deal with NAN in the data string
         data={}
         for k,v in zip(data_only_var_name,data_only):
-            data[k]=v
+            data[k]=float(v)
 
         records.append((stamp, data))
 
