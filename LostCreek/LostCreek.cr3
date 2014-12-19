@@ -274,7 +274,7 @@ Units co2 = mg/m^3 'LI-7500 output is mmol/m^3, but it's then converted to mg/m^
 Units h2o = g/m^3  'LI-7500 output is mmol/m^3, but it's then converted to g/m^3
 Units press_li7500 = kPa+50
 Units diag_irga = unitless
-
+units diag_irga_orig = unitless
 'Working variables
 
 Dim diag_csat_work As Long 'Working variable used to break out the CSAT3 diagnostic bits
@@ -292,7 +292,7 @@ DataTable (ts_data,true,-1)
   Sample (1,co2,IEEE4)   ' mass density
   Sample (1,h2o,IEEE4)   ' mass density   mass/m^3
   Sample(1,press_li7500,fp2)
-  Sample (1,diag_irga,UINT2)
+  Sample (1,diag_irga_orig,UINT2)
   Sample(1,CH4_density,IEEE4) ' molar density  micromoles/m^3
   ' Sample(1,CH4_mole_fraction,IEEE4)
   Sample(1,Temperature,FP2)
@@ -335,7 +335,7 @@ DataTable(dailydiag,true,-1)   ' this will totalize the number of errors in a da
   Totalize(1,n,uint4,NOT(diag_bits2(8)))
   FieldNames("sync_li7500:")
   Average(1,signalstrength,FP2,0)
-  fieldnames("signalstrength_li7500")
+  FieldNames("signalstrength_li7500")
   Totalize(1,n,uint4,NOT(motor_failure))
   FieldNames("motor_fail_li7700:")
   Totalize(1,n,uint4,NOT(calibrating))
