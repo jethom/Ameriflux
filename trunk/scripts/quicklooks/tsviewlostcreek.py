@@ -3,7 +3,6 @@
 # script to make plots of the ts data files from Lost Creek
 #
 import matplotlib
-matplotlib.use('Agg')
 import sys
 import re
 import logging
@@ -17,10 +16,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 #import pandas as pd
 from matplotlib.dates import HourLocator, DateFormatter
-
+runmode = 'OPER'
+if runmode == 'TEST':
 # file directory
-#datadir = os.path.expanduser("~") + "/Documents/amerifluxdata/"
-datadir = "/air/incoming/LostCreek/"
+# TEST -------------------------------------------------------------------------------
+    #datadir = os.path.expanduser("~") + "/Documents/amerifluxdata/"
+    datadir = os.path.expanduser("~") + "/Documents/data/LostCreek/"
+    datestr = '20140713'
+    currenttime = datetime.strptime(datestr,'%Y%m%d')
+# TEST -------------------------------------------------------------------------------
+else:
+# OPERATIONAL ------------------------------------------------------------------------
+    matplotlib.use('Agg')
+    datadir = "/air/incoming/LostCreek/"
+    currenttime = datetime.now()
+# OPERATIONAL ------------------------------------------------------------------------
+yesterday = currenttime + timedelta(days=-1)
+
+# directory where figures are stored
 figdir = os.path.expanduser("~") + "/public_html/images/lostcreek"
 
 # clean up the existing figures in the directory
@@ -38,13 +51,8 @@ if os.path.exists(figdir + '/pressureirga.png'):
     os.remove(figdir + '/pressureirga.png')
 if os.path.exists(figdir + '/diagnostics.png'):
     os.remove(figdir + '/diagnostics.png')
-
-# plot current day number of days of data
-currenttime = datetime.now()
-#datestr = '20140218'
-#currenttime = datetime.strptime(datestr,'%Y%m%d')
-# to get the diagnostics file
-yesterday = currenttime + timedelta(days=-1)
+if os.path.exists(figdir + '/SS7500.png'):
+    os.remove(figdir + '/SS7500.png')
 
 # find the files that we need
 # ts data
@@ -219,7 +227,7 @@ ax.xaxis.set_major_formatter(hrsfmt)
 ax.autoscale_view()
 ax.grid(True)
 plt.savefig(figdir + '/pressureirga.png', dpi=100)
-# plot the diagnostics for the csat3, li7500, li7700
+
 f, axarr = plt.subplots(3, sharex=True)
 axarr[0].plot_date(tstimelist,tsarray[tskeys.index('diag_csat')],'.',
                 xdate=True,ydate=False,label='CSAT3 Diag')
@@ -236,3 +244,78 @@ axarr[2].xaxis.set_major_locator(hrs3)
 axarr[2].xaxis.set_major_formatter(hrsfmt)
 axarr[2].autoscale_view()
 plt.savefig(figdir + '/diagnostics.png', dpi=100)
+
+# make more meaningful values for the diagnositcs
+# plot the diagnostics for the csat3, li7500, li7700
+diag_irga = tsarray[tskeys.index('diag_irga')]
+# for now: change the diagnostic value back to its default value (this may change in the future)
+for i in range(len(diag_irga)):
+    diag_irga[i]=(int(diag_irga[i]) ^ 240)
+# LI7500 diaganostics
+ss_7500 = [0] * len(diag_irga)   # signal strength
+chopper = [0] * len(diag_irga)
+detect = [0] * len(diag_irga)
+PLL = [0] * len(diag_irga)
+sync = [0] * len(diag_irga)
+for i in range(len(diag_irga)):
+   ss_7500[i]=((int(diag_irga[i]) & 15) * 6.67)
+   chopper[i]=(int(diag_irga[i]) & 128) >> 7
+   detect[i]=(int(diag_irga[i]) & 64) >> 6
+   PLL[i]=(int(diag_irga[i]) & 32) >> 5
+   sync[i]=(int(diag_irga[i]) & 16) >> 4
+ss_7500=np.array(ss_7500,dtype='float')
+# li7500 signal strength plot
+fig, ax = plt.subplots()
+ax.plot_date(tstimelist,ss_7500,'.',
+             xdate=True,ydate=False,label='SS_7500')
+ax.set_xlabel('Time')
+ax.set_ylabel('Signal Strength')
+plt.title('LI7500 Signal Strength (0-100) ' + figdate)
+ax.xaxis.set_major_locator(hrs3)
+ax.xaxis.set_major_formatter(hrsfmt)
+ax.autoscale_view()
+ax.grid(True)
+plt.savefig(figdir + '/SS7500.png', dpi=100)
+# CSAT 3 diagnostics
+csat_diag=tsarray[tskeys.index('diag_csat')]
+#61502 : anemometer does not respond
+#61440 : lost trigger
+#61503 : no data available
+#61551 : SDM Comms error
+#61442 : Wrong CSAT3 embedded code
+ux_range = [0] *len(csat_diag)
+uy_range = [0] *len(csat_diag)
+uz_range = [0] *len(csat_diag)
+counter = [0] *len(csat_diag)
+b15 = [0] *len(csat_diag) 
+b14 = [0] *len(csat_diag)
+b13 = [0] *len(csat_diag)
+b12 = [0] *len(csat_diag)
+for i in range(len(csat_diag)):
+    counter[i] = int(csat_diag[i]) & 63
+    uz_range[i]=(int(csat_diag[i])&192) >> 6
+    uy_range[i]=(int(csat_diag[i])&768) >> 8
+    ux_range[i]=(int(csat_diag[i])&3072) >> 10
+    b12[i]=(int(csat_diag[i])&4096) >> 12
+    b13[i]=(int(csat_diag[i])&8192) >> 13
+    b14[i]=(int(csat_diag[i])&16384) >> 14
+    b15[i]=(int(csat_diag[i])&32768) >> 15
+# LI7700 diagnostics
+diag_7700 = tsarray[tskeys.index('Diag_li7700')]
+#32768 : not ready 2**15
+#16384 : nosignal 2**14
+#8192 : refunlocked 2**13
+#4096 : badtemp 2**12
+#2048 : lasertempunregulated 2**11
+#1024 : blocktempunregulated 2**10
+#512 : motorspinning 2**9
+#256 : pumpon 2**8
+#128 : topHeateron 2**7
+#64 : bottomheateron 2**6
+#32 : calibrating 2**5
+#16 : motorfailure 2**4
+#8 : badauxtc1 2**3
+#4 : badauxtc2 2**2
+#2 : badauxtc3 2**1
+#1 : boxconnected (li-7550 attached) 2**0
+
