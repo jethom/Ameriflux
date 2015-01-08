@@ -13,9 +13,7 @@ from glob import glob
 from campbellread import toa5head
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 #import pandas as pd
-from matplotlib.dates import HourLocator, DateFormatter
 runmode = 'OPER'
 if runmode == 'TEST':
 # file directory
@@ -31,6 +29,8 @@ else:
     datadir = "/air/incoming/LostCreek/"
     currenttime = datetime.now()
 # OPERATIONAL ------------------------------------------------------------------------
+import matplotlib.pyplot as plt
+from matplotlib.dates import HourLocator, DateFormatter
 yesterday = currenttime + timedelta(days=-1)
 
 # directory where figures are stored
