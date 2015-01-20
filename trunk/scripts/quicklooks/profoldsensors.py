@@ -2,13 +2,8 @@
 #
 # script to make plots of the profiler data from Willow Creek
 #
-# do not need this for my laptop
-#----------------------------------------------------------------
-#import matplotlib
-#matplotlib.use('Agg')
 #----------------------------------------------------------------
 import matplotlib
-matplotlib.use('Agg')
 import sys
 import re
 import logging
@@ -19,34 +14,26 @@ from glob import glob
 from campbellread import toa5head
 import os
 import numpy as np
+
+runmode = 'OPER'
+if runmode == 'TEST':
+# file directory
+# TEST -------------------------------------------------------------------------------
+    datadir = os.path.expanduser("~") + "/Documents/data/LostCreek/"
+    datestr = '20140713'
+    currenttime = datetime.strptime(datestr,'%Y%m%d')
+# TEST -------------------------------------------------------------------------------
+else:
+# OPERATIONAL ------------------------------------------------------------------------
+    matplotlib.use('Agg')
+    datadir = "/air/incoming/WillowCreek/"
+    currenttime = datetime.now()
+# OPERATIONAL ------------------------------------------------------------------------
 import matplotlib.pyplot as plt
-import matplotlib.colors as colors
-import matplotlib.cm as cm
-#import pandas as pd
 from matplotlib.dates import HourLocator, DateFormatter
-
-# plot current day number of days of data
-currenttime = datetime.now()
-#----------------------------------------------------------------
-# will use this for testing
-#----------------------------------------------------------------
-#datestr = '20140828'
-#currenttime = datetime.strptime(datestr,'%Y%m%d')
-#----------------------------------------------------------------
 yesterday = currenttime + timedelta(days=-1)
-#----------------------------------------------------------------
 
-#-----------------------------------------------------------
-# Directories to look for files and write figures
-#-----------------------------------------------------------
-# test directories
-#-----------------------------------------------------------
-#datadir = os.path.expanduser("~") + "/Documents/dev/dailyView/data/"
-#figdir = os.path.expanduser("~") + "/Documents/amerifluxdata/willowcreek/images/profiler"
-#-----------------------------------------------------------
-datadir = "/air/incoming/WillowCreek/"
 figdir = os.path.expanduser("~") + "/public_html/images/willowcreek/profiler"
-
 
 # clean up the existing figures in the directory
 if os.path.exists(figdir + '/oldairt.png'):

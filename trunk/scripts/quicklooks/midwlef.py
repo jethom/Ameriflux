@@ -2,12 +2,8 @@
 #
 # script to make quicklook plots of the mid data files from WLEF
 #
-# do not need this for my lapmid
 #----------------------------------------------------------------
 import matplotlib
-matplotlib.use('Agg')
-#----------------------------------------------------------------
-#
 import sys
 import re
 import logging
@@ -18,29 +14,28 @@ from glob import glob
 from campbellread import toa5head
 import os
 import numpy as np
+
+runmode = 'OPER'
+if runmode == 'TEST':
+# file directory
+# TEST -------------------------------------------------------------------------------
+    #datadir = os.path.expanduser("~") + "/Documents/amerifluxdata/"
+    datadir = os.path.expanduser("~") + "/Documents/data/LostCreek/"
+    datestr = '20140713'
+    currenttime = datetime.strptime(datestr,'%Y%m%d')
+# TEST -------------------------------------------------------------------------------
+else:
+# OPERATIONAL ------------------------------------------------------------------------
+    matplotlib.use('Agg')
+    datadir = "/air/incoming/WLEFFlux/Data/"
+    currenttime = datetime.now()
+# OPERATIONAL ------------------------------------------------------------------------
 import matplotlib.pyplot as plt
-#import pandas as pd
 from matplotlib.dates import HourLocator, DateFormatter
+yesterday = currenttime + timedelta(days=-1)
 
 logger = 'mid'
-# plot current day number of days of data
-currenttime = datetime.now()
-#----------------------------------------------------------------
-# will use this for testing
-#----------------------------------------------------------------
-#datestr = '20140306'
-#currenttime = datetime.strptime(datestr,'%Y%m%d')
-#----------------------------------------------------------------
-yesterday = currenttime + timedelta(days=-1)
-#----------------------------------------------------------------
 #-----------------------------------------------------------
-# Directories to look for files and write figures
-#-----------------------------------------------------------
-# test directories
-#-----------------------------------------------------------
-#datadir = os.path.expanduser("~") + "/Documents/amerifluxdata/wlef/"
-#-----------------------------------------------------------
-datadir = "/air/incoming/WLEFFlux/Data/"
 figdir = os.path.expanduser("~") + "/public_html/images/wlef/" + logger
 
 # clean up the existing figures in the directory

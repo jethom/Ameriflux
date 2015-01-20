@@ -9,7 +9,6 @@
 #----------------------------------------------------------------
 #
 import matplotlib
-matplotlib.use('Agg')
 import sys
 import re
 import logging
@@ -21,29 +20,27 @@ from campbellread import toa5head
 from campbellread import wcflux
 import os
 import numpy as np
+
+runmode = 'OPER'
+if runmode == 'TEST':
+# file directory
+# TEST -------------------------------------------------------------------------------
+    datadir = os.path.expanduser("~") + "/Documents/data/WillowCreek/"
+    datestr = '20140713'
+    currenttime = datetime.strptime(datestr,'%Y%m%d')
+# TEST -------------------------------------------------------------------------------
+else:
+# OPERATIONAL ------------------------------------------------------------------------
+    matplotlib.use('Agg')
+    datadir = "/air/incoming/WillowCreek/"
+    currenttime = datetime.now()
+# OPERATIONAL ------------------------------------------------------------------------
 import matplotlib.pyplot as plt
-#import pandas as pd
 from matplotlib.dates import HourLocator, DateFormatter
 
-# plot current day number of days of data
-currenttime = datetime.now()
-#----------------------------------------------------------------
-# will use this for testing
-#----------------------------------------------------------------
-#datestr = '20140220'
-#currenttime = datetime.strptime(datestr,'%Y%m%d')
-#----------------------------------------------------------------
 yesterday = currenttime + timedelta(days=-1)
-#----------------------------------------------------------------
 #-----------------------------------------------------------
-# Directories to look for files and write figures
-#-----------------------------------------------------------
-# test directories
-#-----------------------------------------------------------
-#datadir = os.path.expanduser("~") + "/Documents/amerifluxdata/willowcreek/flux/"
-#figdir = os.path.expanduser("~") + "/Documents/amerifluxdata/willowcreek/images/flux"
-#-----------------------------------------------------------
-datadir = "/air/incoming/WillowCreek/"
+#- html directory for plots
 figdir = os.path.expanduser("~") + "/public_html/images/willowcreek/flux"
 
 # clean up the existing figures in the directory
