@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import matplotlib
-matplotlib.use('Agg')
 import sys
 import re
 import logging
@@ -12,8 +11,24 @@ from glob import glob
 from campbellread import toa5head
 import os
 import numpy as np
+
+runmode = 'OPER'
+if runmode == 'TEST':
+# file directory
+# TEST -------------------------------------------------------------------------------
+    datadir = os.path.expanduser("~") + "/Documents/data/LostCreek/"
+    datestr = '20140713'
+    currenttime = datetime.strptime(datestr,'%Y%m%d')
+# TEST -------------------------------------------------------------------------------
+else:
+# OPERATIONAL ------------------------------------------------------------------------
+    matplotlib.use('Agg')
+    datadir = "/air/incoming/LostCreek/"
+    currenttime = datetime.now()
+# OPERATIONAL ------------------------------------------------------------------------
 import matplotlib.pyplot as plt
 from matplotlib.dates import HourLocator, DateFormatter
+yesterday = currenttime + timedelta(days=-1)
 
 # file directory
 #datadir = os.path.expanduser("~") + "/Documents/amerifluxdata/"
@@ -39,12 +54,6 @@ if os.path.exists(figdir + '/rain.png'):
     os.remove(figdir + '/rain.png')
 if os.path.exists(figdir + '/water.png'):
     os.remove(figdir + '/water.png')
-# plot current day number of days of data
-currenttime = datetime.now()
-#datestr = '20140218'
-#currenttime = datetime.strptime(datestr,'%Y%m%d')
-# to get the diagnostics file
-yesterday = currenttime + timedelta(days=-1)
 
 # find the files that we need
 # met data

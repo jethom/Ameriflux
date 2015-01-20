@@ -314,28 +314,28 @@ BeginProg        ' bit15 - - - - -  bit00
     ' measure PAR 60 ft (SN49839)
     'licor cal 6.44 microamps/1000 micromol s-1 m-2
     ' mult 257.08 (flux density)
-    VoltDiff(PAR_60ft,1,mV20,5,false,0,_60Hz,257.08,0)
+    VoltDiff(PAR_60ft,1,mV20,5,True,0,_60Hz,257.08,0)
     If PAR_60ft <0 Then PAR_60ft=0
     PulsePort(8,1000)
     PulsePort(8,1000)
     ' measure PAR 40 ft (SN49838)
     'licor cal 6.51 microamps/1000 micromol s-1 m-2
     ' mult 254.32 (flux density)
-    VoltDiff(PAR_40ft,1,mV20,5,false,0,_60Hz,254.32,0)
+    VoltDiff(PAR_40ft,1,mV20,5,True,0,_60Hz,254.32,0)
     If PAR_40ft < 0 Then PAR_40ft = 0
     PulsePort(8,1000)
     PulsePort(8,1000)
     ' measure PAR 25 ft (SN49836)
     'licor cal 6.83 microamps/1000 micromol s-1 m-2
     ' mult 242.40 (flux density)
-    VoltDiff(PAR_25ft,1,mV20,5,false,0,_60Hz,242.40,0)
+    VoltDiff(PAR_25ft,1,mV20,5,True,0,_60Hz,242.40,0)
     If PAR_25ft < 0 Then PAR_25ft = 0
     PulsePort(8,1000)
     PulsePort(8,1000)
     ' measure PAR 60 ft (SN49835)
     'licor cal 6.55 microamps/1000 micromol s-1 m-2
     ' mult 252.77 (flux density)
-    VoltDiff(PAR_2m,1,mV20,5,false,0,_60Hz,252.77,0)
+    VoltDiff(PAR_2m,1,mV20,5,True,0,_60Hz,252.77,0)
     If PAR_2m < 0 Then PAR_2m = 0
     PulsePort(8,1000)
     PulsePort(8,1000)
