@@ -142,7 +142,7 @@ qclim['RECORD'] = [0,1]
 qclim['diag_csat'] = [0, 65534]
 # slow data qc limits
 qclim['RTD_T_AVG'] = [-40, 70]
-qclim['Atm_P'] = [950,1040]
+qclim['Atm_P'] = [900,1040]
 qclim['RH'] = [0, 100]
 qclim['Solar_In_AVG'] = [0, 1500]
 qclim['Solar_Out_AVG'] = [0, 1000]
