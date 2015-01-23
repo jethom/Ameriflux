@@ -64,9 +64,10 @@ mettimelist = []
 #create directories to look in
 yesterdaydir = datadir + yesterday.strftime('%Y%m%d')
 todaydir = datadir + currenttime.strftime('%Y%m%d')
-metfiles.extend(glob(yesterdaydir + '/*met*'))
-metfiles.extend(glob(todaydir + '/*met*'))
+metfiles.extend(glob(yesterdaydir + '/*met*.dat'))
+metfiles.extend(glob(todaydir + '/*met*.dat'))
 for filein in metfiles:
+   print filein
    filedata = toa5head(filein)   
    met.extend(filedata)
 metkeys = met[0][1].keys()

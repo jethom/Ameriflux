@@ -52,6 +52,8 @@ qclim['RECORD'] = [0,1]
 qclim['diag_irga'] = [0, 255]
 qclim['diag_csat'] = [0, 65534]
 qclim['Diag_li7700'] = [0, 65534]
+qclim['diag_irga_orig'] = [0, 255]
+qclim['RSSI'] = [0, 100]
 
 
 # directory where figures are stored
@@ -74,8 +76,8 @@ tstimelist = []
 #create directories to look in and make a list of files to read
 yesterdaydir = datadir + yesterday.strftime('%Y%m%d')
 todaydir = datadir + currenttime.strftime('%Y%m%d')
-tsfiles.extend(glob(yesterdaydir + '/*ts*'))
-tsfiles.extend(glob(todaydir + '/*ts*'))
+tsfiles.extend(glob(yesterdaydir + '/*ts*.dat'))
+tsfiles.extend(glob(todaydir + '/*ts*.dat'))
 # loop through the files and read in the data
 for filein in tsfiles:
    filedata = toa5head(filein)   
