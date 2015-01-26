@@ -2,20 +2,20 @@ from glob import glob
 from datetime import datetime, timedelta
 from campbellread import toa5head
 
-namematch= { 'LW_up_Avg':'LWout', \
- 'PAR_Den_Avg': 'PPFD', \
- 'panel_temp_Avg': 'enctemp', \
- 'Water_Temp_C_Avg': 'Ts', \
- 'SW_up_Avg': 'SWout', \
- 'rain_mm_Tot': 'P_rain' , \
- 'RECORD': 'RECORD', \
- 'airTC_Avg': 'Ta', \
- 'atmpres_Avg': 'Pa', \
- 'RH_Avg': 'RH', \
- 'Level_Avg': 'waterlevel', \
- 'LW_down_Avg': 'LWin', \
- 'cnr4_T_C_Avg': 'cnr4temp', \
- 'SW_down_Avg': 'SWin'} 
+namematch= { 'LW_up_Avg':'LWout_1_1_1', \
+ 'PAR_Den_Avg': 'PPFD_1_1_1', \
+ 'panel_temp_Avg': 'enctemp_1_1_1', \
+ 'Water_Temp_C_Avg': 'Ts_1_1_1', \
+ 'SW_up_Avg': 'SWout_1_1_1', \
+ 'rain_mm_Tot': 'P_rain_1_1_1' , \
+ 'RECORD': 'RECORD_1_1_1', \
+ 'airTC_Avg': 'Ta_1_1_1', \
+ 'atmpres_Avg': 'Pa_1_1_1', \
+ 'RH_Avg': 'RH_1_1_1', \
+ 'Level_Avg': 'waterlevel_1_1_1', \
+ 'LW_down_Avg': 'LWin_1_1_1', \
+ 'cnr4_T_C_Avg': 'cnr4temp_1_1_1', \
+ 'SW_down_Avg': 'SWin_1_1_1'} 
 
 unitsmatch = {'LW_up_Avg': 'W+1m-2', \
 'batt_volt_Avg': 'volts', \
