@@ -49,37 +49,34 @@ headunits=timeunits + ',' + ','.join(unitslist) + '\n'
 
 filepath='/Users/jthom/Documents/data/LostCreek/'
 # find dates to process
-dates=[]
-datedir = glob(filepath + '2014*')
-for i in range(len(datedir)):
-    dates.append(datedir[i].split('/')[-1])
+dates=datetime.now() - timedelta(days=1)
+datestr = dates.strftime('%Y%m%d')
 
 
-for datein in dates:
-    filesin=glob(filepath + datein + '/*metvalues*')
-    timelist=[]
-    datalist=[]
-    for fn in filesin:
-        data=toa5head(fn)
-        for i in range(len(data)):
-            timelist.append(data[i][0]) 
-            datalist.append(data[i][1]) 
-    timelistindx = sorted(range(len(timelist)), key=lambda k: timelist[k])
+filesin=glob(filepath + datestr + '/*metvalues*')
+timelist=[]
+datalist=[]
+for fn in filesin:
+    data=toa5head(fn)
+    for i in range(len(data)):
+        timelist.append(data[i][0]) 
+        datalist.append(data[i][1]) 
+timelistindx = sorted(range(len(timelist)), key=lambda k: timelist[k])
 
 
+datafrmt=[]
+printstr=[]
+for i in timelistindx:
+    for j in keystoprint:
+        datafrmt.append('%.2f' % datalist[i][j])
+     datastr.append(','.join(datafrmt) + '\n')     
+     timstr.append(timelist[i].strftime('%Y-%m-%d %H%M'))
+    printstr.append(timelist[i].strftime('%Y-%m-%d %H%M') + ',' + ','.join(datafrmt) + '\n')
     datafrmt=[]
-    printstr=[]
-    for i in timelistindx:
-        for j in keystoprint:
-            datafrmt.append('%.2f' % datalist[i][j])
- #       datastr.append(','.join(datafrmt) + '\n')     
- #       timstr.append(timelist[i].strftime('%Y-%m-%d %H%M'))
-        printstr.append(timelist[i].strftime('%Y-%m-%d %H%M') + ',' + ','.join(datafrmt) + '\n')
-        datafrmt=[]
-     
-    fout=filepath + datedir + '/biomet.data'
-    fo=open(fout,'wt')
-    fo.write(headtitles)
-    fo.write(headunits)
-    fo.writelines(printstr)
-    fo.close()
+ 
+fout=filepath + datestr + '/biomet.data'
+fo=open(fout,'wt')
+fo.write(headtitles)
+fo.write(headunits)
+fo.writelines(printstr)
+fo.close()
