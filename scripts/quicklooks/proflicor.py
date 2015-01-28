@@ -179,9 +179,11 @@ hrsfmt = DateFormatter("%H")
 # Licor Data plots
 #
 #
+import matplotlib.cm as cm
+import matplotlib.colors as colors
 values = range(1,11)
 fig,ax = plt.subplots()
-rbcm = plt.get_cmap('rainbow')
+rbcm = cm.get_cmap('rainbow')
 cNorm = colors.Normalize(vmin=1, vmax=values[-1])
 scalarMap = cm.ScalarMappable(norm=cNorm, cmap = rbcm)
 for i in values:
