@@ -50,7 +50,7 @@ date2=datetime(2014,6,20)
 timetitle='TIMESTAMP_1'
 timeunits='yyyy-mm-dd HHMM'
 
-filepath='/Users/jthom/Documents/data/sylvania/2015/'
+filepath='/air/incoming/sylvania/2014/'
 # find dates to process
 dates=datetime.now() - timedelta(days=1)
 datestr = dates.strftime('%Y%m%d')
@@ -62,6 +62,9 @@ datalist=[]
 for fn in filesin:
     datefilenameIn=datetime.strptime(fn,filepath + 'met_data_%Y_%m_%d_%H%M.dat')
     data=toa5head(fn)
+
+    timelist=[]
+    datalist=[]
     for i in range(len(data)):
         timelist.append(data[i][0]) 
         datalist.append(data[i][1]) 
