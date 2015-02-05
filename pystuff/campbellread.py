@@ -13,17 +13,32 @@ csiepochstart=631152000  # seconds difference between unix epoch 1970-01-01,00:0
 LOG = logging.getLogger(__name__)
 
 def toa5head(filepth):
+# included logic to handle TOACI1 files as well. These are not very common.
 
     records=[]
 
     LOG.info("opening %s" % filepth)
     lines=open(filepth,'rt').readlines()
-    line=lines[1]
+    lineno=0
+    line=lines[lineno]
+    line=line[:-2]
+    line=line.replace('"','')
+    filetype=line.split(',')[0]
+    
+    lineno+=1
+    line=lines[lineno]
     line=line[:-2]
     line=line.replace('"','')
     var_name=line.split(',') 
+    lineno+=1
+    if filetype=='TOA5':
+        line=lines[lineno]
+        line=line[:-2]
+        line=line.replace('"','')
+        units=line.split(',')
+        lineno+=3
     LOG.info("starting data")
-    for line in lines[4:]:
+    for line in lines[lineno:]:
         type(line)
         line=line[:-2]
         # print line
@@ -52,14 +67,21 @@ def toa5head(filepth):
         # data list
         data_only=data_list[1:]
         data_only_var_name=var_name[1:]
+        if filetype=='TOA5':
+            data_only_units_name=units[1:]
 
  
 # how do I deal with NAN in the data string
         data={}
+        metadata={}
         for k,v in zip(data_only_var_name,data_only):
             data[k]=float(v)
-
-        records.append((stamp, data))
+        if filetype=='TOA5':
+            for k,v in zip(data_only_var_name,data_only_units_name):
+                metadata[k]=v
+            records.append((stamp, data,metadata))
+        else:
+            records.append((stamp, data))
 
     return records
 
