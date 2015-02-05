@@ -33,7 +33,7 @@ unitsmatch = {'LW_up_Avg': 'W+1m-2', \
 'cnr4_T_C_Avg' : 'C', \
 'SW_down_Avg' : 'W+1m-2'}
 
-keystoprint = ['airTC_Avg','RH_Avg','LW_up_Avg', 'LW_down_Avg', 'SW_up_Avg', 'SW_down_Avg', 'PAR_Den_Avg', 'Water_Temp_C_Avg']
+keystoprint = ['airTC_Avg','RH_Avg','LW_up_Avg', 'LW_down_Avg', 'SW_up_Avg', 'SW_down_Avg', 'PAR_Den_Avg', 'Water_Temp_C_Avg','atmpres_Avg']
 
 # make header strings for the biomet file
 timetitle='TIMESTAMP_1'

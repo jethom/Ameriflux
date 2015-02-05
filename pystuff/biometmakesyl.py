@@ -50,7 +50,8 @@ date2=datetime(2014,6,20)
 timetitle='TIMESTAMP_1'
 timeunits='yyyy-mm-dd HHMM'
 
-filepath='/air/incoming/sylvania/2014/'
+#filepath='/air/incoming/sylvania/2014/'
+filepath='/Users/jthom/Documents/data/sylvania/2012/'
 # find dates to process
 dates=datetime.now() - timedelta(days=1)
 datestr = dates.strftime('%Y%m%d')
