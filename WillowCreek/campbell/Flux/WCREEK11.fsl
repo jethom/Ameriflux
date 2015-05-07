@@ -1,6 +1,6 @@
 Final Storage Label File for:  WCREEK11.csi
-Date:  4/28/2015
-Time:  00:29:25
+Date:  5/7/2015
+Time:  14:16:29
 
 114 Output_Table   0.10 Sec
 1 114 L
@@ -25,7 +25,7 @@ Time:  00:29:25
 4 Hour_Minute_RTM  H
 5 RTD_T_AVG  H
 6 Atm_P  H
-7 RH_AVG  H
+7 RH  H
 8 Solar_In_AVG  H
 9 Solar_Out_AVG  H
 10 IR_In_AVG  H
@@ -34,7 +34,6 @@ Time:  00:29:25
 13 Battery  H
 14 Leaf_Wet  H
 15 Solar_In_STD  H
-16 T215_AVG  H
 
 
-Estimated Total Final Storage Locations used per day 19918080
+Estimated Total Final Storage Locations used per day 19915200

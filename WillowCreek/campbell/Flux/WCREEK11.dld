@@ -3,17 +3,17 @@
 ;$
 ;:Ux       :Uy       :Uz       :Ts       :CSAT_Diag
 ;:CO2      :H20      :LI_P     :LI_T     :RTD_T    
-;:Atm_P    :_________:Solar_In :Solar_Out:IR_In    
-;:IR_Out   :KZ_T     :Battery  :Leaf_Wet :T215     
-;:RH       :_________:_________:_________:_________
+;:Atm_P    :RH       :Solar_In :Solar_Out:IR_In    
+;:IR_Out   :KZ_T     :Battery  :Leaf_Wet :_________
+;:_________:_________:_________:_________:_________
 ;:_________:_________:_________:_________:_________
 ;:_________
 ;$
 
 ;%
 ;Final Storage Label File for:  WCREEK11.csi
-;Date:  4/28/2015
-;Time:  00:29:25
+;Date:  5/7/2015
+;Time:  14:16:29
 ;
 ;114 Output_Table   0.10 Sec
 ;1 114 L
@@ -38,7 +38,7 @@
 ;4 Hour_Minute_RTM  H
 ;5 RTD_T_AVG  H
 ;6 Atm_P  H
-;7 RH_AVG  H
+;7 RH  H
 ;8 Solar_In_AVG  H
 ;9 Solar_Out_AVG  H
 ;10 IR_In_AVG  H
@@ -47,10 +47,9 @@
 ;13 Battery  H
 ;14 Leaf_Wet  H
 ;15 Solar_In_STD  H
-;16 T215_AVG  H
 ;
 ;
-;Estimated Total Final Storage Locations used per day 19918080
+;Estimated Total Final Storage Locations used per day 19915200
 ;%
 
 MODE 1
@@ -153,28 +152,20 @@ SCAN RATE .1
 2:10
 
 22:P70
-1:1
+1:2
 2:11
 
 23:P71
-1:1
-2:21
-
-24:P71
 1:5
 2:13
 
-25:P70
+24:P70
 1:2
 2:18
 
-26:P82
+25:P82
 1:1
 2:13
-
-27:P71
-1:1
-2:20
 
 
 MODE 2
@@ -219,13 +210,13 @@ SCAN RATE 1
 2:60
 3:30
 
-6:P105
-1:4
-2:0
-3:7
-4:20
-5:1.0
-6:0.0
+6:P2
+1:1
+2:14
+3:4
+4:12
+5:.1
+6:0
 
 7:P9
 1:1
