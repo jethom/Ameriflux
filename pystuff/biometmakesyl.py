@@ -1,3 +1,4 @@
+# make Licor style biomet files from Sylvania TOA5 files
 from glob import glob
 from datetime import datetime, timedelta
 from campbellread import toa5head
@@ -51,7 +52,7 @@ timetitle='TIMESTAMP_1'
 timeunits='yyyy-mm-dd HHMM'
 
 #filepath='/air/incoming/sylvania/2014/'
-filepath='/Users/jthom/Documents/data/sylvania/2012/'
+filepath='/Users/jthom/Documents/data/sylvania/2015/'
 # find dates to process
 dates=datetime.now() - timedelta(days=1)
 datestr = dates.strftime('%Y%m%d')
@@ -69,6 +70,11 @@ for fn in filesin:
     for i in range(len(data)):
         timelist.append(data[i][0]) 
         datalist.append(data[i][1]) 
+
+# convert the long wave data to include the sensor body temperature adjustment
+    for i in range(len(data)):
+        datalist[i]['IR01Dn_Avg'] = datalist[i]['IR01Dn_Avg'] + 5.67e-8 * (datalist[i]['TC_Avg'] + 273.15) ** 4  
+        datalist[i]['IR01Up_Avg'] = datalist[i]['IR01Up_Avg'] + 5.67e-8 * (datalist[i]['TC_Avg'] + 273.15) ** 4  
 
     if datefilenameIn < date1:
         keystoprint=keystoprint1
