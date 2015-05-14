@@ -33,17 +33,17 @@ def toa5head(filepth):
     lineno+=1
     if filetype=='TOA5':
         line=lines[lineno]
-        line=line[:-2]
+        line=line.replace('\n','')
         line=line.replace('"','')
         units=line.split(',')
         lineno+=3
     LOG.info("starting data")
     for line in lines[lineno:]:
         type(line)
-        line=line[:-2]
         # print line
         LOG.info("break data into a list")
         line=line.replace('"','')
+        line=line.replace('\n','')
         # make a timestamp for the observation
         data_list=line.split(',')
         # extract the data
