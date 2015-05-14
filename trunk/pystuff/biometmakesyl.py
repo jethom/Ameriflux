@@ -2,6 +2,7 @@
 from glob import glob
 from datetime import datetime, timedelta
 from campbellread import toa5head
+import os
 
 namematch= { 'IR01Up_Avg':'LWin_1_1_1', \
 'PAR_Den_Avg': 'PPFD_1_1_1', \
@@ -52,10 +53,12 @@ timetitle='TIMESTAMP_1'
 timeunits='yyyy-mm-dd HHMM'
 
 filepath='/air/incoming/sylvania/2014/'
-#filepath='/Users/jthom/Documents/data/sylvania/2015/'
-# find dates to process
-dates=datetime.now() - timedelta(days=1)
-datestr = dates.strftime('%Y%m%d')
+#filepath='/Users/jthom/Documents/data/sylvania/2012/'
+
+# remove existing biomet files from 
+dellist = glob(filepath + '*biomet.txt')
+for fn in dellist:
+    os.remove(fn)
 
 
 filesin=glob(filepath + '/met_data*.dat')
@@ -100,8 +103,13 @@ for fn in filesin:
         datafrmt=[]
  
     fout = datefilenameIn.strftime(filepath + '%jbiomet.txt')
-    fo=open(fout,'wt')
-    fo.write(headtitles)
-    fo.write(headunits)
-    fo.writelines(printstr)
-    fo.close()
+    if os.path.exists(fout):
+        fo=open(fout,'at')
+        fo.writelines(printstr)
+        fo.close()
+    else:
+        fo=open(fout,'wt')
+        fo.write(headtitles)
+        fo.write(headunits)
+        fo.writelines(printstr)
+        fo.close()
