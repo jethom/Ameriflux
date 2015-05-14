@@ -3,11 +3,11 @@ from glob import glob
 from datetime import datetime, timedelta
 from campbellread import toa5head
 
-namematch= { 'IR01Up_Avg':'LWout_1_1_1', \
+namematch= { 'IR01Up_Avg':'LWin_1_1_1', \
 'PAR_Den_Avg': 'PPFD_1_1_1', \
 'panel_temp_Avg': 'enctemp_1_1_1', \
 's_temp_1_Avg': 'Ts_1_1_1', \
-'SR01Up_Avg': 'SWout_1_1_1', \
+'SR01Up_Avg': 'SWin_1_1_1', \
 'Rain_accum_Max': 'P_rain_1_1_1' , \
 'RECORD': 'RECORD_1_1_1', \
 'Air_temp_Avg': 'Ta_1_1_1', \
@@ -16,8 +16,8 @@ namematch= { 'IR01Up_Avg':'LWout_1_1_1', \
 'RH_Avg': 'RH_1_1_1', \
 'rh_hmp_Avg': 'RH_1_1_1', \
 'water_content_1_Avg': 'SWC_1_1_1', \
-'IR01Dn_Avg': 'LWin_1_1_1', \
-'SR01Dn_Avg': 'SWin_1_1_1', \
+'IR01Dn_Avg': 'LWout_1_1_1', \
+'SR01Dn_Avg': 'SWout_1_1_1', \
 'Wind_Speed_max_Max' : 'MWS_1_1_1', \
 'Wind_Dir_mean_Avg' : 'WD_1_1_1'}
 
@@ -51,8 +51,8 @@ date2=datetime(2014,6,20)
 timetitle='TIMESTAMP_1'
 timeunits='yyyy-mm-dd HHMM'
 
-#filepath='/air/incoming/sylvania/2014/'
-filepath='/Users/jthom/Documents/data/sylvania/2015/'
+filepath='/air/incoming/sylvania/2014/'
+#filepath='/Users/jthom/Documents/data/sylvania/2015/'
 # find dates to process
 dates=datetime.now() - timedelta(days=1)
 datestr = dates.strftime('%Y%m%d')
@@ -63,6 +63,7 @@ timelist=[]
 datalist=[]
 for fn in filesin:
     datefilenameIn=datetime.strptime(fn,filepath + 'met_data_%Y_%m_%d_%H%M.dat')
+    print fn
     data=toa5head(fn)
 
     timelist=[]
