@@ -36,7 +36,7 @@ def toa5head(filepth):
         line=line.replace('\n','')
         line=line.replace('"','')
         units=line.split(',')
-        lineno+=3
+        lineno+=2
     LOG.info("starting data")
     for line in lines[lineno:]:
         type(line)
@@ -105,8 +105,8 @@ def parse_csi_value(sval):
 def readtob1file(fileptr):
     records=[]
     fileptr.seek(0)
-    CSItypes = {'ULONG': 'I', 'IEEE4': 'f', 'FP2': '', 'UINT2': 'H', 'UINT4': 'I'}
-    CSItypelen = {'ULONG': 4, 'IEEE4': 4, 'FP2': 2 ,'UINT2': 2, 'UINT4' : 4}
+    CSItypes = {'ULONG': 'I', 'IEEE4': 'f', 'FP2': '', 'UINT2': 'H', 'UINT4': 'I', 'IEEE4B':'f'}
+    CSItypelen = {'ULONG': 4, 'IEEE4': 4, 'FP2': 2 ,'UINT2': 2, 'UINT4' : 4, 'IEEE4B':4}
     # read in the first five lines of file description
     infolines = []
     for i in range(5):
