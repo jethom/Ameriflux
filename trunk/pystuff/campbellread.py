@@ -12,6 +12,81 @@ csiepochstart=631152000  # seconds difference between unix epoch 1970-01-01,00:0
 
 LOG = logging.getLogger(__name__)
 
+def toa5iter(fileiter):
+# included logic to handle TOACI1 files as well. These are not very common.
+
+    records=[]
+
+    LOG.info("opening %s" % fileiter)
+    lines=fileiter.readlines()
+    lineno=0
+    line=lines[lineno]
+    line=line[:-2]
+    line=line.replace('"','')
+    filetype=line.split(',')[0]
+    
+    lineno+=1
+    line=lines[lineno]
+    line=line[:-2]
+    line=line.replace('"','')
+    var_name=line.split(',') 
+    lineno+=1
+    if filetype=='TOA5':
+        line=lines[lineno]
+        line=line.replace('\n','')
+        line=line.replace('"','')
+        units=line.split(',')
+        lineno+=2
+    LOG.info("starting data")
+    for line in lines[lineno:]:
+        type(line)
+        # print line
+        LOG.info("break data into a list")
+        line=line.replace('"','')
+        line=line.replace('\n','')
+        # make a timestamp for the observation
+        data_list=line.split(',')
+        # extract the data
+        # get the time
+        needmicrosec = data_list[0].find('.')
+        if needmicrosec>0:
+            microsecs = int(data_list[0][(needmicrosec+1):]) * 100000
+            data_list[0] = data_list[0][:needmicrosec]
+            data_list[0] = data_list[0] + ':' + str(microsecs)
+            # found a period in the date string
+        else:
+            data_list[0] = data_list[0] + ':000000'
+        stamp=datetime.strptime(data_list[0], '%Y-%m-%d %H:%M:%S:%f')
+        # check to see if RECORD is a variable name if it exists then remove it
+        #try:
+            #recordidx = var_name.index('RECORD')
+            #var_name.pop(recordidx)
+            #data_list.pop(recordidx)
+        #except ValueError:
+            #pass
+        # data list
+        data_only=data_list[1:]
+        data_only_var_name=var_name[1:]
+        if filetype=='TOA5':
+            data_only_units_name=units[1:]
+
+ 
+# how do I deal with NAN in the data string
+        data={}
+        metadata={}
+        for k,v in zip(data_only_var_name,data_only):
+            data[k]=float(v)
+        if filetype=='TOA5':
+            for k,v in zip(data_only_var_name,data_only_units_name):
+                metadata[k]=v
+            records.append((stamp, data,metadata))
+        else:
+            records.append((stamp, data))
+
+    return records
+
+
+
 def toa5head(filepth):
 # included logic to handle TOACI1 files as well. These are not very common.
 
