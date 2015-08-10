@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.cm as cm
 from windrose import WindroseAxes
 
-def buoyLimnoPlot(fileptr):
+def buoyLimnoPlot(fileptr,figdir):
     wT=[[] for x in range(23)]
     wTLevels=(np.array([0,0.5,1,1.5,2,3,4,5,6,7,8,9,10,
                11,12,13,14,15,16,17,18,19,20]))
@@ -48,7 +48,7 @@ def buoyLimnoPlot(fileptr):
     plt.ylabel('Temp (degC)')
     plt.legend(loc='best')
     plt.title('Near Surface Temperatures ' + datadate)
-    plt.savefig('temps.png',dpi=100)
+    plt.savefig(figdir + 'temps.png',dpi=100)
 
     #plot pco2 and o2ppm
     fig, ax1 = plt.subplots()
@@ -63,7 +63,7 @@ def buoyLimnoPlot(fileptr):
     for tl in ax2.get_yticklabels():
         tl.set_color('r')
     plt.title('pCO2 and O2 (ppm) ' + datadate)
-    plt.savefig('co2_o2.png',dpi=100)
+    plt.savefig(figdir + 'co2_o2.png',dpi=100)
 
     #plot o2temp and o2sat
     fig, ax1 = plt.subplots()
@@ -78,7 +78,7 @@ def buoyLimnoPlot(fileptr):
     for tl in ax2.get_yticklabels():
         tl.set_color('r')
     plt.title('DOpto Temp and O2 Sat ' + datadate)
-    plt.savefig('dopto_T_sat.png',dpi=100)
+    plt.savefig(figdir + 'dopto_T_sat.png',dpi=100)
 
     #plot chlor and  phyco
     fig, ax1 = plt.subplots()
@@ -93,7 +93,7 @@ def buoyLimnoPlot(fileptr):
     for tl in ax2.get_yticklabels():
         tl.set_color('b')
     plt.title('Chlorophyll and Phycocyanin ' + datadate)
-    plt.savefig('chlor_phyco.png',dpi=100)
+    plt.savefig(figdir + 'chlor_phyco.png',dpi=100)
 
 # plot the water column contour over time
     plt.figure()
@@ -104,9 +104,9 @@ def buoyLimnoPlot(fileptr):
     plt.xlabel('time')
     plt.ylabel('depth (m)')
     plt.title('Water Temperature ' + datadate)
-    plt.savefig('watertemp.png',dpi=100)
+    plt.savefig(figdir + 'watertemp.png',dpi=100)
 
-def buoyMetPlot(fileiter):
+def buoyMetPlot(fileiter,figdir):
     windsp=[]
     winddir=[]
     airT=[]
@@ -137,7 +137,7 @@ def buoyMetPlot(fileiter):
     plt.ylabel('Temp (degC)')
     plt.legend(loc='best')
     plt.title('Air Temperature and IR Skin Temperature ' + datadate)
-    plt.savefig('air_skin_temp.png', dpi=100)
+    plt.savefig(figdir + 'air_skin_temp.png', dpi=100)
      
 
 # plot wind speed
@@ -146,7 +146,7 @@ def buoyMetPlot(fileiter):
     plt.xlabel('Time')
     plt.ylabel('Wind speed (m/s)')
     plt.title('Wind Speed ' + datadate)
-    plt.savefig('windspeed.png', dpi=100)
+    plt.savefig(figdir + 'windspeed.png', dpi=100)
      
 # plot wind direction
     plt.figure()
@@ -154,7 +154,7 @@ def buoyMetPlot(fileiter):
     plt.xlabel('Time')
     plt.ylabel('Wind direction (degrees)')
     plt.title('Wind Direction ' + datadate)
-    plt.savefig('winddir.png', dpi=100)
+    plt.savefig(figdir + 'winddir.png', dpi=100)
 
 # plot relative humidity
     plt.figure()
@@ -162,14 +162,14 @@ def buoyMetPlot(fileiter):
     plt.xlabel('Time')
     plt.ylabel('Relative Humidity (%)')
     plt.title('Relative Humidity ' + datadate)
-    plt.savefig('rh.png', dpi=100)
+    plt.savefig(figdir + 'rh.png', dpi=100)
 
 # plot windrose
     ax=new_axes()
     ax.bar(winddir,windsp,normed=True, opening=0.8, edgecolor='white')
     set_legend(ax)
     plt.title('Wind Rose ' + datadate)
-    plt.savefig('windrose.png')
+    plt.savefig(figdir + 'windrose.png')
 
 def set_legend(ax):
     l=ax.legend(loc='best')
@@ -182,3 +182,41 @@ def new_axes():
     fig.add_axes(ax)
     return ax
 
+def buoySysPlot(fileptr,figdir):
+    batt = []
+    Tpanel =[]
+    enchum=[]
+    buoysystime=[]
+
+    ld = toa5iter(fileptr)
+    for i in range(len(ld)):
+       buoysystime.append(ld[i][0])
+       batt.append(ld[i][1].get('batt_volt'))
+       Tpanel.append(ld[i][1].get('PTemp'))
+       enchum.append(ld[i][1].get('enc_hum'))
+
+    datadate=buoysystime[1].strftime('(%Y%m%d)')
+
+# plot battery voltage
+    plt.figure()
+    plt.plot_date(buoysystime,batt,'.')
+    plt.xlabel('Time')
+    plt.ylabel('Buoy Battery Voltage (volts)')
+    plt.title('Battery Voltage ' + datadate)
+    plt.savefig(figdir + 'batt.png', dpi=100)
+
+# plot datalogger panel temperature
+    plt.figure()
+    plt.plot_date(buoysystime,Tpanel,'.')
+    plt.xlabel('Time')
+    plt.ylabel('Datalogger panel temperature (degC)')
+    plt.title('Enclosure temperature ' + datadate)
+    plt.savefig(figdir + 'tpanel.png', dpi=100)
+
+# plot battery voltage
+    plt.figure()
+    plt.plot_date(buoysystime,enchum,'.')
+    plt.xlabel('Time')
+    plt.ylabel('Buoy enclosure humidity (%)')
+    plt.title('Enclosure humidity ' + datadate)
+    plt.savefig(figdir + 'encrh.png', dpi=100)
