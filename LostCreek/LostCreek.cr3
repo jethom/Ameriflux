@@ -300,13 +300,14 @@ DataTable (ts_data,true,-1)
   Sample (1,co2,IEEE4)   ' mass density
   Sample (1,h2o,IEEE4)   ' mass density   mass/m^3
   Sample(1,press_li7500,fp2)
-  Sample (1,diag_irga_orig,UINT2)
+  Sample (1,diag_irga,UINT2)
   Sample(1,CH4_density,IEEE4) ' molar density  micromoles/m^3
   ' Sample(1,CH4_mole_fraction,IEEE4)
   Sample(1,Temperature,FP2)
   Sample(1,press_li7700,fp2)
   Sample (1,Diag_li7700,UINT2)
   Sample(1,RSSI,FP2)
+  Sample(1,diag_irga_orig,UINT2)
 EndTable
 
 DataTable(metvalues,true,-1)
