@@ -21,7 +21,11 @@
 '
 'CSAT3   3D sonic anemometer (SDM default address = 3)
 'LI-7500 open path IRGA (SDM default address = 7)
-
+' 
+'
+'   update 2015-08-25
+' code to measure Forerunner GP002
+'
 
 '*** Unit Definitions ***
 
@@ -117,6 +121,7 @@ Const pyrgeo_bot_mult = 1000/6.94
 Const PAR_Cal = 251.998
 Dim cnr4_mult(4)
 Public cnr4(4),cnr4_prt_R,cnr4_T_C,Rs_R0
+Public pco2,pco2temp,pco2cor
 Alias cnr4(1) = SW_down
 Alias cnr4(2) = SW_up
 Alias cnr4(3) = LW_down
@@ -126,6 +131,9 @@ Units SW_up = W/m^2
 Units LW_down = W/m^2
 Units LW_up = W/m^2
 Units cnr4_T_C = C
+Units pco2=ppm
+Units pco2temp=degC
+Units pco2cor=ppm
 Public atmpres
 Units atmpres = hPa+500
 Public TRHData(2)
@@ -298,7 +306,7 @@ DataTable (ts_data,true,-1)
   Sample(1,Temperature,FP2)
   Sample(1,press_li7700,fp2)
   Sample (1,Diag_li7700,UINT2)
-  ' Sample(1,RSSI,FP2)
+  Sample(1,RSSI,FP2)
 EndTable
 
 DataTable(metvalues,true,-1)
@@ -314,6 +322,9 @@ DataTable(metvalues,true,-1)
   Totalize(1,rain_mm, fp2, 0)
   Average(1,Level,fp2,0)
   Average(1,Water_Temp_C,fp2,0)
+  Average(1,pco2,fp2,0)
+  Average(1,pco2cor,fp2,0)
+  Average(1,pco2temp,fp2,0)
 EndTable
 
 DataTable(dailydiag,true,-1)   ' this will totalize the number of errors in a day. 
@@ -596,6 +607,16 @@ BeginProg
     VoltDiff(PAR_Den,1,mv20,9, true,0,250,1,0)
     If PAR_Den< 0 Then PAR_Den=0
     PAR_Den = PAR_Den * PAR_Cal
+    ' Forerunner GP0002
+    ' 12V red (red/black connector)
+    ' G black
+    ' 10H purple (co2 0-5000 ppm)
+    ' 10L black from ground connector
+    ' 11H blue (temperature)
+    ' 11L black from ground connector
+    VoltDiff(pCO2,1,mV5000,10,true,0,250,1,0)
+    pco2cor = pco2 * 1013.5/(atmpres + 500)
+    VoltDiff(pco2temp,1,mv5000,11,true,0,250,.014,-20)
 
     '  NextScan
     '  EndSequence
