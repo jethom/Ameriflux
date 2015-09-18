@@ -69,8 +69,7 @@ printstr=[]
 for i in timelistindx:
     for j in keystoprint:
         datafrmt.append('%.2f' % datalist[i][j])
-     datastr.append(','.join(datafrmt) + '\n')     
-     timstr.append(timelist[i].strftime('%Y-%m-%d %H%M'))
+    timstr.append(timelist[i].strftime('%Y-%m-%d %H%M'))
     printstr.append(timelist[i].strftime('%Y-%m-%d %H%M') + ',' + ','.join(datafrmt) + '\n')
     datafrmt=[]
  
