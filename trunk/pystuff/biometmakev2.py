@@ -47,7 +47,8 @@ for j in keystoprint:
 headtitles=timetitle + ',' + ','.join(titlelist) + '\n'
 headunits=timeunits + ',' + ','.join(unitslist) + '\n'
 
-filepath='/Users/jthom/Documents/data/LostCreek/'
+#filepath='/Users/jthom/Documents/data/LostCreek/'
+filepath='/air/incoming/LostCreek/'
 # find dates to process
 dates=[]
 datedir = glob(filepath + '2014*')
@@ -72,8 +73,6 @@ for datein in dates:
     for i in timelistindx:
         for j in keystoprint:
             datafrmt.append('%.2f' % datalist[i][j])
- #       datastr.append(','.join(datafrmt) + '\n')     
- #       timstr.append(timelist[i].strftime('%Y-%m-%d %H%M'))
         printstr.append(timelist[i].strftime('%Y-%m-%d %H%M') + ',' + ','.join(datafrmt) + '\n')
         datafrmt=[]
      
