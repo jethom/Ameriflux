@@ -4,7 +4,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.cm as cm
 from windrose import WindroseAxes
+import urllib2
 
+#:wdef buoyPlot(figdir,**kwargs):
+ # arguments figdir= string (location where the figures should be written)
+ # kew word arguments should be year=, month= and day= otherwise will create figures 
+ # for yesterdays date
+    
+    
 def buoyLimnoPlot(fileptr,figdir):
     wT=[[] for x in range(23)]
     wTLevels=(np.array([0,0.5,1,1.5,2,3,4,5,6,7,8,9,10,
@@ -49,6 +56,7 @@ def buoyLimnoPlot(fileptr,figdir):
     plt.legend(loc='best')
     plt.title('Near Surface Temperatures ' + datadate)
     plt.savefig(figdir + 'temps.png',dpi=100)
+    plt.close()
 
     #plot pco2 and o2ppm
     fig, ax1 = plt.subplots()
@@ -64,6 +72,7 @@ def buoyLimnoPlot(fileptr,figdir):
         tl.set_color('r')
     plt.title('pCO2 and O2 (ppm) ' + datadate)
     plt.savefig(figdir + 'co2_o2.png',dpi=100)
+    plt.close()
 
     #plot o2temp and o2sat
     fig, ax1 = plt.subplots()
@@ -79,6 +88,7 @@ def buoyLimnoPlot(fileptr,figdir):
         tl.set_color('r')
     plt.title('DOpto Temp and O2 Sat ' + datadate)
     plt.savefig(figdir + 'dopto_T_sat.png',dpi=100)
+    plt.close()
 
     #plot chlor and  phyco
     fig, ax1 = plt.subplots()
@@ -94,6 +104,7 @@ def buoyLimnoPlot(fileptr,figdir):
         tl.set_color('b')
     plt.title('Chlorophyll and Phycocyanin ' + datadate)
     plt.savefig(figdir + 'chlor_phyco.png',dpi=100)
+    plt.close()
 
 # plot the water column contour over time
     plt.figure()
@@ -105,6 +116,7 @@ def buoyLimnoPlot(fileptr,figdir):
     plt.ylabel('depth (m)')
     plt.title('Water Temperature ' + datadate)
     plt.savefig(figdir + 'watertemp.png',dpi=100)
+    plt.close()
 
 def buoyMetPlot(fileiter,figdir):
     windsp=[]
@@ -138,15 +150,26 @@ def buoyMetPlot(fileiter,figdir):
     plt.legend(loc='best')
     plt.title('Air Temperature and IR Skin Temperature ' + datadate)
     plt.savefig(figdir + 'air_skin_temp.png', dpi=100)
+    plt.close()
      
 
 # plot wind speed
     plt.figure()
-    plt.plot_date(met_ts,windsp,'.')
+    plt.plot_date(met_ts,windsp,'.',label ='wind speed')
     plt.xlabel('Time')
     plt.ylabel('Wind speed (m/s)')
     plt.title('Wind Speed ' + datadate)
     plt.savefig(figdir + 'windspeed.png', dpi=100)
+    plt.close()
+
+# plot wind gust 
+    plt.figure()
+    plt.plot_date(met_ts,gust,'.',label ='wind speed')
+    plt.xlabel('Time')
+    plt.ylabel('Wind Gust speed (m/s)')
+    plt.title('2 Min Gust Wind Speed ' + datadate)
+    plt.savefig(figdir + 'gust.png', dpi=100)
+    plt.close()
      
 # plot wind direction
     plt.figure()
@@ -155,6 +178,7 @@ def buoyMetPlot(fileiter,figdir):
     plt.ylabel('Wind direction (degrees)')
     plt.title('Wind Direction ' + datadate)
     plt.savefig(figdir + 'winddir.png', dpi=100)
+    plt.close()
 
 # plot relative humidity
     plt.figure()
@@ -163,6 +187,7 @@ def buoyMetPlot(fileiter,figdir):
     plt.ylabel('Relative Humidity (%)')
     plt.title('Relative Humidity ' + datadate)
     plt.savefig(figdir + 'rh.png', dpi=100)
+    plt.close()
 
 # plot windrose
     ax=new_axes()
@@ -170,6 +195,7 @@ def buoyMetPlot(fileiter,figdir):
     set_legend(ax)
     plt.title('Wind Rose ' + datadate)
     plt.savefig(figdir + 'windrose.png')
+    plt.close()
 
 def set_legend(ax):
     l=ax.legend(loc='best')
@@ -204,6 +230,7 @@ def buoySysPlot(fileptr,figdir):
     plt.ylabel('Buoy Battery Voltage (volts)')
     plt.title('Battery Voltage ' + datadate)
     plt.savefig(figdir + 'batt.png', dpi=100)
+    plt.close()
 
 # plot datalogger panel temperature
     plt.figure()
@@ -212,6 +239,7 @@ def buoySysPlot(fileptr,figdir):
     plt.ylabel('Datalogger panel temperature (degC)')
     plt.title('Enclosure temperature ' + datadate)
     plt.savefig(figdir + 'tpanel.png', dpi=100)
+    plt.close()
 
 # plot battery voltage
     plt.figure()
@@ -220,3 +248,4 @@ def buoySysPlot(fileptr,figdir):
     plt.ylabel('Buoy enclosure humidity (%)')
     plt.title('Enclosure humidity ' + datadate)
     plt.savefig(figdir + 'encrh.png', dpi=100)
+    plt.close()

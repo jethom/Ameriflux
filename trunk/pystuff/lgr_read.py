@@ -6,6 +6,8 @@ import logging
 import collections
 from time import mktime
 from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
+import numpy as np
 
 LOG = logging.getLogger(__name__)
 
@@ -50,3 +52,46 @@ def lgr_read(filepth):
     return records
 
         
+def lgr_cal(co2cal,ch4cal,filename):
+    data=lgr_read(filename)
+
+# create savenames for figures
+    co2savename='{:5.1f}co2'.format(co2cal)
+    co2savename=co2savename.replace('.','_') + '.png'
+    ch4savename='{:5.1f}ch4'.format(ch4cal)
+    ch4savename=ch4savename.replace('.','_') + '.png'
+# initialize the date and co2/ch4 lists
+    dt=[]
+    co2=[]
+    ch4=[]
+    
+# read in the data from the record
+    for i in range(len(data)):
+        dt.append(data[i][0])
+        co2.append(data[i][1].get('[CO2]_ppm'))
+        ch4.append(data[i][1].get('[CH4]_ppm'))
+
+     
+    plt.figure()
+    co2mean=np.nanmean(co2)
+    co2std=np.nanstd(co2)
+    figtitle='cal tank = {:5.1f} ppm LGR mean = {:5.1f} ppm; LGR std ={:5.1f} ppm'.format(co2cal,co2mean,co2std)
+    plt.title(figtitle)
+    plt.plot_date(dt,co2,'b.')
+    plt.axhspan(co2mean + co2std, co2mean-co2std,color='y',alpha=0.5,lw=0)
+    plt.axhline(y=co2cal, color='r')
+
+    plt.savefig(co2savename,dpi=100)
+    plt.close()
+
+    plt.figure()
+    ch4mean=np.nanmean(ch4)
+    ch4std=np.nanstd(ch4)
+    figtitle='cal tank = {:6.4f} ppm LGR mean = {:6.4f} ppm; LGR std ={:6.4f} ppm'.format(ch4cal/1000.,ch4mean,ch4std)
+    plt.plot_date(dt,ch4,'b.')
+    plt.title(figtitle)
+    plt.axhspan(ch4mean + ch4std, ch4mean-ch4std,color='y',alpha=0.5,lw=0)
+    plt.axhline(y=ch4cal/1000., color='r')
+
+    plt.savefig(ch4savename,dpi=100)
+    plt.close()
