@@ -10,14 +10,10 @@ import collections
 from datetime import datetime, timedelta
 import urllib2
 from dataread import flux_read
-import numpy as np
-import pandas as pd
-import xray
-from record2xray import record2xray
 
 plotvars=['cflux', 'qflux', 'tflux', 'ch4flux', 'cstor', 'qstor', 'tstor', 'ch4stor','NEE_CO2', 'LE', 'H', 'NEE_CH4', 'u*']
-runmode = 'TEST'
-if runmode == 'OPER':
+runmode = 'OPER'
+if runmode == 'TEST':
 # file directory
 # TEST -------------------------------------------------------------------------------
     figdir='/Users/jthom/public_html/images/lostcreek/'
@@ -28,6 +24,10 @@ else:
     figdir='/home/jthom/public_html/images/lostcreek/'
 # OPERATIONAL ------------------------------------------------------------------------
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import xray
+from record2xray import record2xray
 
 today=datetime.now()
 tminus5=today-timedelta(5)
