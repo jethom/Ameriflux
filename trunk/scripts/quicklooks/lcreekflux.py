@@ -24,6 +24,7 @@ else:
     figdir='/home/jthom/public_html/images/lostcreek/'
 # OPERATIONAL ------------------------------------------------------------------------
 import matplotlib.pyplot as plt
+from matplotlib.dates import HourLocator, DateFormatter
 import numpy as np
 import pandas as pd
 import xray
@@ -44,6 +45,8 @@ flptr.close()
 
 datax=record2xray(data)
 for var in plotvars:
+    fig,ax=plt.subplots()
     datax.sel(varname=var, time=slice(TsliceB, TsliceE)).plot(marker='.')
+    ax.xaxis.set_major_formatter(DateFormatter("%m/%d-%H"))
     plt.savefig(figdir + var + '.png', dpi=100)
     plt.close()
