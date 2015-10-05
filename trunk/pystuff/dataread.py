@@ -11,6 +11,71 @@ import numpy as np
 
 LOG = logging.getLogger(__name__)
 
+def wc_flux_read(filepth):
+    var_name=['YY', 'MM','DD','HH','DOY','fDOY','Cstor_30','Cflux_30','NEE_30','LE_30','H_30','u*','Flag']
+    records=[]
+    lines=filepth.readlines()
+    for line in lines:
+        line=line.replace('\n','')
+        data_list=line.split()
+        # extract the data
+        try: 
+            stamp=datetime.strptime('{} {} {} {} {}'.format(data_list[0],data_list[1],data_list[2],int(float(data_list[3])),int((float(data_list[3])*60)%60)),'%Y %m %d %H %M')
+        except ValueError:
+            break
+        # data list
+        data_only=data_list[6:]
+        data_only_var_name=var_name[6:]
+
+ 
+# how do I deal with NAN in the data string
+        data={}
+        for k,v in zip(data_only_var_name,data_only):
+            if float(v)==-999:
+                data[k]=float('nan')
+            else:
+                data[k]=float(v)
+
+        records.append((stamp, data))
+
+    return records
+
+def wc_met_read(filepth):
+# 69 columns in met file
+    var_name=[None]*69
+    var_name[0:13]=['YY', 'MM','DD','HH','DOY','fDOY','CO2_2','CO2_5','CO2_10','CO2_25','CO2_45','CO2_70','CO2_97']
+    for i in range(13,69):
+        var_name[i]='col{:02d}'.format(i)
+    records=[]
+    lines=filepth.readlines()
+    len(lines)
+    for line in lines:
+        line=line.replace('\n','')
+        data_list=line.split()
+        # extract the data
+        try: 
+            stamp=datetime.strptime('{} {} {} {} {}'.format(data_list[0],data_list[1],data_list[2],int(float(data_list[3])),int((float(data_list[3])*60)%60)),'%Y %m %d %H %M')
+        except ValueError:
+            break
+        # data list
+        data_only=data_list[6:]
+        data_only_var_name=var_name[6:]
+
+ 
+# how do I deal with NAN in the data string
+        data={}
+        for k,v in zip(data_only_var_name,data_only):
+            if float(v)==-999:
+                data[k]=float('nan')
+            else:
+                data[k]=float(v)
+
+        records.append((stamp, data))
+
+    return records
+
+
+
 def flux_read(filepth):
     records=[]
     lines=filepth.readlines()
