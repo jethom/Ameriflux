@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from buoyPlot import *
 
 figdir='/Users/jthom/Documents/buoyfigs/'
-dateyest = datetime.now() - timedelta(days=3)
+dateyest = datetime.now() - timedelta(days=10)
 #dateyest= datetime.now() - timedelta(days=8)
 
 urlLD=dateyest.strftime('http://metobs.ssec.wisc.edu/pub/cache/mendota/buoy/ascii/v0/00/%Y/%j/MendotaBuoy_limnodata_%Y%m%d.dat')

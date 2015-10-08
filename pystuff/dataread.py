@@ -112,6 +112,65 @@ def sylv_flux_read(filepth):
 
     return records
 
+def wlef_flux_read(filepth):
+    records=[]
+    lines=filepth.readlines()
+    line=lines[0].replace('\n','')
+    var_name=line.split()
+    for line in lines[1:]:
+        line=line.replace('\n','')
+        data_list=line.split()
+        # extract the data
+        try: 
+            stamp=datetime.strptime('{} {} {} {}'.format(data_list[0],data_list[1],data_list[2],data_list[3]),'%Y %m %d %H')
+        except ValueError:
+            break
+        # data list
+        data_only=data_list[3:]
+        data_only_var_name=var_name[3:]
+
+ 
+# how do I deal with NAN in the data string
+        data={}
+        for k,v in zip(data_only_var_name,data_only):
+            if float(v)==-999:
+                data[k]=float('nan')
+            else:
+                data[k]=float(v)
+
+        records.append((stamp, data))
+
+    return records
+
+def noaa_wlef_read(filepth):
+    records=[]
+    lines=filepth.readlines()
+    line=lines[0].replace('\n','')
+    var_name=line.split()
+    for line in lines[1:]:
+        line=line.replace('\n','')
+        data_list=line.split()
+        # extract the data
+        try: 
+            stamp=datetime.strptime('{} {} {}'.format(data_list[0],data_list[1],data_list[2]),'%Y %j %H')
+        except ValueError:
+            break
+        # data list
+        data_only=data_list[3:]
+        data_only_var_name=var_name[3:]
+
+ 
+# how do I deal with NAN in the data string
+        data={}
+        for k,v in zip(data_only_var_name,data_only):
+            if float(v)==-999:
+                data[k]=float('nan')
+            else:
+                data[k]=float(v)
+
+        records.append((stamp, data))
+
+    return records
 
 def flux_read(filepth):
     records=[]
@@ -126,7 +185,6 @@ def flux_read(filepth):
         except ValueError:
             break
         # data list
-        print stamp
         data_only=data_list[3:]
         data_only_var_name=var_name[3:]
 
