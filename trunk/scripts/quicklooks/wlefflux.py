@@ -9,7 +9,6 @@ import sys
 import collections
 from datetime import datetime, timedelta
 import urllib2
-from dataread import *
 
 # file names/url links
 #http://flux.aos.wisc.edu/data/cheas/wlef/flux/prelim/2015/diagch4_2015.txt
@@ -35,6 +34,7 @@ import matplotlib.pyplot as plt
 from matplotlib.dates import HourLocator, DateFormatter
 import numpy as np
 import pandas as pd
+from dataread import *
 import xray
 from record2xray import record2xray
 
