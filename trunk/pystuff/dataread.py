@@ -11,6 +11,7 @@ import numpy as np
 
 LOG = logging.getLogger(__name__)
 
+
 def wc_flux_read(filepth):
     var_name=['YY', 'MM','DD','HH','DOY','fDOY','Cstor_30','Cflux_30','NEE_30','LE_30','H_30','u*','Flag']
     records=[]
@@ -74,6 +75,42 @@ def wc_met_read(filepth):
 
     return records
 
+def sylv_flux_read(filepth):
+    records=[]
+    lines=filepth.readlines()
+    line=lines[18].replace('\n','')
+    var_name=line.split(',')
+    for line in lines[20:]:
+        line=line.replace('\n','')
+        data_list=line.split(',')
+        # extract the data
+      #  print data_list[0], data_list[3], data_list[4]
+        if data_list[4]=='2400':
+            data_list[4]='0000'
+        try: 
+            stamp=datetime.strptime('{} {} {} {}'.format(data_list[0],int(float(data_list[2])),data_list[4][0:2], data_list[4][2:4]),'%Y %j %H  %M')
+        except ValueError:
+            print 'bad date', data_list[0],data_list[3], data_list[4]
+            break
+        # data list
+        data_only=data_list[5:]
+        data_only_var_name=var_name[5:]
+
+ 
+# how do I deal with NAN in the data string
+        data={}
+        for k,v in zip(data_only_var_name,data_only):
+           # print v
+            if v=='':
+                data[k]=float('nan')
+            elif float(v)==-9999:
+                data[k]=float('nan')
+            else:
+                data[k]=float(v)
+
+        records.append((stamp, data))
+
+    return records
 
 
 def flux_read(filepth):
@@ -89,6 +126,7 @@ def flux_read(filepth):
         except ValueError:
             break
         # data list
+        print stamp
         data_only=data_list[3:]
         data_only_var_name=var_name[3:]
 
