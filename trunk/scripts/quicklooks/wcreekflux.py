@@ -62,7 +62,7 @@ datax=record2xray(data)
 fig,ax=plt.subplots()
 for var in plotvarsmet:
     datax.sel(varname=var, time=slice(TsliceB, TsliceE)).plot(marker='.',label=var)
-plt.legend(loc='best')
+plt.legend(loc='best',fontsize='x-small')
 plt.title('CO2 Profile')
 ax.xaxis.set_major_formatter(DateFormatter("%m/%d-%H"))
 plt.savefig(figdir + 'CO2profile.png', dpi=100)
