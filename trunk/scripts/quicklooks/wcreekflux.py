@@ -9,12 +9,11 @@ import sys
 import collections
 from datetime import datetime, timedelta
 import urllib2
-from dataread import *
 
 plotvarsflux=['Cflux_30', 'Cstor_30', 'NEE_30', 'LE_30', 'H_30', 'u*']
 plotvarsmet=['CO2_2','CO2_5','CO2_10','CO2_25','CO2_45','CO2_70','CO2_97']
 
-runmode = 'TEST'
+runmode = 'OPER'
 if runmode == 'TEST':
 # file directory
 # TEST -------------------------------------------------------------------------------
@@ -30,6 +29,7 @@ from matplotlib.dates import HourLocator, DateFormatter
 import numpy as np
 import pandas as pd
 import xray
+from dataread import *
 from record2xray import record2xray
 
 today=datetime.now()
@@ -54,11 +54,20 @@ for var in plotvarsflux:
     plt.close()
 
 # read the met file
-filename=today.strftime('http://flux.aos.wisc.edu/data/wcreek-raw/flux/wcreek%Y_flux.txt')
+filename=today.strftime('http://flux.aos.wisc.edu/data/wcreek-raw/flux/wcreek%Y_met.txt')
 flptr=urllib2.urlopen(filename)
 data=wc_met_read(flptr)
 flptr.close()
 datax=record2xray(data)
+fig,ax=plt.subplots()
+for var in plotvarsmet:
+    datax.sel(varname=var, time=slice(TsliceB, TsliceE)).plot(marker='.',label=var)
+plt.legend(loc='best')
+plt.title('CO2 Profile')
+ax.xaxis.set_major_formatter(DateFormatter("%m/%d-%H"))
+plt.savefig(figdir + 'CO2profile.png', dpi=100)
+plt.close()
+
 for var in plotvarsmet:
     fig,ax=plt.subplots()
     datax.sel(varname=var, time=slice(TsliceB, TsliceE)).plot(marker='.')
