@@ -32,7 +32,7 @@ plotvars=[["t_hmp_Avg","Air_temp_Avg","TC_Avg"],
 plotname=["AirTemp", "RelativeHumidity","BatteryVoltage","PanelTemp","ShortWave","LongWave",
 "WaterContent","ElecCond","SoilTemp","PAR","WindDir","WindSpeed","Pressure","RainAccum","GMPProfile"]
 
-runmode = 'TEST'
+runmode = 'OPER'
 if runmode == 'TEST':
 # file directory
 # TEST -------------------------------------------------------------------------------
@@ -71,7 +71,10 @@ datax=record2xray(data)
 for i,xvar in enumerate(plotvars):
     fig,ax=plt.subplots()
     for var in xvar:
-        datax.sel(varname=var).plot(marker='.',label=var)
+        try:
+            datax.sel(varname=var).plot(marker='.',label=var)
+        except:
+            print var
 
     ax.xaxis.set_major_formatter(DateFormatter("%m/%d-%H"))
     plt.title(plotname[i])
