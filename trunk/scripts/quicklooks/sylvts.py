@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from glob import glob
 
 # variables to plot. If variables are similar plot on same figure
-plotvars=[["UxCSAT"],["UyCSAT"],["UzCSAT"],["TsCSAT"],["diag_CSAT"],["LI7500_CO2"],["LI7500_H2O"],["press_LI7500"],["diag_LI7500"]]
+plotvars=[["UxCSAT"],["UyCSAT"],["UzCSAT"],["TsCSAT"],["LI7500_CO2"],["LI7500_H2O"],["press_LI7500"]]
 
 # plot title and the name to used to save the figure
 plotname=["UxCSAT","UyCSAT","UzCSAT","TsCSAT","diag_CSAT","LI7500_CO2","LI7500_H2O","press_LI7500","diag_LI7500"]
@@ -52,11 +52,18 @@ for i in range(2,-1,-1):
         data.extend(filedata) 
     
 datax=record2xray(data)
+agc=((datax.sel(varname='diag_LI7500').astype('uint8'))&15) * 6.25
+# plot the AGC from the LI7500. 
+fig,ax=plt.subplots()
+agc.transpose().plot(marker='.')
+plt.title('LI 7500 AGC')
+plt.savefig(figdir + 'agc.png', dpi=100)
+plt.close()
 
 for i,xvar in enumerate(plotvars):
     fig,ax=plt.subplots()
     for var in xvar:
-        print var
+        #print var
         try:
             datax.sel(varname=var).plot(marker='.',label=var)
         except:
