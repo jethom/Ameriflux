@@ -54,10 +54,16 @@ dates=[]
 datedir = glob(filepath + '2014*')
 for i in range(len(datedir)):
     dates.append(datedir[i].split('/')[-1])
+#print dates
 
 
+<<<<<<< .mine
+for datedir in dates:
+    filesin=glob(filepath +  datedir + '/*metvalues*')
+=======
 for datein in dates:
     filesin=glob(filepath + datein + '/*metvalues*')
+>>>>>>> .r76
     timelist=[]
     datalist=[]
     for fn in filesin:
@@ -76,7 +82,9 @@ for datein in dates:
         printstr.append(timelist[i].strftime('%Y-%m-%d %H%M') + ',' + ','.join(datafrmt) + '\n')
         datafrmt=[]
      
+#    print printstr
     fout=filepath + datedir + '/biomet.data'
+#    print fout
     fo=open(fout,'wt')
     fo.write(headtitles)
     fo.write(headunits)

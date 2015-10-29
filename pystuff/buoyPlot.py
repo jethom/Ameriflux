@@ -1,5 +1,8 @@
+import os
 from campbellread import *
 from datetime import datetime, timedelta
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.cm as cm
@@ -13,6 +16,7 @@ import urllib2
     
     
 def buoyLimnoPlot(fileptr,figdir):
+    #matplotlib.use('Agg')
     wT=[[] for x in range(23)]
     wTLevels=(np.array([0,0.5,1,1.5,2,3,4,5,6,7,8,9,10,
                11,12,13,14,15,16,17,18,19,20]))
@@ -25,6 +29,7 @@ def buoyLimnoPlot(fileptr,figdir):
     irT=[]
     airT=[]
     limno_ts=[]
+    wtqclim=[0,40]
 
     # read file
     ld = toa5iter(fileptr)
@@ -44,9 +49,16 @@ def buoyLimnoPlot(fileptr,figdir):
            wT[j].append(ld[i][1].get(keyName))
     
     datadate=limno_ts[1].strftime('(%Y%m%d)')
+    waterT=np.array(wT) 
+    wTqcarr = np.ma.masked_outside(waterT,wtqclim[0],wtqclim[1])
+    wTqcarr.fill_value=np.nan
+    
 
+    if os.path.exists(figdir + 'temps.png'):
+        os.remove(figdir + 'temps.png')
 
 # plot air temp, ir temp, 0 water temp , -1 water temp
+    plt.figure()
     plt.plot_date(limno_ts,airT,'r.',label='Air Temp')
     plt.plot_date(limno_ts,irT,'g.',label='IR Skin Temp')
     plt.plot_date(limno_ts,wT[0],'b.',label='0m Water Temp')
@@ -57,6 +69,9 @@ def buoyLimnoPlot(fileptr,figdir):
     plt.title('Near Surface Temperatures ' + datadate)
     plt.savefig(figdir + 'temps.png',dpi=100)
     plt.close()
+
+    if os.path.exists(figdir + 'co2_o2.png'):
+        os.remove(figdir + 'co2_o2.png')
 
     #plot pco2 and o2ppm
     fig, ax1 = plt.subplots()
@@ -74,6 +89,9 @@ def buoyLimnoPlot(fileptr,figdir):
     plt.savefig(figdir + 'co2_o2.png',dpi=100)
     plt.close()
 
+    if os.path.exists(figdir + 'dopto_T_sat.png'):
+        os.remove(figdir + 'dopto_T_sat.png')
+
     #plot o2temp and o2sat
     fig, ax1 = plt.subplots()
     ax1.plot_date(limno_ts,o2temp,'b.')
@@ -90,6 +108,8 @@ def buoyLimnoPlot(fileptr,figdir):
     plt.savefig(figdir + 'dopto_T_sat.png',dpi=100)
     plt.close()
 
+    if os.path.exists(figdir + 'chlor_phyco.png'):
+        os.remove(figdir + 'chlor_phyco.png')
     #plot chlor and  phyco
     fig, ax1 = plt.subplots()
     ax1.plot_date(limno_ts,chlor,'g.')
@@ -106,10 +126,11 @@ def buoyLimnoPlot(fileptr,figdir):
     plt.savefig(figdir + 'chlor_phyco.png',dpi=100)
     plt.close()
 
+    if os.path.exists(figdir + 'watertemp.png'):
+        os.remove(figdir + 'watertemp.png')
 # plot the water column contour over time
     plt.figure()
-    waterT=np.array(wT) 
-    plt.contourf(limno_ts,wTLevels,waterT,50)
+    plt.contourf(limno_ts,wTLevels,wTqcarr,50)
 #    plt.show()
     plt.colorbar()
     plt.xlabel('time')
@@ -119,6 +140,7 @@ def buoyLimnoPlot(fileptr,figdir):
     plt.close()
 
 def buoyMetPlot(fileiter,figdir):
+    #matplotlib.use('Agg')
     windsp=[]
     winddir=[]
     airT=[]
@@ -141,6 +163,8 @@ def buoyMetPlot(fileiter,figdir):
 
     datadate=met_ts[1].strftime('(%Y%m%d)')
 
+    if os.path.exists(figdir + 'air_skin_temp.png'):
+        os.remove(figdir + 'air_skin_temp.png')
 #plot air and skin temp
     plt.figure()
     plt.plot_date(met_ts,airT,'b.',label='Air Temp')
@@ -153,6 +177,8 @@ def buoyMetPlot(fileiter,figdir):
     plt.close()
      
 
+    if os.path.exists(figdir + 'windspeed.png'):
+        os.remove(figdir + 'windspeed.png')
 # plot wind speed
     plt.figure()
     plt.plot_date(met_ts,windsp,'.',label ='wind speed')
@@ -171,6 +197,8 @@ def buoyMetPlot(fileiter,figdir):
     plt.savefig(figdir + 'gust.png', dpi=100)
     plt.close()
      
+    if os.path.exists(figdir + 'winddir.png'):
+        os.remove(figdir + 'winddir.png')
 # plot wind direction
     plt.figure()
     plt.plot_date(met_ts,winddir,'.')
@@ -180,6 +208,8 @@ def buoyMetPlot(fileiter,figdir):
     plt.savefig(figdir + 'winddir.png', dpi=100)
     plt.close()
 
+    if os.path.exists(figdir + 'rh.png'):
+        os.remove(figdir + 'rh.png')
 # plot relative humidity
     plt.figure()
     plt.plot_date(met_ts,u,'.')
@@ -189,6 +219,8 @@ def buoyMetPlot(fileiter,figdir):
     plt.savefig(figdir + 'rh.png', dpi=100)
     plt.close()
 
+    if os.path.exists(figdir + 'windrose.png'):
+        os.remove(figdir + 'windrose.png')
 # plot windrose
     ax=new_axes()
     ax.bar(winddir,windsp,normed=True, opening=0.8, edgecolor='white')
@@ -209,6 +241,7 @@ def new_axes():
     return ax
 
 def buoySysPlot(fileptr,figdir):
+    #matplotlib.use('Agg')
     batt = []
     Tpanel =[]
     enchum=[]
@@ -223,6 +256,8 @@ def buoySysPlot(fileptr,figdir):
 
     datadate=buoysystime[1].strftime('(%Y%m%d)')
 
+    if os.path.exists(figdir + 'batt.png'):
+        os.remove(figdir + 'batt.png')
 # plot battery voltage
     plt.figure()
     plt.plot_date(buoysystime,batt,'.')
@@ -232,6 +267,8 @@ def buoySysPlot(fileptr,figdir):
     plt.savefig(figdir + 'batt.png', dpi=100)
     plt.close()
 
+    if os.path.exists(figdir + 'tpanel.png'):
+        os.remove(figdir + 'tpanel.png')
 # plot datalogger panel temperature
     plt.figure()
     plt.plot_date(buoysystime,Tpanel,'.')
@@ -241,7 +278,9 @@ def buoySysPlot(fileptr,figdir):
     plt.savefig(figdir + 'tpanel.png', dpi=100)
     plt.close()
 
-# plot battery voltage
+    if os.path.exists(figdir + 'encrh.png'):
+        os.remove(figdir + 'encrh.png')
+# enclosure relative humidity
     plt.figure()
     plt.plot_date(buoysystime,enchum,'.')
     plt.xlabel('Time')

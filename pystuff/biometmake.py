@@ -38,7 +38,8 @@ keystoprint = ['airTC_Avg','RH_Avg','LW_up_Avg', 'LW_down_Avg', 'SW_up_Avg', 'SW
 timetitle='TIMESTAMP_1'
 timeunits='yyyy-mm-dd HHMM'
 
-filesin=glob('*metvalues*')
+#filesin=glob('/air/incoming/LostCreek/2014/2014*/*metvalues*')
+filesin=glob('/air/incoming/LostCreek/201510*/*metvalues*')
 unitslist=[]
 titlelist=[]
 for j in keystoprint:
