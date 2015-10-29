@@ -221,8 +221,8 @@ def wcflux(filepth):
     LOG.info("opening %s" % filepth)
     lines=open(filepth,'rt').readlines()
     LOG.info("starting data")
+    #print filepth
     for line in lines:
-        
         line=line.replace('\r\n','')
         file_id = line.split(',')[0]
         if file_id=='114':

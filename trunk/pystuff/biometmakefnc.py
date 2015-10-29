@@ -47,9 +47,12 @@ for j in keystoprint:
 headtitles=timetitle + ',' + ','.join(titlelist) + '\n'
 headunits=timeunits + ',' + ','.join(unitslist) + '\n'
 
-filepath='/Users/jthom/Documents/data/LostCreek/'
+#filepath='/Users/jthom/Documents/data/LostCreek/'
+filepath='/air/incoming/LostCreek/'
 # find dates to process
-dates=datetime.now() - timedelta(days=1)
+#dates=datetime.now() - timedelta(days=1)
+# actually, I need to process todays date. UTC has already flipped to the next day.
+dates=datetime.now() 
 datestr = dates.strftime('%Y%m%d')
 
 
@@ -69,7 +72,7 @@ printstr=[]
 for i in timelistindx:
     for j in keystoprint:
         datafrmt.append('%.2f' % datalist[i][j])
-    timstr.append(timelist[i].strftime('%Y-%m-%d %H%M'))
+#    timstr.append(timelist[i].strftime('%Y-%m-%d %H%M'))
     printstr.append(timelist[i].strftime('%Y-%m-%d %H%M') + ',' + ','.join(datafrmt) + '\n')
     datafrmt=[]
  

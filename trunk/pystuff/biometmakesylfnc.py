@@ -1,7 +1,9 @@
 # make Licor style biomet files from Sylvania TOA5 files
 from glob import glob
 from datetime import datetime, timedelta
+from math import isnan
 from campbellread import toa5head
+import os
 
 namematch= { 'IR01Up_Avg':'LWout_1_1_1', \
 'PAR_Den_Avg': 'PPFD_1_1_1', \
@@ -39,9 +41,10 @@ unitsmatch = {'IR01Up_Avg': 'W+1m-2', \
 'Wind_Speed_max_Max' : 'm+1s-1', \
 'Wind_Dir_mean_Avg' : 'degrees'}
 
-'water_content_1_Avg' ]
 keystoprint = ['Air_temp_Avg','RH_Avg','IR01Up_Avg', 'IR01Dn_Avg', 'SR01Up_Avg', 'SR01Dn_Avg', 'PAR_Den_Avg', 's_temp_1_Avg', \
 'water_content_1_Avg', 'Wind_Speed_max_Max', 'Wind_Dir_mean_Avg', 'Pressure_Avg']
+
+missing=-999.9
 
 # make header strings for the biomet file
 timetitle='TIMESTAMP_1'
@@ -54,6 +57,8 @@ filepath=dates.strftime('/air/incoming/sylvania/%Y/')
 fndate=dates.strftime('*met_data_%Y_%m_%d_*.dat')
 
 filesin=glob(filepath + fndate)
+fout = dates.strftime(filepath + '%jbiomet.txt')
+
 timelist=[]
 datalist=[]
 for fn in filesin:
@@ -84,13 +89,19 @@ for fn in filesin:
     printstr=[]
     for i in range(len(timelist)):
         for j in keystoprint:
+            if isnan(datalist[i][j]):
+                datalist[i][j]=missing
             datafrmt.append('%.2f' % datalist[i][j])
         printstr.append(timelist[i].strftime('%Y-%m-%d %H%M') + ',' + ','.join(datafrmt) + '\n')
         datafrmt=[]
  
-    fout = dates.strftime(filepath + '%jbiomet.txt')
-    fo=open(fout,'wt')
-    fo.write(headtitles)
-    fo.write(headunits)
-    fo.writelines(printstr)
-    fo.close()
+    if os.path.exists(fout):
+        fo=open(fout,'at')
+        fo.writelines(printstr)
+        fo.close()
+    else:
+        fo=open(fout,'wt')
+        fo.write(headtitles)
+        fo.write(headunits)
+        fo.writelines(printstr)
+        fo.close()

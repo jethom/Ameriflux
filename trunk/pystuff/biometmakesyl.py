@@ -52,20 +52,20 @@ date2=datetime(2014,6,20)
 timetitle='TIMESTAMP_1'
 timeunits='yyyy-mm-dd HHMM'
 
-filepath='/air/incoming/sylvania/2014/'
+filepath='/air/incoming/sylvania/2015/'
 #filepath='/Users/jthom/Documents/data/sylvania/2012/'
 
 # remove existing biomet files from 
-dellist = glob(filepath + '*biomet.txt')
-for fn in dellist:
-    os.remove(fn)
+#dellist = glob(filepath + '*biomet.txt')
+#for fn in dellist:
+    #os.remove(fn)
 
 
-filesin=glob(filepath + '/met_data*.dat')
+filesin=glob(filepath + '/Sylvania_met_data*.dat')
 timelist=[]
 datalist=[]
 for fn in filesin:
-    datefilenameIn=datetime.strptime(fn,filepath + 'met_data_%Y_%m_%d_%H%M.dat')
+    datefilenameIn=datetime.strptime(fn,filepath + 'Sylvania_met_data_%Y_%m_%d_%H%M.dat')
     print fn
     data=toa5head(fn)
 
