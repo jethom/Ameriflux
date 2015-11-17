@@ -249,7 +249,7 @@ def wcflux(filepth):
                                   'Solar_In_AVG', 'Solar_Out_AVG', 
                                   'IR_In_AVG', 'IR_Out_AVG', 
                                   'KZ_T_AVG', 'Battery', 
-                                  'Leaf_Wet', 'Solar_In_STD']    
+                                  'Leaf_Wet', 'Solar_In_STD','HMP_T','fansp']    
             data_list = line.split(',')[4:]
             # if line is short fill it in with "nan"
             data_list=filter(None,data_list)
