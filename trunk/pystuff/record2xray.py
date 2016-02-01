@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import xray
+import xarray as xr
 
 def record2xray(data):
     dt=[]
@@ -20,4 +20,4 @@ def record2xray(data):
     for j in data[0][1].iterkeys():
         variables.append(j)
  
-    return xray.DataArray(dataset,coords=[dtp, variables],dims=['time','varname'])
+    return xr.DataArray(dataset,coords=[dtp, variables],dims=['time','varname'])
