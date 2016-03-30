@@ -42,10 +42,12 @@ def toa5iter(fileiter):
         type(line)
         # print line
         LOG.info("break data into a list")
-        line=line.replace('"','')
+        line=line.replace('""','')
         line=line.replace('\n','')
+        line=line.replace('\r','')
         # make a timestamp for the observation
         data_list=line.split(',')
+        data_list[0]=data_list[0].replace('"','')
         # extract the data
         # get the time
         needmicrosec = data_list[0].find('.')
@@ -75,7 +77,12 @@ def toa5iter(fileiter):
         data={}
         metadata={}
         for k,v in zip(data_only_var_name,data_only):
-            data[k]=float(v)
+           # print k,v
+            try:
+               dataval=float(v)
+            except ValueError:
+               dataval=float('nan')
+            data[k]=dataval
         if filetype=='TOA5':
             for k,v in zip(data_only_var_name,data_only_units_name):
                 metadata[k]=v
@@ -109,6 +116,7 @@ def toa5head(filepth):
     if filetype=='TOA5':
         line=lines[lineno]
         line=line.replace('\n','')
+        line=line.replace('\r','')
         line=line.replace('"','')
         units=line.split(',')
         lineno+=2
@@ -119,6 +127,7 @@ def toa5head(filepth):
         LOG.info("break data into a list")
         line=line.replace('"','')
         line=line.replace('\n','')
+        line=line.replace('\r','')
         # make a timestamp for the observation
         data_list=line.split(',')
         # extract the data
