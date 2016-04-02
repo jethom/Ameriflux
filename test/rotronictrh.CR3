@@ -1,0 +1,50 @@
+'CR3000 Series Datalogger
+'To create a different opening program template, type in new
+'instructions and select Template | Save as Default Template
+'date:
+'program author:
+
+'Declare Public Variables
+'Example:
+Public PTemp, batt_volt,temp,rh
+
+
+'Declare Other Variables
+'Example:
+'Dim Counter
+
+'Declare Constants
+'Example:
+'CONST PI = 3.141592654	
+
+'Define Data Tables.
+DataTable (Test,1,-1) 'Set table size to # of records, or -1 to autoallocate.
+	DataInterval (0,15,Sec,10)
+	Minimum (1,batt_volt,FP2,False,False)
+	Sample (1,PTemp,FP2)
+	Average(1,temp,fp2,false)
+	average(1,rh,fp2,false)
+	
+	
+EndTable
+
+'Define Subroutines
+'Sub
+	'EnterSub instructions here
+'EndSub
+
+'Main Program
+BeginProg
+	Scan (1,Sec,0,0)
+		PanelTemp (PTemp,250)
+		Battery (batt_volt)
+		VoltSe (temp,1,mV1000,23,1,0,_60Hz,.1,-40)
+		VoltSe (rh,1,mv1000,24,1,0,_60Hz,.1,0)
+		
+		'Enter other measurement instructions
+		'Call Output Tables
+		'Example:
+		CallTable Test
+	NextScan
+EndProg
+
