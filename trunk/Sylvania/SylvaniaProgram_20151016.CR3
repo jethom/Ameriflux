@@ -1,0 +1,447 @@
+'CRBasic program for polled data collection.
+'CR3000 Series Datalogger
+'Site: Sylvania Forest
+'date 2013 May 1 - replaced broken EC150 by LI7500
+'date: 2012 April 21
+'date 2012 May 02 - added security codes
+'date 2013 May - replaced the EC150 by a LI7500
+' date 20161016 - updated program to measure ameriflux hmp155 replacement
+
+'Instruments on tower :
+'1.  CSAT3 - sonic anemometer + CO2 H2O Gas Analyzer at 120ft
+'2.  LI-7500 - CO2 & H2O IRGA
+'3.  HMP45C - Temperature Probe at 120ft
+'4.  NR01 - Four component radiation sensor at 120ft
+'5.  CR650 - Four water content reflectometers (soil)
+'6.  Licor Quantum - PAR sensor
+'7.  Raven Modem 
+'6. WXT weather station
+'7 & 8. 2 X GMP CO2 probes
+
+'*** Wiring Diagram ***
+
+' CR3000 Power Supply
+'POS BAR +12VDC	CR3000 power 12VDC (red)
+'NEG BAR -12VDC CR3000 Gnd (black)
+'Groung Lug - 
+
+'RS-232 - CONTROL PORTS When conncting Direct with a Laptop
+'CS-I/O - SC105 - Raven Modem
+
+'1. CSAT3 and EC150 - SDM INPUT - SDM Address is set to 1
+'SDM-C1	CSAT3 SDM Data (green)
+'SDM-C2	CSAT3 SDM Clock (white)
+'SDM-C3	CSAT3 SDM Enable (brown)
+'G BAR	  CSAT3 SDM digital Gnd (black)
+'G BAR    CSAT3 SDM shield (clear)
+'Power Supplay
+'POS BAR +12VDC	CSAT power 12VDC (red)
+'NEG BAR -12VDC CSAT Gnd (black)
+'7gnd		        CSAT  (clear)
+
+'2. LI7500 - SDM INPUT - SDM Address is set to 7
+'SDM-C1	LI-7500 SDM Data (gray) c1
+'SDM-C2	LI-7500 SDM Clock (blue) c2
+'SDM-C3	LI-7500 SDM Enable (brown) c3
+'G	    LI-7500 SDM reference (black)
+'LI-7500 SDM shield (white)
+'Power Supplay - (Yellow Cable)
+'POS BAR 12V	LI-7500 power (red with white)
+'NEG BAR 12V	LI-7500 power reference (red with black)
+'6gnd 		    LI-7500 ground (green)
+
+
+'Fan (for the attached temperature sensor)
+'bring into the EC100 box and conect to power.
+
+'2. Rotronic Hygroclip 2 HC2-S3 - Temp Probe DIFF ANALOG INPUT
+'1H		HMP45C temperature signal (Brown)
+'1L		HMP45C signal reference (bridge to 2L)
+'gnd	HMP45C shield (clear)
+'2H		HMP45C relative humidity signal (white)
+'2L		Yellow
+'Power Supply
+'POS BAR 12V	HMP45C power (green)
+'G BAR 12V 	HMP45C power reference (gray)
+
+'Fan Power Supply - two separate cords
+'POS BAR 12V	HMP45C-vent power (red)
+'NEG BAR 12V 	HMP45C-vent power reference (white)
+
+
+'3. NR01 Radiation Sensor
+'Cable 1 - Solar
+'3H      SR01 UP - downwelling shortwave radiation signal (red)
+'3L      SR01 UP - downwelling shortwave radiation signal reference (blue)
+'3gnd     -> jumper to 3L 
+'4H      SR01 DOWN - upwelling shortwave radiation signal (white)
+'4L      SR01 DOWN - upwelling shortwave radiation signal reference (green)
+'4gnd    -> jumper to 4L
+'5H      IR01 UP - downwelling longwave radiation signal (brown)
+'5L      IR01 UP - downwelling longwave radiation signal reference (yellow)
+'5gnd    -> jumper to 5L
+'6H      IR01 DOWN - upwelling longwave radiation signal (purple)
+'6L      IR01 DOWN - upwelling longwave radiation signal reference (grey)
+'6gnd    -> jumper to 6L NR01 shield (clear)
+'Cable 2 - Temperature/Heater
+'IX1     NR01 current excite (red)
+'IXR     NR01 current return (blue)
+'7H      NR01 Pt100 Signal (White) 
+'7L      NR01 Pt100 Signal Ref (Green) 
+'12V     NR01 Heater Power (brown)
+'G       NR01 Heater Power (yellow)
+'G        NR01 Ground (purple)
+'shield   NR01 Shield (gray)
+'shield   NR01 Shield (clear)
+
+'4.  CR650 - Four water content reflectometers (soil)
+'SN 2873
+'C1 green
+'Shield Organge
+'Shield Clear
+'12V bar Red
+'G bar Black
+
+'SN 2874
+'C1 green
+'Shield Organge
+'Shield Clear
+'12V bar Red
+'G bar Black
+
+'SN 2875
+'C3 green
+'Shield Organge
+'Shield Clear
+'12V bar Red
+'G bar Black
+
+'SN 2876
+'C3 green
+'Shield Organge
+'Shield Clear
+'12V bar Red
+'G bar Black
+
+'5.  Licor Quantum - PAR sensor
+'8H - Side with the other leg of the resistor
+'8L - side where the clear cable is short circuited
+'Shield - jumper to 8L
+
+'6. WXT520 Weather Transmitter - SDI addy 3
+'C5 - white
+'GRD - Grey
+'12V - Brown, yellow (bundle)
+'G - Pink (bundle), red
+
+'7.GMP343
+'13H - yellow
+'13L - jumper to 13G
+'13G - shield
+'12+ - Pink
+'Grd - Grey
+
+'8.GMP343
+'14H - yellow
+'14L - jumper to 14G
+'14G - shield
+'12+ - Pink
+'Grd - Grey
+
+'14
+
+
+' End of the wiring diagram
+
+'****  Constants *****
+'23 NR01 Four-Component Net Radiation Sensor
+'Serial Number 1453 
+'Sensitivity uV/W/m^2   multiplier 1000/sensitivity
+'Pyranometer UP SR01 14.3 69.93  
+'Pyranometer DOWN SR01 14.3 69.93 
+'Pyrgeometer UP IR01 10.3 97.087
+'Pyrgeometer DOWN IR01 9.3 107.527
+
+SequentialMode
+'SetSecurity(43570,2052,3505)
+Const Scan_Interval = 100			            'Scan interval in mSec for CSAT and EC150
+Const CSAT_OPT = INT (1000/Scan_Interval)	'Compute CSAT3 Execution Parameter 10 Hz.
+Const Output_Interval_Met = 1		  	      'Output interval for met data in minutes.
+Const OFFSET = 16				                  'An offset delay that will be introduced to the CSAT3 and EC150 data.
+Const DELAY_IRGA = INT (300/Scan_Interval)'Fixed inherent lag of the LI-7500 data (three scans at 10 Hz).
+Const CO2Mult=0.4  
+
+'Determine scan buffer size, CSAT3 Execution Parameters and fixed lags for CSAT3 and LI-7500.
+Const SCAN_BUFFER_SIZE = 60*INT (1000/Scan_Interval)	'Compute a 60 second scan buffer.
+Const IRGA_REC_BCK = OFFSET-DELAY_IRGA			'Number of records back to align LI-7500 data.
+
+'1. CSAT Data
+Public csat_data(5)
+Alias csat_data(1) = UxCSAT
+Alias csat_data(2) = UyCSAT
+Alias csat_data(3) = UzCSAT
+Alias csat_data(4) = TsCSAT
+Alias csat_data(5) = diag_CSAT
+Units UxCSAT = m/s
+Units UyCSAT = m/s
+Units UzCSAT = m/s
+Units TsCSAT = Deg C
+Units diag_CSAT = unitless
+
+'3. LI-7500 Data.
+Public LI7500(4)
+Alias LI7500(1) = LI7500_CO2
+Alias LI7500(2) = LI7500_H2O
+Alias LI7500(3) = press_LI7500
+Alias LI7500(4) = diag_LI7500
+Units LI7500_CO2 = mmol/m^3
+Units LI7500_H2O = mmol/m^3
+Units press_LI7500 = kPa
+Units diag_LI7500 = unitless
+
+
+'3. HMP45C Data
+Public hmp(3)
+Alias hmp(1) = t_hmp		  'HMP45C temperature.
+Alias hmp(2) = rh_hmp		  'HMP45C relative humidity.
+Alias hmp(3) = e_hmp			'HMP45C vapor pressure.
+Units t_hmp = Deg C
+Units rh_hmp = %
+Units e_hmp = kPa
+
+
+'4. NR01 Data
+'The four calibration coefficients specific to NR01 radiation sensor (1000/Sensitivity) - NR01 - 1153
+Const SR01Upcal = 69.93 
+Const SR01Downcal = 69.93
+Const IR01Upcal = 97.087 
+Const IR01Downcal = 107.527
+
+Public  NR01_data(5)
+Alias NR01_data(1) = SR01Up
+Alias NR01_data(2) = SR01Dn
+Alias NR01_data(3) = IR01Up
+Alias NR01_data(4) = IR01Dn
+Alias NR01_data(5) = TC
+Units SR01Up = W/m2
+Units SR01Dn = W/m2
+Units IR01Up = W/m2
+Units IR01Dn = W/m2
+Units TC = Deg C
+
+'4 CR650 TDR data - 4 probes
+'Calibration constants to be applied to the electrical conductivity
+'SN 2873 EC Mult = 1.01261 Offset = -0.00034
+'SN 2874 EC Mult = 1.01544 Offset = -0.00028 
+'SN 2875 EC Mult = 1.01994 Offset = -0.0003
+'SN 2876 EC Mult = 0.99974 Offset = -0.00039\
+
+Public CR650(12)
+'1st probe
+Alias CR650(1) = water_content_1
+Alias CR650(2) =elec_cond_1
+Alias CR650(3) =s_temp_1
+Units water_content_1 = m3/m3
+Units elec_cond_1 = dS/m
+Units s_temp_1 = Deg C
+
+'2nd probe
+Alias CR650(4) = water_content_2
+Alias CR650(5) =elec_cond_2
+Alias CR650(6) =s_temp_2
+Units water_content_2 = m3/m3
+Units elec_cond_2 = dS/m
+Units s_temp_2 = Deg C
+
+'3rd probe
+Alias CR650(7) = water_content_3
+Alias CR650(8) =elec_cond_3
+Alias CR650(9) =s_temp_3
+Units water_content_3 = m3/m3
+Units elec_cond_3 = dS/m
+Units s_temp_3 = Deg C
+
+'4th probe
+Alias CR650(10) = water_content_4
+Alias CR650(11) =elec_cond_4
+Alias CR650(12) =s_temp_4
+Units water_content_4 = m3/m3
+Units elec_cond_4 = dS/m
+Units s_temp_4 = Deg C
+
+'Licor quantum probe
+'Calibration constants
+'Mult = -190.48
+'tcoff = 0.0036
+Public PAR_Den
+Units PAR_Den= micromol/s/m2
+Const PAR_Mult = 5
+'House (Datalogger) Data.
+Public panel_temp
+Public batt_volt
+Units panel_temp = Deg C
+Units batt_volt = V
+
+'WXT probe
+Public WXT_wind(6)
+Public WXT_met(3)
+Public WXT_prec(8)
+
+Alias WXT_wind(1) = Wind_Dir_min
+Alias WXT_wind(2) = Wind_Dir_mean
+Alias WXT_wind(3) = Wind_Dir_max
+Alias WXT_wind(4) = Wind_Speed_min
+Alias WXT_wind(5) = Wind_Speed_mean
+Alias WXT_wind(6) = Wind_Speed_max
+Alias WXT_met(1) = Air_temp
+Alias WXT_met(2) = RH
+Alias WXT_met(3) = Pressure
+Alias WXT_prec(1) = Rain_accum
+Alias WXT_prec(2) = Rain_dur
+Alias WXT_prec(3) = Rain_intens
+Alias WXT_prec(4) = Hail_accum
+Alias WXT_prec(5) = Hail_dur
+Alias WXT_prec(6) = Hail_intens
+Alias WXT_prec(7) = Rain_pk_intens
+Alias WXT_prec(8) = Hail_pk_intens
+
+Units Wind_Dir_min = deg
+Units Wind_Dir_mean = deg
+Units Wind_Dir_max = deg
+Units Wind_Speed_min = m/s
+Units Wind_Speed_mean = m/s
+Units Wind_Speed_max = m/s
+Units Air_temp = C
+Units RH = %
+Units Pressure = hPa
+Units Rain_accum = mm
+Units Rain_dur = s
+Units Rain_intens = mm/h
+Units Hail_accum = hits/cm2
+Units Hail_dur = s
+Units Hail_intens = hits/cm2/h
+Units Rain_pk_intens = mm/h
+Units Hail_pk_intens = hits/cm2/h
+
+'GMP CO2 probes
+Public GMP1(1)
+Public GMP2(1)
+Alias GMP1(1) = GMP_upper
+Alias GMP2(1) = GMP_lower
+Units GMP1 = ppm
+Units GMP2 = ppm
+
+'Time series data table, CSAT, EC150 (TS)
+DataTable (ts_data,TRUE,-1)
+
+  DataInterval (0,Scan_Interval,mSec,0)' Changed Lapses from 100 to 0 03/14/2011
+
+  CardOut(0,-1)
+  Sample (5,UxCSAT,IEEE4)              'CSAT3 - Lower sonic
+  Sample (4,LI7500_CO2,IEEE4)          'LI-7500
+  
+EndTable
+
+'Meteorological Data Table (MET) NR01 HMP45 CO2 and CR650(soil probes)
+DataTable (met_data,TRUE,1440)
+  DataInterval (0,Output_Interval_Met,Min,100)
+  Average (3,t_hmp,IEEE4,False) 		  'HMPC45
+  Average (1,batt_volt,IEEE4,False) 	'DataLogger Battary Voltage
+  Average (1,panel_temp,IEEE4,False) 	'DataLogger Panel Temp
+  Average (4,SR01Up,IEEE4,False) 		  'NR01 - Solar
+  Average (1,TC,IEEE4,False) 		      'NR01 - Temp (Deg C)
+  Average (12,CR650,IEEE4,False)    '4 CR650 soil probes
+  Average (1, PAR_Den,IEEE4,False)  'PAR
+
+  Minimum (1,WXT_wind(1),IEEE4,False,False) 'Wind dir minimum
+  Average (1,WXT_wind(2),IEEE4,False) 'Wind dir average
+  Maximum (1,WXT_wind(3),IEEE4,False,False) 'Wind dir maximum
+  Minimum (1,WXT_wind(4),IEEE4,False,False) 'Wind speed minimum
+  Average (1,WXT_wind(5),IEEE4,False) 'Wind speed average
+  Maximum (1,WXT_wind(6),IEEE4,False,False) 'Wind speed maximum
+  Average (3,WXT_met,IEEE4,False) 'Pressure, temperature,humidity
+  Maximum(2,WXT_prec(1),IEEE4,False,False) 'Rain amount and duration
+  Average(1,WXT_prec(3),IEEE4,False) 'Rain intensity
+  Maximum(2,WXT_prec(4),IEEE4,False,False) 'Hail amount and duration
+  Average(1,WXT_prec(6),IEEE4,False) 'Hail intensity
+  Maximum(2,WXT_prec(7),IEEE4,False,False) 'Peak rain and intensity
+  
+  Average (1,GMP1(1),IEEE4,False)
+  Average (1,GMP2(1),IEEE4,False)
+EndTable
+  
+'DataTable (PAR,TRUE,-1)
+'  DataInterval (0,15,sec,1000)
+'  Sample (1,PAR_Den,FP2)
+' EndTable
+ 
+BeginProg
+ SDMspeed(100)
+ 'TCPClose (101)
+ 'SerialOpen (Com1,38400,3,0,SERIAL_BUFF_SIZE)
+ 
+  Scan (Scan_Interval,mSec,0,0)
+    
+       
+    'Get CSAT3 wind and Sonic Temperature Data.
+    CSAT3 (UxCSAT,1,3,91,CSAT_OPT) 'CSAT_OPT = 10
+        
+    'Get LI-7500 Data
+    CS7500 (LI7500_CO2,1,7,6)
+       
+    CallTable ts_data
+
+  NextScan
+
+  SlowSequence
+
+  Scan (20,Sec,6,0)  'Get Data for Met Table
+    
+    Battery (batt_volt)
+    PanelTemp (panel_temp,250)
+
+    'Measure the HMP45C bottom temperature and relative humidity.
+  '  VoltDiff (t_hmp,1,AutoRange,1,TRUE,200,250,0.1,-40)
+   ' VoltDiff (rh_hmp,1,AutoRange,2,TRUE,200,250,0.1,0)
+ 'Measure the HMP155 tmperature and humidity at top of tower
+    VoltDiff (t_hmp,1,mV1000,1,TRUE,200,250,0.14,-80)
+    VoltDiff (rh_hmp,1,mV1000,2,TRUE,200,250,0.1,0)
+    
+    'Find the HMP45C vapor pressure and saturation vapor pressure (kPa).
+    VaporPressure (e_hmp,t_hmp,rh_hmp)
+
+    'NR01 Net Radiometer measurements SR01Up, SR01Dn, IR01Up, IR01Dn, TC,
+    VoltDiff(SR01Up,1,mV50,3,True,200,250,SR01Upcal,0)
+    VoltDiff(SR01Dn,1,mV50,4,True,200,250,SR01Downcal,0)
+    VoltDiff(IR01Up,1,mV20,5,True,200,250,IR01Upcal,0)
+    VoltDiff(IR01Dn,1,mV20,6,True,200,250,IR01Downcal,0)
+    'Note maximum sensor temperature with this excitation setting is just over +50
+    Resistance (TC,1,mV200,7,Ix1,1,1675,True ,True,200,250,1.0,0)
+    'Formulate the ratio Rs/R0
+    TC=TC/100
+    PRT(TC,1,TC,1,0)
+    
+    'CR650 soil water content data
+     SDI12Recorder (CR650(1),1,3,"M0!",1,0)
+     SDI12Recorder (CR650(4),1,4,"M0!",1,0)
+     SDI12Recorder (CR650(7),3,5,"M0!",1,0)
+     SDI12Recorder (CR650(10),3,6,"M0!",1,0)
+ 
+     'GMP CO2 probes    
+     VoltDiff (GMP1,1,mV5000,13,TRUE,200,250,CO2Mult,0)
+     VoltDiff (GMP2,1,mV5000,14,TRUE,200,250,CO2Mult,0)
+
+     'WXT weather transmitter
+     SDI12Recorder (WXT_wind,5,3,"M1!",1.0,0)
+     SDI12Recorder (WXT_met,5,3,"M2!",1.0,0)
+     SDI12Recorder (WXT_prec,5,3,"M3!",1.0,0)
+    
+    'Licor Quantum Par sensor
+    VoltDiff(PAR_Den,1,mV1000,8,True ,0,_60Hz,1.0,0)
+    'If PAR_Den<0 Then PAR_Den = 0
+    PAR_Den=PAR_Den*PAR_Mult
+    CallTable met_data
+    'CallTable PAR
+  NextScan
+
+EndProg
